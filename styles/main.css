@@ -482,6 +482,25 @@ body {
     fill: currentColor;
 }
 
+/* Edge Labels */
+.edge-label {
+    font-size: 10px;
+    fill: #7f8c8d;
+    font-weight: 600;
+    pointer-events: none;
+    user-select: none;
+}
+
+.edge.selected .edge-label {
+    fill: #f39c12;
+    font-weight: 700;
+}
+
+.edge.highlighted .edge-label {
+    fill: #e74c3c;
+    font-weight: 700;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;
