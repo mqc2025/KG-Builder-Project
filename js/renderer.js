@@ -114,7 +114,17 @@ class Renderer {
             .attr('stroke-width', 10)
             .attr('fill', 'none')
             .style('cursor', 'pointer');
-
+// Add edge label for edge ID
+edgesEnter.append('text')
+    .attr('class', 'edge-label')
+    .attr('text-anchor', 'middle')
+    .attr('dy', -5)
+    .style('font-size', '10px')
+    .style('fill', '#7f8c8d')
+    .style('font-weight', '600')
+    .style('pointer-events', 'none')
+    .style('user-select', 'none')
+    .text(d => d.id);
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);
 
@@ -266,10 +276,30 @@ class Renderer {
             .attr('transform', d => `translate(${d.x},${d.y})`);
 
         this.edgeGroup.selectAll('.edge').each(function(d) {
-            const path = self.calculateEdgePath(d);
-            d3.select(this).selectAll('path')
-                .attr('d', path);
-        });
+    const path = self.calculateEdgePath(d);
+    d3.select(this).selectAll('path')
+        .attr('d', path);
+    
+    // Update edge label position and rotation
+    const source = d.source;
+    const target = d.target;
+    
+    if (typeof source !== 'string' && typeof target !== 'string') {
+        const midX = (source.x + target.x) / 2;
+        const midY = (source.y + target.y) / 2;
+        const dx = target.x - source.x;
+        const dy = target.y - source.y;
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        
+        // Keep text upright (flip if upside down)
+        const textAngle = (angle > 90 || angle < -90) ? angle + 180 : angle;
+        
+        d3.select(this).select('.edge-label')
+            .attr('x', midX)
+            .attr('y', midY)
+            .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
+    }
+});
     }
 
     /**
