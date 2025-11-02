@@ -110,6 +110,7 @@ class Renderer {
 
         // Add invisible wider path for easier clicking
         edgesEnter.append('path')
+			.attr('class', 'edge-clickable')
             .attr('stroke', 'transparent')
             .attr('stroke-width', 10)
             .attr('fill', 'none')
@@ -140,13 +141,13 @@ class Renderer {
             .classed('path-highlight', d => this.highlightedEdges.has(d.id));
 
         // Click handler on invisible path
-        edgesMerge.select('path:last-child')
-            .on('click', function(event, d) {
-                event.stopPropagation();
-                if (self.onEdgeClick) {
-                    self.onEdgeClick(d);
-                }
-            });
+        edgesMerge.select('.edge-clickable') 
+			.on('click', function(event, d) {
+				event.stopPropagation();
+				if (self.onEdgeClick) {
+					self.onEdgeClick(d);
+				}
+			});
 		
 		// ADD HOVER EFFECTS
 edgesMerge.select('path:last-child')
