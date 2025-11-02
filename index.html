@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Editor</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toolbar.css">
+    <link rel="stylesheet" href="styles/properties.css">
+    <link rel="stylesheet" href="styles/minimap.css">
+</head>
+<body>
+    <!-- Header / Toolbar -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="app-title">Knowledge Graph Editor</h1>
+        </div>
+        <div class="toolbar">
+            <button id="btn-new" class="toolbar-btn" title="New Graph (Ctrl+N)">
+                <span>📄</span> New
+            </button>
+            <button id="btn-open" class="toolbar-btn" title="Open Graph (Ctrl+O)">
+                <span>📂</span> Open
+            </button>
+            <button id="btn-save" class="toolbar-btn" title="Save Graph (Ctrl+S)">
+                <span>💾</span> Save
+            </button>
+            <button id="btn-export" class="toolbar-btn" title="Export">
+                <span>📤</span> Export
+            </button>
+            <div class="toolbar-separator"></div>
+            <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
+                <span>↶</span>
+            </button>
+            <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)" disabled>
+                <span>↷</span>
+            </button>
+            <div class="toolbar-separator"></div>
+            <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
+            <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div id="tabs" class="tabs"></div>
+        <button id="btn-add-tab" class="add-tab-btn" title="New Tab">+</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Sidebar: Tools -->
+        <aside class="left-sidebar">
+            <div class="tool-palette">
+                <h3>Tools</h3>
+                <button id="tool-select" class="tool-btn active" title="Select (V)">
+                    <span>◯</span>
+                    <span class="tool-label">Select</span>
+                </button>
+                <button id="tool-add-node" class="tool-btn" title="Add Node (N)">
+                    <span>⊕</span>
+                    <span class="tool-label">Add Node</span>
+                </button>
+                <button id="tool-add-edge" class="tool-btn" title="Add Edge (E)">
+                    <span>→</span>
+                    <span class="tool-label">Add Edge</span>
+                </button>
+                <button id="tool-pan" class="tool-btn" title="Pan (Space)">
+                    <span>✋</span>
+                    <span class="tool-label">Pan</span>
+                </button>
+                <div class="tool-separator"></div>
+                <button id="btn-layout" class="tool-btn" title="Auto Layout">
+                    <span>⊞</span>
+                    <span class="tool-label">Layout</span>
+                </button>
+                <button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
+                    <span>⚡</span>
+                    <span class="tool-label">Path</span>
+                </button>
+                <button id="btn-cluster" class="tool-btn" title="Cluster Nodes">
+                    <span>⊛</span>
+                    <span class="tool-label">Cluster</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-container">
+            <svg id="graph-canvas" class="graph-canvas"></svg>
+            
+            <!-- Minimap -->
+            <div id="minimap-container" class="minimap-container">
+                <svg id="minimap" class="minimap"></svg>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Properties Panel -->
+        <aside id="properties-panel" class="right-sidebar hidden">
+            <div class="properties-header">
+                <h3>Properties</h3>
+                <button id="btn-close-properties" class="close-btn">✕</button>
+            </div>
+            <div id="properties-content" class="properties-content">
+                <!-- Properties will be dynamically generated -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <span id="status-nodes">Nodes: 0</span>
+        <span class="separator">|</span>
+        <span id="status-edges">Edges: 0</span>
+        <span class="separator">|</span>
+        <span id="status-zoom">Zoom: 100%</span>
+        <span class="separator">|</span>
+        <span id="status-selection">Selected: None</span>
+    </footer>
+
+    <!-- Hidden File Input -->
+    <input type="file" id="file-input" accept=".json" style="display: none;">
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Graph</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <button id="export-json" class="export-option">
+                    <span>📄</span> Export as JSON
+                </button>
+                <button id="export-png" class="export-option">
+                    <span>🖼️</span> Export as PNG
+                </button>
+                <button id="export-svg" class="export-option">
+                    <span>📐</span> Export as SVG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortest Path Modal -->
+    <div id="path-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Find Shortest Path</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>Select two nodes to find the shortest path between them.</p>
+                <div class="path-info">
+                    <div>Start Node: <span id="path-start">None</span></div>
+                    <div>End Node: <span id="path-end">None</span></div>
+                </div>
+                <button id="btn-calculate-path" class="modal-btn" disabled>Calculate Path</button>
+                <button id="btn-clear-path" class="modal-btn">Clear Selection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/algorithms.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/properties.js"></script>
+    <script src="js/minimap.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/tabManager.js"></script>
+    <script src="js/fileManager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

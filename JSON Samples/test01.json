@@ -1,0 +1,43 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "Untitled Graph",
+      "title": "",
+      "description": "",
+      "created": "2025-11-02",
+      "modified": "2025-11-02"
+    },
+    "nodes": [
+      {
+        "id": "node_1",
+        "properties": {
+          "color": "#3498db",
+          "size": 10,
+          "description": ""
+        }
+      },
+      {
+        "id": "node_2",
+        "properties": {
+          "color": "#3498db",
+          "size": 10,
+          "description": ""
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_1762083512195_cufji7qdh",
+        "source": "node_2",
+        "target": "node_1",
+        "properties": {
+          "description": "",
+          "type": "related",
+          "color": "#95a5a6",
+          "weight": 1,
+          "directed": true
+        }
+      }
+    ]
+  }
+}

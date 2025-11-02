@@ -1,0 +1,117 @@
+/* Toolbar Styles */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toolbar-btn {
+    padding: 8px 16px;
+    background-color: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.toolbar-btn span {
+    font-size: 18px;
+}
+
+.toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.toolbar-btn:active {
+    transform: translateY(1px);
+}
+
+.toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.toolbar-btn:disabled:hover {
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.toolbar-btn-small {
+    padding: 6px 10px;
+    background-color: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.toolbar-btn-small:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Search Input */
+.search-input {
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 14px;
+    width: 250px;
+    transition: all 0.2s;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.search-input:focus {
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .toolbar-btn span {
+        display: none;
+    }
+    
+    .toolbar-btn {
+        padding: 8px 12px;
+    }
+    
+    .search-input {
+        width: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-title {
+        font-size: 16px;
+    }
+    
+    .toolbar {
+        gap: 5px;
+    }
+    
+    .search-input {
+        width: 120px;
+        font-size: 12px;
+    }
+}

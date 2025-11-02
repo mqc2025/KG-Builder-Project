@@ -1,0 +1,71 @@
+/* Minimap Styles */
+.minimap-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 180px;
+    height: 120px;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 100;
+    transition: opacity 0.3s;
+}
+
+.minimap-container:hover {
+    border-color: var(--primary-color);
+}
+
+.minimap {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.minimap-viewport {
+    fill: var(--primary-color);
+    fill-opacity: 0.2;
+    stroke: var(--primary-color);
+    stroke-width: 2;
+    cursor: move;
+}
+
+.minimap-node {
+    fill: var(--primary-color);
+    opacity: 0.6;
+}
+
+.minimap-edge {
+    stroke: var(--border-color);
+    stroke-width: 1;
+    opacity: 0.3;
+}
+
+/* Minimap Toggle */
+.minimap-toggle {
+    position: absolute;
+    bottom: 150px;
+    right: 20px;
+    padding: 8px 12px;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+    transition: all 0.2s;
+}
+
+.minimap-toggle:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+}
+
+/* Hide minimap when graph is small */
+.minimap-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

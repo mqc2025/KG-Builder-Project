@@ -1,0 +1,271 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "Sample Knowledge Graph",
+      "title": "AI and Machine Learning Concepts",
+      "description": "A sample graph showing relationships between AI/ML concepts",
+      "created": "2025-11-01",
+      "modified": "2025-11-02"
+    },
+    "nodes": [
+      {
+        "id": "AI",
+        "properties": {
+          "color": "#3498db",
+          "size": 15,
+          "description": "Artificial Intelligence - The simulation of human intelligence in machines",
+          "category": "Field",
+          "year_established": "1956"
+        }
+      },
+      {
+        "id": "ML",
+        "properties": {
+          "color": "#2ecc71",
+          "size": 14,
+          "description": "Machine Learning - Subset of AI that learns from data",
+          "category": "Field",
+          "year_established": "1959"
+        }
+      },
+      {
+        "id": "DL",
+        "properties": {
+          "color": "#2ecc71",
+          "size": 13,
+          "description": "Deep Learning - ML using neural networks with multiple layers",
+          "category": "Field",
+          "year_established": "2006"
+        }
+      },
+      {
+        "id": "NLP",
+        "properties": {
+          "color": "#9b59b6",
+          "size": 12,
+          "description": "Natural Language Processing - AI for understanding human language",
+          "category": "Application",
+          "year_established": "1950"
+        }
+      },
+      {
+        "id": "CV",
+        "properties": {
+          "color": "#9b59b6",
+          "size": 12,
+          "description": "Computer Vision - AI for interpreting visual information",
+          "category": "Application",
+          "year_established": "1960"
+        }
+      },
+      {
+        "id": "NN",
+        "properties": {
+          "color": "#e74c3c",
+          "size": 11,
+          "description": "Neural Networks - Computing systems inspired by biological brains",
+          "category": "Algorithm",
+          "year_established": "1943"
+        }
+      },
+      {
+        "id": "SVM",
+        "properties": {
+          "color": "#e74c3c",
+          "size": 10,
+          "description": "Support Vector Machines - Supervised learning algorithm",
+          "category": "Algorithm",
+          "year_established": "1963"
+        }
+      },
+      {
+        "id": "RF",
+        "properties": {
+          "color": "#e74c3c",
+          "size": 10,
+          "description": "Random Forest - Ensemble learning method",
+          "category": "Algorithm",
+          "year_established": "1995"
+        }
+      },
+      {
+        "id": "RL",
+        "properties": {
+          "color": "#f39c12",
+          "size": 12,
+          "description": "Reinforcement Learning - Learning through trial and error",
+          "category": "Field",
+          "year_established": "1980"
+        }
+      },
+      {
+        "id": "Transformers",
+        "properties": {
+          "color": "#1abc9c",
+          "size": 11,
+          "description": "Transformer Architecture - Neural network architecture for NLP",
+          "category": "Algorithm",
+          "year_established": "2017"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge1",
+        "source": "AI",
+        "target": "ML",
+        "properties": {
+          "description": "ML is a subset of AI",
+          "type": "contains",
+          "color": "#7f8c8d",
+          "weight": 1,
+          "directed": true,
+          "relationship": "parent-child"
+        }
+      },
+      {
+        "id": "edge2",
+        "source": "ML",
+        "target": "DL",
+        "properties": {
+          "description": "DL is a subset of ML",
+          "type": "contains",
+          "color": "#7f8c8d",
+          "weight": 1,
+          "directed": true,
+          "relationship": "parent-child"
+        }
+      },
+      {
+        "id": "edge3",
+        "source": "AI",
+        "target": "NLP",
+        "properties": {
+          "description": "NLP is an application of AI",
+          "type": "applies_to",
+          "color": "#95a5a6",
+          "weight": 2,
+          "directed": true,
+          "relationship": "application"
+        }
+      },
+      {
+        "id": "edge4",
+        "source": "AI",
+        "target": "CV",
+        "properties": {
+          "description": "CV is an application of AI",
+          "type": "applies_to",
+          "color": "#95a5a6",
+          "weight": 2,
+          "directed": true,
+          "relationship": "application"
+        }
+      },
+      {
+        "id": "edge5",
+        "source": "DL",
+        "target": "NN",
+        "properties": {
+          "description": "DL uses neural networks",
+          "type": "uses",
+          "color": "#3498db",
+          "weight": 1,
+          "directed": true,
+          "relationship": "implementation"
+        }
+      },
+      {
+        "id": "edge6",
+        "source": "ML",
+        "target": "SVM",
+        "properties": {
+          "description": "SVM is an ML algorithm",
+          "type": "uses",
+          "color": "#3498db",
+          "weight": 2,
+          "directed": true,
+          "relationship": "implementation"
+        }
+      },
+      {
+        "id": "edge7",
+        "source": "ML",
+        "target": "RF",
+        "properties": {
+          "description": "RF is an ML algorithm",
+          "type": "uses",
+          "color": "#3498db",
+          "weight": 2,
+          "directed": true,
+          "relationship": "implementation"
+        }
+      },
+      {
+        "id": "edge8",
+        "source": "AI",
+        "target": "RL",
+        "properties": {
+          "description": "RL is a paradigm in AI",
+          "type": "contains",
+          "color": "#7f8c8d",
+          "weight": 1.5,
+          "directed": true,
+          "relationship": "parent-child"
+        }
+      },
+      {
+        "id": "edge9",
+        "source": "NLP",
+        "target": "Transformers",
+        "properties": {
+          "description": "Transformers revolutionized NLP",
+          "type": "uses",
+          "color": "#2ecc71",
+          "weight": 1,
+          "directed": true,
+          "relationship": "implementation"
+        }
+      },
+      {
+        "id": "edge10",
+        "source": "DL",
+        "target": "Transformers",
+        "properties": {
+          "description": "Transformers are a DL architecture",
+          "type": "uses",
+          "color": "#3498db",
+          "weight": 1,
+          "directed": true,
+          "relationship": "implementation"
+        }
+      },
+      {
+        "id": "edge11",
+        "source": "DL",
+        "target": "CV",
+        "properties": {
+          "description": "DL greatly improved CV",
+          "type": "improves",
+          "color": "#e67e22",
+          "weight": 1.5,
+          "directed": true,
+          "relationship": "enhancement"
+        }
+      },
+      {
+        "id": "edge12",
+        "source": "DL",
+        "target": "NLP",
+        "properties": {
+          "description": "DL greatly improved NLP",
+          "type": "improves",
+          "color": "#e67e22",
+          "weight": 1.5,
+          "directed": true,
+          "relationship": "enhancement"
+        }
+      }
+    ]
+  }
+}
