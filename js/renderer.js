@@ -379,8 +379,11 @@ edgesMerge.select('path:last-child')
      * Update selection styling
      */
     updateSelection() {
-        this.nodeGroup.selectAll('.node circle')
-            .classed('selected', d => this.selectedNodes.has(d.id));
+        // Update node selection
+    this.nodeGroup.selectAll('.node')
+        .classed('selected', d => this.selectedNodes.has(d.id))
+        .select('circle')
+        .classed('selected', d => this.selectedNodes.has(d.id));
 
         this.edgeGroup.selectAll('.edge path:first-child')
             .classed('selected', d => this.selectedEdges.has(d.id));
