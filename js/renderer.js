@@ -15,13 +15,18 @@ class Renderer {
         this.nodeGroup = this.g.append('g').attr('class', 'nodes');
         
         // Initialize zoom behavior
-        this.zoom = d3.zoom()
-            .scaleExtent([0.1, 4])
-            .on('zoom', (event) => {
-                this.g.attr('transform', event.transform);
-                this.currentTransform = event.transform;
-                this.updateZoomStatus();
-            });
+		this.zoom = d3.zoom()
+			.scaleExtent([0.1, 4])
+			.on('zoom', (event) => {
+				this.g.attr('transform', event.transform);
+				this.currentTransform = event.transform;
+				this.updateZoomStatus();
+			})
+			.filter(function(event) {
+				// Disable zoom on double-click
+				// Allow all other zoom interactions (wheel, pinch, drag)
+				return event.type !== 'dblclick';
+			});
         
         this.svg.call(this.zoom);
         this.currentTransform = d3.zoomIdentity;
@@ -296,6 +301,28 @@ edgesMerge.select('path:last-child')
             .on('drag', dragged)
             .on('end', dragended);
     }
+	/**
+	 * Unpin a node (allow it to move freely again)
+	 */
+	unpinNode(nodeId) {
+		const node = this.graph.nodes.find(n => n.id === nodeId);
+		if (node) {
+			node.fx = null;
+			node.fy = null;
+			this.simulation.alpha(0.3).restart();
+		}
+	}
+
+	/**
+	 * Unpin all nodes
+	 */
+	unpinAllNodes() {
+		this.graph.nodes.forEach(node => {
+			node.fx = null;
+			node.fy = null;
+		});
+		this.simulation.alpha(0.5).restart();
+	}
 
     /**
      * Update node and edge positions on simulation tick

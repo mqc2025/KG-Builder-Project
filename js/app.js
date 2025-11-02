@@ -26,6 +26,8 @@ class KnowledgeGraphApp {
         // Shortest path state
         this.pathStartNode = null;
         this.pathEndNode = null;
+		this.lastNodeClick = null;
+		this.lastNodeClickTime = 0;
         
         // Setup
         this.setupEventListeners();
@@ -173,6 +175,11 @@ class KnowledgeGraphApp {
                 e.preventDefault();
                 // Space key panning is handled by D3 zoom behavior
             }
+			// U - Unpin all nodes
+			if (e.key === 'u' || e.key === 'U') {
+				this.renderer.unpinAllNodes();
+				this.updateStatus('All nodes unpinned');
+			}
         });
     }
 
@@ -234,12 +241,24 @@ class KnowledgeGraphApp {
      * Handle node click
      */
     handleNodeClick(node) {
-        if (this.currentTool === 'select') {
-            this.renderer.selectNodes([node.id]);
-            this.renderer.selectEdges([]);
-            this.propertiesPanel.showNodeProperties(node.id);
-            this.updateStatus(`Selected: ${node.id}`);
-        } else if (this.currentTool === 'add-edge') {
+		if (this.currentTool === 'select') {
+			// Check for double-click to unpin
+			const now = Date.now();
+			if (this.lastNodeClick === node.id && (now - this.lastNodeClickTime) < 300) {
+				// Double-click detected - unpin the node
+				this.renderer.unpinNode(node.id);
+				this.updateStatus(`Unpinned: ${node.id}`);
+				this.lastNodeClick = null;
+				return;
+			}
+			this.lastNodeClick = node.id;
+			this.lastNodeClickTime = now;
+			
+			this.renderer.selectNodes([node.id]);
+			this.renderer.selectEdges([]);
+			this.propertiesPanel.showNodeProperties(node.id);
+			this.updateStatus(`Selected: ${node.id}`);
+		} else if (this.currentTool === 'add-edge') {
             if (!this.edgeSourceNode) {
                 this.edgeSourceNode = node.id;
                 this.renderer.selectNodes([node.id]);
