@@ -501,26 +501,59 @@ class KnowledgeGraphApp {
      * Show shortest path modal
      */
     showPathModal() {
-        const modal = document.getElementById('path-modal');
-        modal?.classList.remove('hidden');
+    // Check if user has selected nodes
+		const selectedNodes = Array.from(this.renderer.selectedNodes);
+		
+		if (selectedNodes.length === 2) {
+			// User already selected 2 nodes - calculate immediately
+			this.pathStartNode = selectedNodes[0];
+			this.pathEndNode = selectedNodes[1];
+			this.calculateShortestPath();
+			return;
+		}
+		
+		// Show modal for manual selection
+		const modal = document.getElementById('path-modal');
+		modal?.classList.remove('hidden');
 
-        // Reset path state
-        this.pathStartNode = null;
-        this.pathEndNode = null;
-        this.renderer.clearHighlight();
+		// Reset path state
+		this.pathStartNode = null;
+		this.pathEndNode = null;
+		this.renderer.clearHighlight();
 
-        document.getElementById('path-start').textContent = 'None';
-        document.getElementById('path-end').textContent = 'None';
+		document.getElementById('path-start').textContent = 'None';
+		document.getElementById('path-end').textContent = 'None';
 
-        const calculateBtn = document.getElementById('btn-calculate-path');
-        if (calculateBtn) {
-            calculateBtn.disabled = true;
-        }
+		const calculateBtn = document.getElementById('btn-calculate-path');
+		if (calculateBtn) {
+			calculateBtn.disabled = true;
+		}
 
-        // Setup event handlers
-        this.setupPathModal();
+		// Setup event handlers
+		this.setupPathModal();
+	}
+/**
+ * Calculate shortest path (extracted method)
+ */
+calculateShortestPath() {
+    if (!this.pathStartNode || !this.pathEndNode) return;
+    
+    const path = Algorithms.findShortestPath(
+        this.graph,
+        this.pathStartNode,
+        this.pathEndNode
+    );
+
+    if (path) {
+        this.renderer.highlightNodes(path.nodes);
+        this.renderer.highlightEdges(path.edges);
+        alert(`Shortest path found!\n` +
+              `Path: ${path.nodes.join(' → ')}\n` +
+              `Distance: ${path.distance.toFixed(2)}`);
+    } else {
+        alert('No path found between these nodes');
     }
-
+}
     /**
      * Setup path modal event handlers
      */
@@ -544,23 +577,9 @@ class KnowledgeGraphApp {
         };
 
         // Calculate path
-        const handleCalculate = () => {
-            if (this.pathStartNode && this.pathEndNode) {
-                const path = Algorithms.findShortestPath(
-                    this.graph,
-                    this.pathStartNode,
-                    this.pathEndNode
-                );
-
-                if (path) {
-                    this.renderer.highlightNodes(path.nodes);
-                    this.renderer.highlightEdges(path.edges);
-                    alert(`Shortest path found! Distance: ${path.distance.toFixed(2)}`);
-                } else {
-                    alert('No path found between these nodes');
-                }
-            }
-        };
+const handleCalculate = () => {
+    this.calculateShortestPath();
+};
 
         // Clear selection
         const handleClear = () => {
