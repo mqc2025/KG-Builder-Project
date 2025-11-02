@@ -64,18 +64,30 @@ class Renderer {
      * Render the graph
      */
     render() {
-        const nodes = this.graph.nodes;
-        const edges = this.graph.edges;
+		const nodes = this.graph.nodes;
+		const edges = this.graph.edges;
 
-        // Prepare edge data for D3
-        const edgeData = edges.map(e => ({
-            ...e,
-            source: e.source,
-            target: e.target
-        }));
+		// Initialize node positions at center if they don't exist
+		const centerX = this.width / 2;
+		const centerY = this.height / 2;
+		
+		nodes.forEach(node => {
+			if (node.x === undefined || node.y === undefined) {
+				// Add small random offset to prevent exact overlap
+				node.x = centerX + (Math.random() - 0.5) * 100;
+				node.y = centerY + (Math.random() - 0.5) * 100;
+			}
+		});
 
-        // Update simulation
-        this.simulation.nodes(nodes);
+		// Prepare edge data for D3
+		const edgeData = edges.map(e => ({
+			...e,
+			source: e.source,
+			target: e.target
+		}));
+
+		// Update simulation
+		this.simulation.nodes(nodes);
         this.simulation.force('link').links(edgeData);
         this.simulation.alpha(0.3).restart();
 

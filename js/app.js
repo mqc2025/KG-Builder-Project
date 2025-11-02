@@ -492,11 +492,17 @@ class KnowledgeGraphApp {
      * Load graph from JSON
      */
     loadGraph(json) {
-        this.graph.fromJSON(json);
-        this.renderer.render();
-        this.updateStats();
-        this.propertiesPanel.hide();
-    }
+		this.graph.fromJSON(json);
+		this.renderer.render();
+		
+		// Center view on loaded graph
+		setTimeout(() => {
+			this.renderer.fitToView();
+		}, 150);
+		
+		this.updateStats();
+		this.propertiesPanel.hide();
+	}
 
     /**
      * Apply auto layout

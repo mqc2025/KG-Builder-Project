@@ -120,9 +120,13 @@ class FileManager {
                 }
 
                 this.renderer.render();
-                this.renderer.fitToView();
 
-                if (window.app) {
+				// Give simulation a moment to position nodes, then fit to view
+				setTimeout(() => {
+					this.renderer.fitToView();
+				}, 150);
+
+				if (window.app) {
                     window.app.updateStats();
                     window.app.saveState();
                     window.app.propertiesPanel.hide();
