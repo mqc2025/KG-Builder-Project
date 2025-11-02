@@ -28,10 +28,14 @@ class Renderer {
         
         // Initialize force simulation
         this.simulation = d3.forceSimulation()
-            .force('link', d3.forceLink().id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-300))
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-            .force('collision', d3.forceCollide().radius(30));
+			.force('link', d3.forceLink().id(d => d.id).distance(100).strength(0.5))
+			.force('charge', d3.forceManyBody().strength(-200))  // Reduced from -300
+			.force('center', d3.forceCenter(this.width / 2, this.height / 2).strength(0.1))  // Added strength
+			.force('collision', d3.forceCollide().radius(30))
+			.force('x', d3.forceX(this.width / 2).strength(0.05))  // NEW: Pull toward center X
+			.force('y', d3.forceY(this.height / 2).strength(0.05))  // NEW: Pull toward center Y
+			.alphaDecay(0.02)  // NEW: Slower decay = more settling time
+			.velocityDecay(0.4);  // NEW: More friction = less drift
         
         // Event handlers
         this.onNodeClick = null;
@@ -271,15 +275,21 @@ edgesMerge.select('path:last-child')
         }
 
         function dragended(event, d) {
-            if (!event.active) self.simulation.alphaTarget(0);
-            // Keep node fixed at dragged position
-            // d.fx = null;
-            // d.fy = null;
-            
-            if (self.onNodeDragEnd) {
-                self.onNodeDragEnd(d);
-            }
-        }
+			// Gradually cool down the simulation after dragging
+			if (!event.active) {
+				self.simulation.alphaTarget(0).restart();
+			}
+			
+			// Keep node fixed at dragged position
+			// d.fx and d.fy remain set (node stays pinned)
+			
+			// Reheat simulation slightly to let other nodes adjust
+			self.simulation.alpha(0.3).restart();
+			
+			if (self.onNodeDragEnd) {
+				self.onNodeDragEnd(d);
+			}
+		}
 
         return d3.drag()
             .on('start', dragstarted)
