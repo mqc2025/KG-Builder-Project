@@ -70,9 +70,20 @@ class KnowledgeGraphApp {
         this.renderer.onCanvasClick = () => this.handleCanvasClick();
         this.renderer.onNodeDragEnd = () => this.saveState();
         
-        // Canvas tool interactions
-        const canvas = document.getElementById('graph-canvas');
-        canvas.addEventListener('click', (e) => this.handleCanvasToolClick(e));
+        // Canvas tool interactions - only for background clicks
+		const canvas = document.getElementById('graph-canvas');
+		canvas.addEventListener('click', (e) => {
+			// Only handle clicks on the actual canvas/background, not on edges or nodes
+			const target = e.target;
+			const isCanvasBackground = target.tagName === 'svg' || 
+									   target.tagName === 'SVG' || 
+									   target.classList.contains('graph-canvas') ||
+									   target.tagName === 'g';
+			
+			if (isCanvasBackground) {
+				this.handleCanvasToolClick(e);
+			}
+		});
         
         // Simulation updates
         this.renderer.simulation.on('tick', () => {
@@ -362,11 +373,23 @@ class KnowledgeGraphApp {
      * Update status message
      */
     updateStatus(message) {
-        const selected = Array.from(this.renderer.selectedNodes)[0] || 
-                        Array.from(this.renderer.selectedEdges)[0] || 
-                        'None';
-        document.getElementById('status-selection').textContent = `Selected: ${selected}`;
-    }
+		const selectedNode = Array.from(this.renderer.selectedNodes)[0];
+		const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
+		
+		let selectionText = 'None';
+		if (selectedNode) {
+			selectionText = `Node: ${selectedNode}`;
+		} else if (selectedEdge) {
+			const edge = this.graph.getEdge(selectedEdge);
+			if (edge) {
+				selectionText = `Edge: ${edge.properties.type || selectedEdge}`;
+			} else {
+				selectionText = `Edge: ${selectedEdge}`;
+			}
+		}
+		
+		document.getElementById('status-selection').textContent = `Selected: ${selectionText}`;
+	}
 
     /**
      * Save current state to history

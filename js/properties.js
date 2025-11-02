@@ -103,9 +103,12 @@ class PropertiesPanel {
         this.currentType = 'edge';
         this.show();
 
-        const html = `
-            <div class="property-group">
-                <div class="property-group-title">Edge Information</div>
+        const sourceNode = this.graph.getNode(edge.source)?.id || edge.source;
+		const targetNode = this.graph.getNode(edge.target)?.id || edge.target;
+
+		const html = `
+			<div class="property-group">
+				<div class="property-group-title">Edge: ${Utils.sanitizeHtml(sourceNode)} → ${Utils.sanitizeHtml(targetNode)}</div>
                 
                 <div class="property-item">
                     <label class="property-label">ID</label>
@@ -275,6 +278,13 @@ class PropertiesPanel {
 
         // Re-render to show changes
         this.renderer.render();
+		
+		// ADD THIS BLOCK - Refresh edge labels if type changed
+		if (this.currentType === 'edge' && key === 'type') {
+			this.renderer.edgeGroup.selectAll('.edge-label')
+				.filter(d => d.id === this.currentSelection)
+				.text(d => d.properties.type || d.id);
+		}
         
         // Trigger save for history
         if (window.app) {

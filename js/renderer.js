@@ -113,18 +113,23 @@ class Renderer {
             .attr('stroke', 'transparent')
             .attr('stroke-width', 10)
             .attr('fill', 'none')
-            .style('cursor', 'pointer');
-// Add edge label for edge ID
-edgesEnter.append('text')
-    .attr('class', 'edge-label')
-    .attr('text-anchor', 'middle')
-    .attr('dy', -5)
-    .style('font-size', '10px')
-    .style('fill', '#7f8c8d')
-    .style('font-weight', '600')
-    .style('pointer-events', 'none')
-    .style('user-select', 'none')
-    .text(d => d.id);
+            .style('cursor', 'pointer')
+			.style('pointer-events', 'stroke');
+			
+		// Add edge label showing type or ID
+		edgesEnter.append('text')
+			.attr('class', 'edge-label')
+			.attr('text-anchor', 'middle')
+			.attr('dy', -5)
+			.style('font-size', '11px')  // Increased from 10px
+			.style('fill', '#7f8c8d')
+			.style('font-weight', '600')
+			.style('pointer-events', 'none')
+			.style('user-select', 'none')
+			.style('background', 'white')  // ADD THIS
+			.style('padding', '2px 4px')   // ADD THIS
+			.text(d => d.properties.type || d.id);  // Show type first, fallback to ID
+			
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);
 
@@ -142,6 +147,21 @@ edgesEnter.append('text')
                     self.onEdgeClick(d);
                 }
             });
+		
+		// ADD HOVER EFFECTS
+edgesMerge.select('path:last-child')
+    .on('mouseenter', function(event, d) {
+        d3.select(this.parentNode).select('path:first-child')
+            .attr('stroke-width', 3)
+            .style('filter', 'drop-shadow(0 0 2px rgba(52, 152, 219, 0.6))');
+    })
+    .on('mouseleave', function(event, d) {
+        if (!self.selectedEdges.has(d.id)) {
+            d3.select(this.parentNode).select('path:first-child')
+                .attr('stroke-width', 2)
+                .style('filter', 'none');
+        }
+    });
 
         // Define arrowhead marker
         this.defineArrowhead();
