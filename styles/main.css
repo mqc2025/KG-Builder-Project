@@ -298,15 +298,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.3);  /* Lighter overlay */
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;  /* Changed from center */
+    justify-content: flex-end;  /* Changed from center */
+    padding: 20px;
     z-index: 2000;
-}
-
-.modal.hidden {
-    display: none;
+    pointer-events: none;  /* ← KEY: Allow clicks through overlay */
 }
 
 .modal-content {
@@ -315,6 +313,7 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     min-width: 400px;
     max-width: 600px;
+    pointer-events: auto;  /* ← KEY: But modal content captures clicks */
 }
 
 .modal-header {
@@ -410,7 +409,18 @@ body {
     font-weight: 600;
     color: var(--primary-color);
 }
+/* Position path modal in top-right corner */
+#path-modal {
+    align-items: flex-start;
+    justify-content: flex-end;
+}
 
+#path-modal .modal-content {
+    margin-top: 80px;  /* Below toolbar */
+    margin-right: 20px;
+    min-width: 350px;
+    max-width: 350px;
+}
 /* SVG Styles */
 .node {
     cursor: pointer;
