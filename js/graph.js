@@ -232,7 +232,7 @@ class Graph {
      * @returns {Object} Cleaned object
      */
     stripD3Properties(obj) {
-        const d3Props = ['x', 'y', 'fx', 'fy', 'vx', 'vy', 'index'];
+        const d3Props = ['vx', 'vy', 'index'];
         const cleaned = {};
         
         for (const [key, value] of Object.entries(obj)) {
@@ -249,11 +249,21 @@ class Graph {
      * @returns {Object} JSON representation
      */
     toJSON() {
-        // Strip D3 force simulation properties before saving
-        const cleanNodes = this.nodes.map(node => ({
-            id: node.id,
-            properties: this.stripD3Properties(node.properties)
-        }));
+        // Save nodes with position properties (x, y, fx, fy) but strip other D3 properties
+        const cleanNodes = this.nodes.map(node => {
+            const nodeData = {
+                id: node.id,
+                properties: this.stripD3Properties(node.properties)
+            };
+            
+            // Preserve position properties (x, y) and pin status (fx, fy)
+            if (node.x !== undefined) nodeData.x = node.x;
+            if (node.y !== undefined) nodeData.y = node.y;
+            if (node.fx !== undefined) nodeData.fx = node.fx;
+            if (node.fy !== undefined) nodeData.fy = node.fy;
+            
+            return nodeData;
+        });
 
         const cleanEdges = this.edges.map(edge => ({
             id: edge.id,
@@ -293,12 +303,19 @@ class Graph {
             this.nodes = json.graph.nodes || [];
             this.edges = json.graph.edges || [];
 
-            // Validate nodes have required structure and clean D3 properties
+            // Validate nodes have required structure and restore position properties
             this.nodes = this.nodes.filter(node => {
                 if (!node.id || !node.properties) return false;
                 
-                // Clean D3 properties if they exist
+                // Clean D3 properties from properties object if they exist
                 node.properties = this.stripD3Properties(node.properties);
+                
+                // Restore position properties to node root level
+                // These will be used by D3 simulation
+                if (node.x !== undefined) {
+                    // x, y, fx, fy are already at root level, keep them there
+                    // Do nothing, they're in the right place
+                }
                 
                 // Ensure required properties exist
                 node.properties.color = node.properties.color || '#3498db';
