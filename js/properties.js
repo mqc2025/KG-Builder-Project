@@ -82,6 +82,14 @@ class PropertiesPanel {
                 </div>
                 <button class="btn-add-property" id="btn-add-custom-property">+ Add Property</button>
             </div>
+			<div class="property-group">
+				<div class="property-group-title">Connections (${this.getNodeEdges(nodeId).length})</div>
+				<div id="connections-container">
+					${this.renderConnections(nodeId)}
+				</div>
+				<button class="btn-add-property" id="btn-connect-to-node">+ Connect to Another Node</button>
+			</div>
+			
 
             <div class="property-actions">
                 <button class="btn-delete-selected" id="btn-delete-node">Delete Node</button>
@@ -262,6 +270,41 @@ class PropertiesPanel {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => this.deleteSelected());
         }
+		// Connection item handlers
+		const connectionsContainer = document.getElementById('connections-container');
+		if (connectionsContainer) {
+			connectionsContainer.addEventListener('click', (e) => {
+				const connectionItem = e.target.closest('.connection-item');
+				if (!connectionItem) return;
+				
+				const edgeId = connectionItem.dataset.edgeId;
+				
+				if (e.target.classList.contains('btn-edit-connection')) {
+					// Show edge properties
+					this.showEdgeProperties(edgeId);
+				} else if (e.target.classList.contains('btn-delete-connection')) {
+					// Delete connection
+					if (Utils.confirm('Delete this connection?')) {
+						this.graph.removeEdge(edgeId);
+						this.renderer.render();
+						// Refresh node properties
+						this.showNodeProperties(this.currentSelection);
+						if (window.app) {
+							window.app.updateStats();
+							window.app.saveState();
+						}
+					}
+				}
+			});
+		}
+
+		// Connect to node button
+		const connectBtn = document.getElementById('btn-connect-to-node');
+		if (connectBtn) {
+			connectBtn.addEventListener('click', () => {
+				this.showConnectToNodeDialog(this.currentSelection);
+			});
+		}
     }
 
     /**
@@ -417,6 +460,85 @@ class PropertiesPanel {
             window.app.saveState();
         }
     }
+	/**
+	 * Get all edges connected to a node
+	 */
+	getNodeEdges(nodeId) {
+		return this.graph.edges.filter(e => {
+			const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+			const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+			return sourceId === nodeId || targetId === nodeId;
+		});
+	}
+
+	/**
+	 * Render connections list for a node
+	 */
+	renderConnections(nodeId) {
+		const edges = this.getNodeEdges(nodeId);
+		
+		if (edges.length === 0) {
+			return '<p style="color: var(--text-secondary); font-size: 13px;">No connections</p>';
+		}
+		
+		return edges.map(edge => {
+			const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+			const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+			
+			const isOutgoing = sourceId === nodeId;
+			const otherNodeId = isOutgoing ? targetId : sourceId;
+			const direction = isOutgoing ? '→' : '←';
+			const edgeLabel = edge.properties.type || edge.id;
+			
+			return `
+				<div class="connection-item" data-edge-id="${edge.id}">
+					<div class="connection-info">
+						<span class="connection-direction">${direction}</span>
+						<span class="connection-node">${Utils.sanitizeHtml(otherNodeId)}</span>
+						<span class="connection-label">${Utils.sanitizeHtml(edgeLabel)}</span>
+					</div>
+					<div class="connection-actions">
+						<button class="btn-edit-connection" title="Edit edge properties">✎</button>
+						<button class="btn-delete-connection" title="Delete connection">✕</button>
+					</div>
+				</div>
+			`;
+		}).join('');
+	}
+
+	/**
+	 * Show connection to node dialog
+	 */
+	showConnectToNodeDialog(sourceNodeId) {
+		const availableNodes = this.graph.nodes
+			.filter(n => n.id !== sourceNodeId)
+			.map(n => n.id)
+			.sort();
+		
+		if (availableNodes.length === 0) {
+			alert('No other nodes available to connect to');
+			return;
+		}
+		
+		// Create simple selection dialog
+		const nodeList = availableNodes.map(id => `• ${id}`).join('\n');
+		const targetId = prompt(`Select target node to connect to:\n\n${nodeList}\n\nEnter node ID:`);
+		
+		if (!targetId) return;
+		
+		// Validate node exists
+		if (!this.graph.getNode(targetId)) {
+			alert('Invalid node ID');
+			return;
+		}
+		
+		// Create edge using app controller
+		if (window.app) {
+			window.app.addEdge(sourceNodeId, targetId);
+			// Refresh properties panel
+			this.showNodeProperties(sourceNodeId);
+		}
+	}
 }
 
 // Export

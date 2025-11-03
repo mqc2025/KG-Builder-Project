@@ -249,3 +249,74 @@
 .metadata-item span {
     color: var(--text-secondary);
 }
+
+/* Connection Items */
+.connection-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: var(--light-bg);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.connection-item:hover {
+    background-color: #e8eaed;
+    border-left-color: var(--secondary-color);
+}
+
+.connection-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.connection-direction {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.connection-node {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.connection-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.connection-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-edit-connection,
+.btn-delete-connection {
+    padding: 4px 8px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+}
+
+.btn-edit-connection:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-delete-connection:hover {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
