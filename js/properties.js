@@ -520,23 +520,54 @@ class PropertiesPanel {
 			return;
 		}
 		
-		// Create simple selection dialog
-		const nodeList = availableNodes.map(id => `• ${id}`).join('\n');
-		const targetId = prompt(`Select target node to connect to:\n\n${nodeList}\n\nEnter node ID:`);
+		// Create dropdown selector inline
+		const dropdownHTML = `
+			<div class="connection-selector" style="margin-top: 15px; padding: 15px; background: var(--light-bg); border-radius: 6px;">
+				<label class="property-label">Select target node:</label>
+				<select id="target-node-dropdown" class="property-select" style="margin-bottom: 10px;">
+					<option value="">-- Choose a node --</option>
+					${availableNodes.map(id => `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(id)}</option>`).join('')}
+				</select>
+				<div style="display: flex; gap: 10px;">
+					<button id="btn-confirm-connection" class="modal-btn" style="flex: 1;" disabled>Create Connection</button>
+					<button id="btn-cancel-connection" class="modal-btn" style="flex: 1; background-color: var(--border-color);">Cancel</button>
+				</div>
+			</div>
+		`;
 		
-		if (!targetId) return;
-		
-		// Validate node exists
-		if (!this.graph.getNode(targetId)) {
-			alert('Invalid node ID');
-			return;
-		}
-		
-		// Create edge using app controller
-		if (window.app) {
-			window.app.addEdge(sourceNodeId, targetId);
-			// Refresh properties panel
-			this.showNodeProperties(sourceNodeId);
+		// Insert dropdown into connections container
+		const connectionsContainer = document.getElementById('connections-container');
+		if (connectionsContainer) {
+			const existingSelector = connectionsContainer.querySelector('.connection-selector');
+			if (existingSelector) existingSelector.remove(); // Remove if already exists
+			
+			connectionsContainer.insertAdjacentHTML('afterend', dropdownHTML);
+			
+			// Setup event handlers
+			const dropdown = document.getElementById('target-node-dropdown');
+			const confirmBtn = document.getElementById('btn-confirm-connection');
+			const cancelBtn = document.getElementById('btn-cancel-connection');
+			
+			dropdown.addEventListener('change', () => {
+				confirmBtn.disabled = !dropdown.value;
+			});
+			
+			confirmBtn.addEventListener('click', () => {
+				const targetId = dropdown.value;
+				if (targetId && window.app) {
+					window.app.addEdge(sourceNodeId, targetId);
+					// Refresh properties panel
+					this.showNodeProperties(sourceNodeId);
+				}
+			});
+			
+			cancelBtn.addEventListener('click', () => {
+				const selector = document.querySelector('.connection-selector');
+				if (selector) selector.remove();
+			});
+			
+			// Auto-focus dropdown
+			dropdown.focus();
 		}
 	}
 }
