@@ -520,7 +520,7 @@ class PropertiesPanel {
 			return;
 		}
 		
-		// Create dropdown selector inline
+		// Create dropdown selector inline with direction control
 		const dropdownHTML = `
 			<div class="connection-selector" style="margin-top: 15px; padding: 15px; background: var(--light-bg); border-radius: 6px;">
 				<label class="property-label">Select target node:</label>
@@ -528,6 +528,23 @@ class PropertiesPanel {
 					<option value="">-- Choose a node --</option>
 					${availableNodes.map(id => `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(id)}</option>`).join('')}
 				</select>
+				
+				<label class="property-label" style="margin-top: 10px;">Connection direction:</label>
+				<div style="display: flex; gap: 15px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 4px;">
+					<label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+						<input type="radio" name="connection-direction" value="outgoing" checked style="cursor: pointer;">
+						<span style="font-size: 13px;">
+							<strong>${Utils.sanitizeHtml(sourceNodeId)}</strong> → Target (Outgoing)
+						</span>
+					</label>
+					<label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+						<input type="radio" name="connection-direction" value="incoming" style="cursor: pointer;">
+						<span style="font-size: 13px;">
+							Target → <strong>${Utils.sanitizeHtml(sourceNodeId)}</strong> (Incoming)
+						</span>
+					</label>
+				</div>
+				
 				<div style="display: flex; gap: 10px;">
 					<button id="btn-confirm-connection" class="modal-btn" style="flex: 1;" disabled>Create Connection</button>
 					<button id="btn-cancel-connection" class="modal-btn" style="flex: 1; background-color: var(--border-color);">Cancel</button>
@@ -554,8 +571,17 @@ class PropertiesPanel {
 			
 			confirmBtn.addEventListener('click', () => {
 				const targetId = dropdown.value;
+				const direction = document.querySelector('input[name="connection-direction"]:checked').value;
+				
 				if (targetId && window.app) {
-					window.app.addEdge(sourceNodeId, targetId);
+					// Create edge based on selected direction
+					if (direction === 'outgoing') {
+						// Current node → Target node
+						window.app.addEdge(sourceNodeId, targetId);
+					} else {
+						// Target node → Current node
+						window.app.addEdge(targetId, sourceNodeId);
+					}
 					// Refresh properties panel
 					this.showNodeProperties(sourceNodeId);
 				}
