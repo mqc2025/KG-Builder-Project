@@ -16,6 +16,8 @@ class KnowledgeGraphApp {
         this.searchManager = new SearchManager(this.graph, this.renderer);
         this.fileManager = new FileManager(this.graph, this.renderer);
         this.tabManager = new TabManager();
+        this.filterManager = new FilterManager(this.graph, this.renderer);
+        this.contextMenuManager = new ContextMenuManager(this);
         
         // Current tool
         this.currentTool = 'select';
@@ -26,8 +28,11 @@ class KnowledgeGraphApp {
         // Shortest path state
         this.pathStartNode = null;
         this.pathEndNode = null;
-		this.lastNodeClick = null;
-		this.lastNodeClickTime = 0;
+        this.lastNodeClick = null;
+        this.lastNodeClickTime = 0;
+        
+        // Feature 13: Merging state
+        this.mergingNode = null;
         
         // Setup
         this.setupEventListeners();
@@ -61,10 +66,16 @@ class KnowledgeGraphApp {
         document.getElementById('tool-add-edge')?.addEventListener('click', () => this.setTool('add-edge'));
         document.getElementById('tool-pan')?.addEventListener('click', () => this.setTool('pan'));
         
+        // Feature 3: Freeze button
+        document.getElementById('btn-freeze')?.addEventListener('click', () => this.toggleFreeze());
+        
         // Advanced features
         document.getElementById('btn-layout')?.addEventListener('click', () => this.applyLayout());
         document.getElementById('btn-shortest-path')?.addEventListener('click', () => this.showPathModal());
         document.getElementById('btn-cluster')?.addEventListener('click', () => this.clusterNodes());
+        
+        // Feature 13: Merge nodes button
+        document.getElementById('btn-merge-nodes')?.addEventListener('click', () => this.startMergeNodes());
         
         // Renderer event handlers
         this.renderer.onNodeClick = (node) => this.handleNodeClick(node);
@@ -72,20 +83,24 @@ class KnowledgeGraphApp {
         this.renderer.onCanvasClick = () => this.handleCanvasClick();
         this.renderer.onNodeDragEnd = () => this.saveState();
         
+        // Feature 12: Context menu handlers
+        this.renderer.onNodeContextMenu = (node, event) => this.contextMenuManager.showNodeMenu(node, event);
+        this.renderer.onEdgeContextMenu = (edge, event) => this.contextMenuManager.showEdgeMenu(edge, event);
+        this.renderer.onCanvasContextMenu = (event) => this.contextMenuManager.showCanvasMenu(event);
+        
         // Canvas tool interactions - only for background clicks
-		const canvas = document.getElementById('graph-canvas');
-		canvas.addEventListener('click', (e) => {
-			// Only handle clicks on the actual canvas/background, not on edges or nodes
-			const target = e.target;
-			const isCanvasBackground = target.tagName === 'svg' || 
-									   target.tagName === 'SVG' || 
-									   target.classList.contains('graph-canvas') ||
-									   target.tagName === 'g';
-			
-			if (isCanvasBackground) {
-				this.handleCanvasToolClick(e);
-			}
-		});
+        const canvas = document.getElementById('graph-canvas');
+        canvas.addEventListener('click', (e) => {
+            const target = e.target;
+            const isCanvasBackground = target.tagName === 'svg' || 
+                                       target.tagName === 'SVG' || 
+                                       target.classList.contains('graph-canvas') ||
+                                       target.tagName === 'g';
+            
+            if (isCanvasBackground) {
+                this.handleCanvasToolClick(e);
+            }
+        });
         
         // Simulation updates
         this.renderer.simulation.on('tick', () => {
@@ -102,64 +117,55 @@ class KnowledgeGraphApp {
      */
     setupKeyboardShortcuts() {
         document.addEventListener('keydown', (e) => {
-            // Check if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
 
             const ctrl = e.ctrlKey || e.metaKey;
 
-            // Ctrl/Cmd + N - New
             if (ctrl && e.key === 'n') {
                 e.preventDefault();
                 this.newGraph();
             }
 
-            // Ctrl/Cmd + O - Open
             if (ctrl && e.key === 'o') {
                 e.preventDefault();
                 this.openGraph();
             }
 
-            // Ctrl/Cmd + S - Save
             if (ctrl && e.key === 's') {
                 e.preventDefault();
                 this.saveGraph();
             }
 
-            // Ctrl/Cmd + Z - Undo
             if (ctrl && e.key === 'z' && !e.shiftKey) {
                 e.preventDefault();
                 this.undo();
             }
 
-            // Ctrl/Cmd + Shift + Z - Redo
             if (ctrl && e.key === 'z' && e.shiftKey) {
                 e.preventDefault();
                 this.redo();
             }
 
-            // Ctrl/Cmd + F - Focus search
             if (ctrl && e.key === 'f') {
                 e.preventDefault();
                 document.getElementById('search-input')?.focus();
             }
 
-            // Delete - Delete selected
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 this.deleteSelected();
             }
 
-            // Escape - Deselect / Cancel tool
             if (e.key === 'Escape') {
                 this.setTool('select');
                 this.renderer.clearSelection();
                 this.propertiesPanel.hide();
                 this.edgeSourceNode = null;
+                this.mergingNode = null;
                 this.updateStatus('Cancelled');
             }
 
-            // Tool shortcuts
             if (e.key === 'v' || e.key === 'V') {
                 this.setTool('select');
             }
@@ -169,17 +175,22 @@ class KnowledgeGraphApp {
             if (e.key === 'e' || e.key === 'E') {
                 this.setTool('add-edge');
             }
+            
+            // Feature 3: F to toggle freeze
+            if (e.key === 'f' || e.key === 'F') {
+                if (!ctrl) {
+                    this.toggleFreeze();
+                }
+            }
 
-            // Space - Pan tool (hold)
             if (e.key === ' ') {
                 e.preventDefault();
-                // Space key panning is handled by D3 zoom behavior
             }
-			// U - Unpin all nodes
-			if (e.key === 'u' || e.key === 'U') {
-				this.renderer.unpinAllNodes();
-				this.updateStatus('All nodes unpinned');
-			}
+            
+            if (e.key === 'u' || e.key === 'U') {
+                this.renderer.unpinAllNodes();
+                this.updateStatus('All nodes unpinned');
+            }
         });
     }
 
@@ -189,7 +200,6 @@ class KnowledgeGraphApp {
     setTool(tool) {
         this.currentTool = tool;
         
-        // Update tool button states
         document.querySelectorAll('.tool-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -199,7 +209,6 @@ class KnowledgeGraphApp {
             toolBtn.classList.add('active');
         }
         
-        // Update canvas cursor
         const canvas = document.getElementById('graph-canvas');
         canvas.classList.remove('adding-node', 'adding-edge', 'panning');
         
@@ -209,6 +218,8 @@ class KnowledgeGraphApp {
         } else if (tool === 'add-edge') {
             canvas.classList.add('adding-edge');
             this.edgeSourceNode = null;
+            // Feature 7: Clear selection when starting edge creation
+            this.renderer.clearSelection();
             this.updateStatus('Click on a node to start creating an edge');
         } else if (tool === 'pan') {
             canvas.classList.add('panning');
@@ -219,11 +230,28 @@ class KnowledgeGraphApp {
     }
 
     /**
+     * Feature 3: Toggle freeze
+     */
+    toggleFreeze() {
+        this.renderer.toggleFreeze();
+        const freezeBtn = document.getElementById('btn-freeze');
+        if (freezeBtn) {
+            if (this.renderer.isFrozen) {
+                freezeBtn.classList.add('active');
+                freezeBtn.title = 'Unfreeze Simulation (F)';
+            } else {
+                freezeBtn.classList.remove('active');
+                freezeBtn.title = 'Freeze Simulation (F)';
+            }
+        }
+        this.updateStatus(this.renderer.isFrozen ? 'Simulation frozen' : 'Simulation active');
+    }
+
+    /**
      * Handle canvas click for tool actions
      */
     handleCanvasToolClick(event) {
         if (this.currentTool === 'add-node') {
-            // Get click position relative to graph coordinates
             const svgElement = document.getElementById('graph-canvas');
             const pt = svgElement.createSVGPoint();
             pt.x = event.clientX;
@@ -241,29 +269,39 @@ class KnowledgeGraphApp {
      * Handle node click
      */
     handleNodeClick(node) {
-		if (this.currentTool === 'select') {
-			// Check for double-click to unpin
-			const now = Date.now();
-			if (this.lastNodeClick === node.id && (now - this.lastNodeClickTime) < 300) {
-				// Double-click detected - unpin the node
-				this.renderer.unpinNode(node.id);
-				this.updateStatus(`Unpinned: ${node.id}`);
-				this.lastNodeClick = null;
-				return;
-			}
-			this.lastNodeClick = node.id;
-			this.lastNodeClickTime = now;
-			
-			this.renderer.selectNodes([node.id]);
-			this.renderer.selectEdges([]);
-			this.propertiesPanel.showNodeProperties(node.id);
-			this.updateStatus(`Selected: ${node.id}`);
-		} else if (this.currentTool === 'add-edge') {
+        // Feature 13: Check if in merge mode
+        if (this.mergingNode) {
+            if (this.mergingNode !== node.id) {
+                this.mergeNodes(this.mergingNode, node.id);
+                this.mergingNode = null;
+            } else {
+                this.updateStatus('Cannot merge a node with itself');
+            }
+            return;
+        }
+        
+        if (this.currentTool === 'select') {
+            const now = Date.now();
+            if (this.lastNodeClick === node.id && (now - this.lastNodeClickTime) < 300) {
+                this.renderer.unpinNode(node.id);
+                this.updateStatus(`Unpinned: ${node.id}`);
+                this.lastNodeClick = null;
+                return;
+            }
+            this.lastNodeClick = node.id;
+            this.lastNodeClickTime = now;
+            
+            this.renderer.selectNodes([node.id]);
+            this.renderer.selectEdges([]);
+            this.propertiesPanel.showNodeProperties(node.id);
+            this.updateStatus(`Selected: ${node.id}`);
+        } else if (this.currentTool === 'add-edge') {
             if (!this.edgeSourceNode) {
                 this.edgeSourceNode = node.id;
                 this.renderer.selectNodes([node.id]);
                 this.updateStatus(`Source selected. Click on target node to create edge.`);
             } else {
+                // Feature 7: Create edge and clear selection
                 this.addEdge(this.edgeSourceNode, node.id);
                 this.edgeSourceNode = null;
                 this.renderer.clearSelection();
@@ -301,7 +339,6 @@ class KnowledgeGraphApp {
         const nodeId = prompt('Enter node ID:', `node_${this.graph.nodes.length + 1}`);
         if (!nodeId) return;
 
-        // Check for duplicate ID
         if (this.graph.getNode(nodeId)) {
             alert('A node with this ID already exists');
             return;
@@ -314,7 +351,6 @@ class KnowledgeGraphApp {
             description: ''
         });
 
-        // Set initial position
         node.x = x;
         node.y = y;
         node.fx = x;
@@ -380,6 +416,59 @@ class KnowledgeGraphApp {
     }
 
     /**
+     * Feature 13: Start merge nodes process
+     */
+    startMergeNodes() {
+        const selectedNodes = Array.from(this.renderer.selectedNodes);
+        
+        if (selectedNodes.length === 2) {
+            this.mergeNodes(selectedNodes[0], selectedNodes[1]);
+        } else {
+            this.mergingNode = null;
+            this.setTool('select');
+            this.updateStatus('Select first node to merge');
+            alert('Click on two nodes to merge them. The first node you select will be merged into the second.');
+        }
+    }
+
+    /**
+     * Feature 13: Merge two nodes
+     */
+    mergeNodes(nodeId1, nodeId2) {
+        const node1 = this.graph.getNode(nodeId1);
+        const node2 = this.graph.getNode(nodeId2);
+        
+        if (!node1 || !node2) {
+            alert('Invalid nodes selected');
+            return;
+        }
+        
+        const keepId = prompt(
+            `Merge nodes:\n1. ${nodeId1}\n2. ${nodeId2}\n\nEnter the ID to keep (1 or 2):`,
+            '2'
+        );
+        
+        if (keepId !== '1' && keepId !== '2') {
+            alert('Cancelled');
+            return;
+        }
+        
+        const finalKeepId = keepId === '1' ? nodeId1 : nodeId2;
+        
+        const success = this.graph.mergeNodes(nodeId1, nodeId2, finalKeepId);
+        
+        if (success) {
+            this.renderer.clearSelection();
+            this.renderer.render();
+            this.updateStats();
+            this.saveState();
+            this.updateStatus(`Merged nodes into: ${finalKeepId}`);
+        } else {
+            alert('Failed to merge nodes');
+        }
+    }
+
+    /**
      * Update statistics in status bar
      */
     updateStats() {
@@ -392,23 +481,23 @@ class KnowledgeGraphApp {
      * Update status message
      */
     updateStatus(message) {
-		const selectedNode = Array.from(this.renderer.selectedNodes)[0];
-		const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
-		
-		let selectionText = 'None';
-		if (selectedNode) {
-			selectionText = `Node: ${selectedNode}`;
-		} else if (selectedEdge) {
-			const edge = this.graph.getEdge(selectedEdge);
-			if (edge) {
-				selectionText = `Edge: ${edge.properties.type || selectedEdge}`;
-			} else {
-				selectionText = `Edge: ${selectedEdge}`;
-			}
-		}
-		
-		document.getElementById('status-selection').textContent = `Selected: ${selectionText}`;
-	}
+        const selectedNode = Array.from(this.renderer.selectedNodes)[0];
+        const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
+        
+        let selectionText = 'None';
+        if (selectedNode) {
+            selectionText = `Node: ${selectedNode}`;
+        } else if (selectedEdge) {
+            const edge = this.graph.getEdge(selectedEdge);
+            if (edge) {
+                selectionText = `Edge: ${edge.properties.type || selectedEdge}`;
+            } else {
+                selectionText = `Edge: ${selectedEdge}`;
+            }
+        }
+        
+        document.getElementById('status-selection').textContent = `Selected: ${selectionText}`;
+    }
 
     /**
      * Save current state to history
@@ -492,29 +581,29 @@ class KnowledgeGraphApp {
      * Load graph from JSON
      */
     loadGraph(json) {
-		this.graph.fromJSON(json);
-		this.renderer.render();
-		
-		// Center view on loaded graph
-		setTimeout(() => {
-			this.renderer.fitToView();
-		}, 150);
-		
-		this.updateStats();
-		this.propertiesPanel.hide();
-	}
+        this.graph.fromJSON(json);
+        this.renderer.render();
+        
+        setTimeout(() => {
+            this.renderer.fitToView();
+        }, 150);
+        
+        this.updateStats();
+        this.propertiesPanel.hide();
+    }
 
     /**
      * Apply auto layout
      */
     applyLayout() {
-        // Reset node positions and restart simulation
         this.graph.nodes.forEach(node => {
             node.fx = null;
             node.fy = null;
         });
 
-        this.renderer.simulation.alpha(1).restart();
+        if (!this.renderer.isFrozen) {
+            this.renderer.simulation.alpha(1).restart();
+        }
         this.updateStatus('Layout applied');
         
         setTimeout(() => {
@@ -526,59 +615,56 @@ class KnowledgeGraphApp {
      * Show shortest path modal
      */
     showPathModal() {
-    // Check if user has selected nodes
-		const selectedNodes = Array.from(this.renderer.selectedNodes);
-		
-		if (selectedNodes.length === 2) {
-			// User already selected 2 nodes - calculate immediately
-			this.pathStartNode = selectedNodes[0];
-			this.pathEndNode = selectedNodes[1];
-			this.calculateShortestPath();
-			return;
-		}
-		
-		// Show modal for manual selection
-		const modal = document.getElementById('path-modal');
-		modal?.classList.remove('hidden');
+        const selectedNodes = Array.from(this.renderer.selectedNodes);
+        
+        if (selectedNodes.length === 2) {
+            this.pathStartNode = selectedNodes[0];
+            this.pathEndNode = selectedNodes[1];
+            this.calculateShortestPath();
+            return;
+        }
+        
+        const modal = document.getElementById('path-modal');
+        modal?.classList.remove('hidden');
 
-		// Reset path state
-		this.pathStartNode = null;
-		this.pathEndNode = null;
-		this.renderer.clearHighlight();
+        this.pathStartNode = null;
+        this.pathEndNode = null;
+        this.renderer.clearHighlight();
 
-		document.getElementById('path-start').textContent = 'None';
-		document.getElementById('path-end').textContent = 'None';
+        document.getElementById('path-start').textContent = 'None';
+        document.getElementById('path-end').textContent = 'None';
 
-		const calculateBtn = document.getElementById('btn-calculate-path');
-		if (calculateBtn) {
-			calculateBtn.disabled = true;
-		}
+        const calculateBtn = document.getElementById('btn-calculate-path');
+        if (calculateBtn) {
+            calculateBtn.disabled = true;
+        }
 
-		// Setup event handlers
-		this.setupPathModal();
-	}
-/**
- * Calculate shortest path (extracted method)
- */
-calculateShortestPath() {
-    if (!this.pathStartNode || !this.pathEndNode) return;
-    
-    const path = Algorithms.findShortestPath(
-        this.graph,
-        this.pathStartNode,
-        this.pathEndNode
-    );
-
-    if (path) {
-        this.renderer.highlightNodes(path.nodes);
-        this.renderer.highlightEdges(path.edges);
-        alert(`Shortest path found!\n` +
-              `Path: ${path.nodes.join(' → ')}\n` +
-              `Distance: ${path.distance.toFixed(2)}`);
-    } else {
-        alert('No path found between these nodes');
+        this.setupPathModal();
     }
-}
+
+    /**
+     * Calculate shortest path
+     */
+    calculateShortestPath() {
+        if (!this.pathStartNode || !this.pathEndNode) return;
+        
+        const path = Algorithms.findShortestPath(
+            this.graph,
+            this.pathStartNode,
+            this.pathEndNode
+        );
+
+        if (path) {
+            this.renderer.highlightNodes(path.nodes);
+            this.renderer.highlightEdges(path.edges);
+            alert(`Shortest path found!\n` +
+                  `Path: ${path.nodes.join(' → ')}\n` +
+                  `Distance: ${path.distance.toFixed(2)}`);
+        } else {
+            alert('No path found between these nodes');
+        }
+    }
+
     /**
      * Setup path modal event handlers
      */
@@ -588,7 +674,6 @@ calculateShortestPath() {
         const clearBtn = document.getElementById('btn-clear-path');
         const closeBtn = modal?.querySelector('.modal-close');
 
-        // Override node click for path selection
         const originalNodeClick = this.renderer.onNodeClick;
         this.renderer.onNodeClick = (node) => {
             if (!this.pathStartNode) {
@@ -601,12 +686,10 @@ calculateShortestPath() {
             }
         };
 
-        // Calculate path
-const handleCalculate = () => {
-    this.calculateShortestPath();
-};
+        const handleCalculate = () => {
+            this.calculateShortestPath();
+        };
 
-        // Clear selection
         const handleClear = () => {
             this.pathStartNode = null;
             this.pathEndNode = null;
@@ -616,7 +699,6 @@ const handleCalculate = () => {
             if (calculateBtn) calculateBtn.disabled = true;
         };
 
-        // Close modal
         const handleClose = () => {
             modal?.classList.add('hidden');
             this.renderer.onNodeClick = originalNodeClick;
@@ -635,7 +717,7 @@ const handleCalculate = () => {
      * Cluster nodes
      */
     clusterNodes() {
-        const property = prompt('Enter property name to cluster by:', 'type');
+        const property = prompt('Enter property name to cluster by:', 'category');
         if (!property) return;
 
         const clusters = Algorithms.clusterByProperty(this.graph, property);
@@ -643,7 +725,6 @@ const handleCalculate = () => {
 
         alert(`Found ${clusterCount} clusters based on property "${property}"`);
 
-        // Assign colors to clusters
         const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
         let colorIndex = 0;
 
@@ -661,7 +742,6 @@ const handleCalculate = () => {
     }
 }
 
-// Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new KnowledgeGraphApp();
 });

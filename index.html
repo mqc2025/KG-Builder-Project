@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="styles/toolbar.css">
     <link rel="stylesheet" href="styles/properties.css">
     <link rel="stylesheet" href="styles/minimap.css">
+    <link rel="stylesheet" href="styles/contextMenu.css">
+    <link rel="stylesheet" href="styles/filter.css">
 </head>
 <body>
     <!-- Header / Toolbar -->
@@ -40,6 +42,9 @@
             <div class="toolbar-separator"></div>
             <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
             <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
+            <button id="btn-filter" class="toolbar-btn" title="Filter Graph">
+                <span>🔍</span> Filter
+            </button>
         </div>
     </header>
 
@@ -72,6 +77,10 @@
                     <span class="tool-label">Pan</span>
                 </button>
                 <div class="tool-separator"></div>
+                <button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
+                    <span>❄️</span>
+                    <span class="tool-label">Freeze</span>
+                </button>
                 <button id="btn-layout" class="tool-btn" title="Auto Layout">
                     <span>⊞</span>
                     <span class="tool-label">Layout</span>
@@ -84,11 +93,15 @@
                     <span>⊛</span>
                     <span class="tool-label">Cluster</span>
                 </button>
+                <button id="btn-merge-nodes" class="tool-btn" title="Merge Two Nodes">
+                    <span>⊗</span>
+                    <span class="tool-label">Merge</span>
+                </button>
             </div>
         </aside>
 
         <!-- Canvas Area -->
-        <main class="canvas-container">
+        <main class="canvas-container" id="canvas-drop-zone">
             <svg id="graph-canvas" class="graph-canvas"></svg>
             
             <!-- Minimap -->
@@ -123,6 +136,8 @@
         <span id="status-zoom">Zoom: 100%</span>
         <span class="separator">|</span>
         <span id="status-selection">Selected: None</span>
+        <span class="separator">|</span>
+        <span id="status-simulation">Simulation: Active</span>
     </footer>
 
     <!-- Hidden File Input -->
@@ -168,6 +183,42 @@
         </div>
     </div>
 
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Filter Graph</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-group">
+                    <label class="filter-label">Property Name:</label>
+                    <input type="text" id="filter-property" class="filter-input" placeholder="e.g., category, priority">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Property Value:</label>
+                    <input type="text" id="filter-value" class="filter-input" placeholder="e.g., High, Field">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Match Type:</label>
+                    <select id="filter-match-type" class="filter-select">
+                        <option value="exact">Exact Match</option>
+                        <option value="contains">Contains</option>
+                        <option value="starts">Starts With</option>
+                        <option value="ends">Ends With</option>
+                    </select>
+                </div>
+                <button id="btn-apply-filter" class="modal-btn">Apply Filter</button>
+                <button id="btn-clear-filter" class="modal-btn" style="background-color: var(--border-color);">Clear Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <!-- Dynamically populated -->
+    </div>
+
     <!-- D3.js Library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -180,6 +231,8 @@
     <script src="js/properties.js"></script>
     <script src="js/minimap.js"></script>
     <script src="js/search.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/contextMenu.js"></script>
     <script src="js/tabManager.js"></script>
     <script src="js/fileManager.js"></script>
     <script src="js/app.js"></script>

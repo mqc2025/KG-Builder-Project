@@ -10,24 +10,22 @@ class FileManager {
         
         this.setupEventListeners();
         this.setupAutoSave();
+        this.setupDragAndDrop(); // Feature 6
     }
 
     /**
      * Setup event listeners
      */
     setupEventListeners() {
-        // File input
         this.fileInput?.addEventListener('change', (e) => {
             this.handleFileSelect(e);
         });
 
-        // Export modal
         const modalClose = this.exportModal?.querySelector('.modal-close');
         modalClose?.addEventListener('click', () => {
             this.exportModal.classList.add('hidden');
         });
 
-        // Export options
         document.getElementById('export-json')?.addEventListener('click', () => {
             this.exportJSON();
             this.exportModal.classList.add('hidden');
@@ -43,7 +41,6 @@ class FileManager {
             this.exportModal.classList.add('hidden');
         });
 
-        // Click outside modal to close
         this.exportModal?.addEventListener('click', (e) => {
             if (e.target === this.exportModal) {
                 this.exportModal.classList.add('hidden');
@@ -52,15 +49,87 @@ class FileManager {
     }
 
     /**
+     * Feature 6: Setup drag and drop for JSON files
+     */
+    setupDragAndDrop() {
+        const dropZone = document.getElementById('canvas-drop-zone');
+        
+        if (!dropZone) return;
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        // Highlight drop zone when dragging over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-over');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-over');
+            });
+        });
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            if (!file.name.endsWith('.json')) {
+                alert('Please drop a JSON file');
+                return;
+            }
+            
+            this.handleDroppedFile(file);
+        });
+    }
+
+    /**
+     * Feature 6: Handle dropped file
+     */
+    handleDroppedFile(file) {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                
+                // Create new tab with the dropped file
+                if (window.app && window.app.tabManager) {
+                    const filename = file.name.replace('.json', '');
+                    const newTabId = window.app.tabManager.createTab(filename);
+                    window.app.tabManager.switchTab(newTabId);
+                    
+                    // Load the graph in the new tab
+                    this.importGraph(json);
+                }
+            } catch (error) {
+                alert('Error reading dropped file: ' + error.message);
+                console.error('Drop error:', error);
+            }
+        };
+
+        reader.readAsText(file);
+    }
+
+    /**
      * Setup auto-save functionality
      */
     setupAutoSave() {
-        // Auto-save every 30 seconds
         setInterval(() => {
             this.saveToLocalStorage();
         }, 30000);
 
-        // Try to recover on page load
         this.tryRecoverFromLocalStorage();
     }
 
@@ -96,7 +165,6 @@ class FileManager {
 
         reader.readAsText(file);
 
-        // Reset file input
         event.target.value = '';
     }
 
@@ -114,19 +182,17 @@ class FileManager {
                     throw new Error('Invalid graph format');
                 }
 
-                // Update tab name if metadata has a name
                 if (json.graph?.metadata?.name && window.app?.tabManager) {
                     window.app.tabManager.renameActiveTab(json.graph.metadata.name);
                 }
 
                 this.renderer.render();
 
-				// Give simulation a moment to position nodes, then fit to view
-				setTimeout(() => {
-					this.renderer.fitToView();
-				}, 150);
+                setTimeout(() => {
+                    this.renderer.fitToView();
+                }, 150);
 
-				if (window.app) {
+                if (window.app) {
                     window.app.updateStats();
                     window.app.saveState();
                     window.app.propertiesPanel.hide();
@@ -182,7 +248,6 @@ class FileManager {
                     canvas.width = svgElement.clientWidth;
                     canvas.height = svgElement.clientHeight;
                     
-                    // White background
                     ctx.fillStyle = 'white';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     
@@ -230,7 +295,6 @@ class FileManager {
             const svgElement = document.getElementById('graph-canvas');
             const svgClone = svgElement.cloneNode(true);
             
-            // Add white background
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('width', '100%');
             rect.setAttribute('height', '100%');
@@ -276,7 +340,6 @@ class FileManager {
             const now = new Date();
             const hoursSince = (now - timestamp) / (1000 * 60 * 60);
 
-            // Only recover if saved within last 24 hours
             if (hoursSince > 24) {
                 localStorage.removeItem('knowledge-graph-autosave');
                 return;

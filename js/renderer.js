@@ -14,39 +14,50 @@ class Renderer {
         this.edgeGroup = this.g.append('g').attr('class', 'edges');
         this.nodeGroup = this.g.append('g').attr('class', 'nodes');
         
+        // Feature 3: Freeze state
+        this.isFrozen = false;
+        
         // Initialize zoom behavior
-		this.zoom = d3.zoom()
-			.scaleExtent([0.1, 4])
-			.on('zoom', (event) => {
-				this.g.attr('transform', event.transform);
-				this.currentTransform = event.transform;
-				this.updateZoomStatus();
-			})
-			.filter(function(event) {
-				// Disable zoom on double-click
-				// Allow all other zoom interactions (wheel, pinch, drag)
-				return event.type !== 'dblclick';
-			});
+        this.zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => {
+                this.g.attr('transform', event.transform);
+                this.currentTransform = event.transform;
+                this.updateZoomStatus();
+                // Feature 9: Update font sizes relative to zoom
+                this.updateFontSizes();
+            })
+            .filter(function(event) {
+                // Disable zoom on double-click
+                // Allow all other zoom interactions (wheel, pinch, drag)
+                return event.type !== 'dblclick';
+            });
         
         this.svg.call(this.zoom);
         this.currentTransform = d3.zoomIdentity;
         
         // Initialize force simulation
         this.simulation = d3.forceSimulation()
-			.force('link', d3.forceLink().id(d => d.id).distance(100).strength(0.5))
-			.force('charge', d3.forceManyBody().strength(-200))  // Reduced from -300
-			.force('center', d3.forceCenter(this.width / 2, this.height / 2).strength(0.1))  // Added strength
-			.force('collision', d3.forceCollide().radius(30))
-			.force('x', d3.forceX(this.width / 2).strength(0.05))  // NEW: Pull toward center X
-			.force('y', d3.forceY(this.height / 2).strength(0.05))  // NEW: Pull toward center Y
-			.alphaDecay(0.02)  // NEW: Slower decay = more settling time
-			.velocityDecay(0.4);  // NEW: More friction = less drift
+            .force('link', d3.forceLink().id(d => d.id).distance(100).strength(0.5))
+            .force('charge', d3.forceManyBody().strength(-200))
+            .force('center', d3.forceCenter(this.width / 2, this.height / 2).strength(0.1))
+            .force('collision', d3.forceCollide().radius(30))
+            .force('x', d3.forceX(this.width / 2).strength(0.05))
+            .force('y', d3.forceY(this.height / 2).strength(0.05))
+            .alphaDecay(0.02)
+            .velocityDecay(0.4);
+        
+        // Feature 4: Add world boundary force
+        this.updateBoundaryForce();
         
         // Event handlers
         this.onNodeClick = null;
         this.onEdgeClick = null;
         this.onCanvasClick = null;
         this.onNodeDragEnd = null;
+        this.onNodeContextMenu = null;
+        this.onEdgeContextMenu = null;
+        this.onCanvasContextMenu = null;
         
         // Selection tracking
         this.selectedNodes = new Set();
@@ -56,40 +67,133 @@ class Renderer {
         this.highlightedNodes = new Set();
         this.highlightedEdges = new Set();
         
+        // Feature 10: Edge break controls
+        this.edgeBreakControls = new Map();
+        
         // Handle window resize
         window.addEventListener('resize', () => this.handleResize());
+    }
+
+    /**
+     * Feature 3: Freeze simulation
+     */
+    freezeSimulation() {
+        this.isFrozen = true;
+        this.simulation.stop();
+        this.updateSimulationStatus();
+    }
+
+    /**
+     * Feature 3: Unfreeze simulation
+     */
+    unfreezeSimulation() {
+        this.isFrozen = false;
+        this.simulation.alpha(0.3).restart();
+        this.updateSimulationStatus();
+    }
+
+    /**
+     * Feature 3: Toggle freeze state
+     */
+    toggleFreeze() {
+        if (this.isFrozen) {
+            this.unfreezeSimulation();
+        } else {
+            this.freezeSimulation();
+        }
+    }
+
+    /**
+     * Feature 3: Update simulation status in UI
+     */
+    updateSimulationStatus() {
+        const statusElem = document.getElementById('status-simulation');
+        if (statusElem) {
+            statusElem.textContent = `Simulation: ${this.isFrozen ? 'Frozen' : 'Active'}`;
+        }
+    }
+
+    /**
+     * Feature 4: Update world boundary force
+     */
+    updateBoundaryForce() {
+        const boundary = this.graph.settings.worldBoundary;
+        
+        if (boundary.enabled) {
+            this.simulation.force('boundary', alpha => {
+                this.graph.nodes.forEach(node => {
+                    if (node.x < boundary.minX) {
+                        node.vx += (boundary.minX - node.x) * alpha * 0.1;
+                    }
+                    if (node.x > boundary.maxX) {
+                        node.vx += (boundary.maxX - node.x) * alpha * 0.1;
+                    }
+                    if (node.y < boundary.minY) {
+                        node.vy += (boundary.minY - node.y) * alpha * 0.1;
+                    }
+                    if (node.y > boundary.maxY) {
+                        node.vy += (boundary.maxY - node.y) * alpha * 0.1;
+                    }
+                });
+            });
+        } else {
+            this.simulation.force('boundary', null);
+        }
+    }
+
+    /**
+     * Feature 9: Update font sizes relative to zoom
+     */
+    updateFontSizes() {
+        const scale = this.currentTransform.k;
+        const nodeLabelSize = this.graph.settings.nodeLabelSize;
+        const edgeLabelSize = this.graph.settings.edgeLabelSize;
+        
+        // Scale inversely so text stays readable at all zoom levels
+        const nodeSize = nodeLabelSize / scale;
+        const edgeSize = edgeLabelSize / scale;
+        
+        this.nodeGroup.selectAll('.node text')
+            .style('font-size', `${nodeSize}px`);
+        
+        this.edgeGroup.selectAll('.edge-label')
+            .style('font-size', `${edgeSize}px`);
     }
 
     /**
      * Render the graph
      */
     render() {
-		const nodes = this.graph.nodes;
-		const edges = this.graph.edges;
+        const nodes = this.graph.nodes;
+        const edges = this.graph.edges;
 
-		// Initialize node positions at center if they don't exist
-		const centerX = this.width / 2;
-		const centerY = this.height / 2;
-		
-		nodes.forEach(node => {
-			if (node.x === undefined || node.y === undefined) {
-				// Add small random offset to prevent exact overlap
-				node.x = centerX + (Math.random() - 0.5) * 100;
-				node.y = centerY + (Math.random() - 0.5) * 100;
-			}
-		});
+        // Initialize node positions at center if they don't exist
+        const centerX = this.width / 2;
+        const centerY = this.height / 2;
+        
+        nodes.forEach(node => {
+            if (node.x === undefined || node.y === undefined) {
+                // Add small random offset to prevent exact overlap
+                node.x = centerX + (Math.random() - 0.5) * 100;
+                node.y = centerY + (Math.random() - 0.5) * 100;
+            }
+        });
 
-		// Prepare edge data for D3
-		const edgeData = edges.map(e => ({
-			...e,
-			source: e.source,
-			target: e.target
-		}));
+        // Prepare edge data for D3
+        const edgeData = edges.map(e => ({
+            ...e,
+            source: e.source,
+            target: e.target
+        }));
 
-		// Update simulation
-		this.simulation.nodes(nodes);
+        // Update simulation
+        this.simulation.nodes(nodes);
         this.simulation.force('link').links(edgeData);
-        this.simulation.alpha(0.3).restart();
+        
+        // Feature 3: Only restart if not frozen
+        if (!this.isFrozen) {
+            this.simulation.alpha(0.3).restart();
+        }
 
         // Render edges
         this.renderEdges(edgeData);
@@ -101,6 +205,9 @@ class Renderer {
         this.simulation.on('tick', () => {
             this.updatePositions();
         });
+        
+        // Feature 9: Update font sizes
+        this.updateFontSizes();
     }
 
     /**
@@ -127,66 +234,175 @@ class Renderer {
             .attr('stroke', d => d.properties.color || '#95a5a6')
             .attr('stroke-width', 2)
             .attr('fill', 'none')
-            .attr('marker-end', d => d.properties.directed ? 'url(#arrowhead)' : '');
+            .attr('marker-end', d => d.properties.directed ? 'url(#arrowhead)' : '')
+            // Feature 10: Half-edges have dashed stroke
+            .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none');
 
         // Add invisible wider path for easier clicking
         edgesEnter.append('path')
-			.attr('class', 'edge-clickable')
+            .attr('class', 'edge-clickable')
             .attr('stroke', 'transparent')
             .attr('stroke-width', 10)
             .attr('fill', 'none')
             .style('cursor', 'pointer')
-			.style('pointer-events', 'stroke');
-			
-		// Add edge label showing type or ID
-		edgesEnter.append('text')
-			.attr('class', 'edge-label')
-			.attr('text-anchor', 'middle')
-			.attr('dy', -5)
-			.style('font-size', '11px')  // Increased from 10px
-			.style('fill', '#7f8c8d')
-			.style('font-weight', '600')
-			.style('pointer-events', 'none')
-			.style('user-select', 'none')
-			.style('background', 'white')  // ADD THIS
-			.style('padding', '2px 4px')   // ADD THIS
-			.text(d => d.properties.type || d.id);  // Show type first, fallback to ID
-			
+            .style('pointer-events', 'stroke');
+            
+        // Add edge label showing type or ID
+        edgesEnter.append('text')
+            .attr('class', 'edge-label')
+            .attr('text-anchor', 'middle')
+            .attr('dy', -5)
+            .style('fill', '#7f8c8d')
+            .style('font-weight', '600')
+            .style('pointer-events', 'none')
+            .style('user-select', 'none')
+            .text(d => d.properties.type || d.id);
+        
+        // Feature 10: Add break controls for selected edges
+        const breakGroup = edgesEnter.append('g')
+            .attr('class', 'edge-break-controls')
+            .style('display', 'none');
+        
+        // Source break button
+        breakGroup.append('circle')
+            .attr('class', 'break-btn break-btn-source')
+            .attr('r', 6)
+            .attr('fill', '#e74c3c')
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer');
+        
+        breakGroup.append('text')
+            .attr('class', 'break-btn-icon break-btn-source-icon')
+            .attr('text-anchor', 'middle')
+            .attr('dy', 4)
+            .style('font-size', '10px')
+            .style('fill', 'white')
+            .style('pointer-events', 'none')
+            .style('font-weight', 'bold')
+            .text('✕');
+        
+        // Target break button
+        breakGroup.append('circle')
+            .attr('class', 'break-btn break-btn-target')
+            .attr('r', 6)
+            .attr('fill', '#e74c3c')
+            .attr('stroke', 'white')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer');
+        
+        breakGroup.append('text')
+            .attr('class', 'break-btn-icon break-btn-target-icon')
+            .attr('text-anchor', 'middle')
+            .attr('dy', 4)
+            .style('font-size', '10px')
+            .style('fill', 'white')
+            .style('pointer-events', 'none')
+            .style('font-weight', 'bold')
+            .text('✕');
+            
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);
 
         edgesMerge.select('path:first-child')
             .attr('stroke', d => d.properties.color || '#95a5a6')
+            .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none')
             .classed('selected', d => this.selectedEdges.has(d.id))
             .classed('highlighted', d => this.highlightedEdges.has(d.id))
             .classed('path-highlight', d => this.highlightedEdges.has(d.id));
 
         // Click handler on invisible path
-        edgesMerge.select('.edge-clickable') 
-			.on('click', function(event, d) {
-				event.stopPropagation();
-				if (self.onEdgeClick) {
-					self.onEdgeClick(d);
-				}
-			});
-		
-		// ADD HOVER EFFECTS
-edgesMerge.select('path:last-child')
-    .on('mouseenter', function(event, d) {
-        d3.select(this.parentNode).select('path:first-child')
-            .attr('stroke-width', 3)
-            .style('filter', 'drop-shadow(0 0 2px rgba(52, 152, 219, 0.6))');
-    })
-    .on('mouseleave', function(event, d) {
-        if (!self.selectedEdges.has(d.id)) {
-            d3.select(this.parentNode).select('path:first-child')
-                .attr('stroke-width', 2)
-                .style('filter', 'none');
-        }
-    });
+        edgesMerge.select('.edge-clickable')
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                if (self.onEdgeClick) {
+                    self.onEdgeClick(d);
+                }
+            })
+            .on('contextmenu', function(event, d) {
+                event.preventDefault();
+                event.stopPropagation();
+                if (self.onEdgeContextMenu) {
+                    self.onEdgeContextMenu(d, event);
+                }
+            });
+        
+        // Hover effects
+        edgesMerge.select('path:last-child')
+            .on('mouseenter', function(event, d) {
+                d3.select(this.parentNode).select('path:first-child')
+                    .attr('stroke-width', 3)
+                    .style('filter', 'drop-shadow(0 0 2px rgba(52, 152, 219, 0.6))');
+            })
+            .on('mouseleave', function(event, d) {
+                if (!self.selectedEdges.has(d.id)) {
+                    d3.select(this.parentNode).select('path:first-child')
+                        .attr('stroke-width', 2)
+                        .style('filter', 'none');
+                }
+            });
+
+        // Feature 10: Break button handlers
+        edgesMerge.select('.break-btn-source')
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                self.breakEdgeAtSource(d);
+            });
+        
+        edgesMerge.select('.break-btn-target')
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                self.breakEdgeAtTarget(d);
+            });
+        
+        // Show/hide break controls based on selection
+        edgesMerge.select('.edge-break-controls')
+            .style('display', d => this.selectedEdges.has(d.id) ? 'block' : 'none');
 
         // Define arrowhead marker
         this.defineArrowhead();
+    }
+
+    /**
+     * Feature 10: Break edge at source
+     */
+    breakEdgeAtSource(edgeData) {
+        if (!edgeData.source) return; // Already broken
+        
+        const sourceNode = this.graph.nodes.find(n => n.id === (typeof edgeData.source === 'object' ? edgeData.source.id : edgeData.source));
+        if (!sourceNode) return;
+        
+        // Break the edge in the graph model
+        this.graph.breakEdge(edgeData.id, 'source', sourceNode.x, sourceNode.y);
+        
+        // Re-render
+        this.render();
+        
+        if (window.app) {
+            window.app.saveState();
+            window.app.updateStatus(`Broke edge at source`);
+        }
+    }
+
+    /**
+     * Feature 10: Break edge at target
+     */
+    breakEdgeAtTarget(edgeData) {
+        if (!edgeData.target) return; // Already broken
+        
+        const targetNode = this.graph.nodes.find(n => n.id === (typeof edgeData.target === 'object' ? edgeData.target.id : edgeData.target));
+        if (!targetNode) return;
+        
+        // Break the edge in the graph model
+        this.graph.breakEdge(edgeData.id, 'target', targetNode.x, targetNode.y);
+        
+        // Re-render
+        this.render();
+        
+        if (window.app) {
+            window.app.saveState();
+            window.app.updateStatus(`Broke edge at target`);
+        }
     }
 
     /**
@@ -263,12 +479,31 @@ edgesMerge.select('path:last-child')
                 self.onNodeClick(d);
             }
         });
+        
+        // Context menu handler (Feature 12)
+        nodesMerge.on('contextmenu', function(event, d) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (self.onNodeContextMenu) {
+                self.onNodeContextMenu(d, event);
+            }
+        });
 
         // Canvas click (deselect)
         this.svg.on('click', (event) => {
             if (event.target === this.svg.node()) {
                 if (this.onCanvasClick) {
                     this.onCanvasClick();
+                }
+            }
+        });
+        
+        // Canvas context menu (Feature 12)
+        this.svg.on('contextmenu', (event) => {
+            if (event.target === this.svg.node() || event.target.tagName === 'svg' || event.target.tagName === 'SVG') {
+                event.preventDefault();
+                if (this.onCanvasContextMenu) {
+                    this.onCanvasContextMenu(event);
                 }
             }
         });
@@ -281,7 +516,7 @@ edgesMerge.select('path:last-child')
         const self = this;
 
         function dragstarted(event, d) {
-            if (!event.active) self.simulation.alphaTarget(0.3).restart();
+            if (!event.active && !self.isFrozen) self.simulation.alphaTarget(0.3).restart();
             d.fx = d.x;
             d.fy = d.y;
         }
@@ -292,49 +527,49 @@ edgesMerge.select('path:last-child')
         }
 
         function dragended(event, d) {
-			// Gradually cool down the simulation after dragging
-			if (!event.active) {
-				self.simulation.alphaTarget(0).restart();
-			}
-			
-			// Keep node fixed at dragged position
-			// d.fx and d.fy remain set (node stays pinned)
-			
-			// Reheat simulation slightly to let other nodes adjust
-			self.simulation.alpha(0.3).restart();
-			
-			if (self.onNodeDragEnd) {
-				self.onNodeDragEnd(d);
-			}
-		}
+            if (!event.active && !self.isFrozen) {
+                self.simulation.alphaTarget(0).restart();
+            }
+            
+            self.simulation.alpha(0.3).restart();
+            
+            if (self.onNodeDragEnd) {
+                self.onNodeDragEnd(d);
+            }
+        }
 
         return d3.drag()
             .on('start', dragstarted)
             .on('drag', dragged)
             .on('end', dragended);
     }
-	/**
-	 * Unpin a node (allow it to move freely again)
-	 */
-	unpinNode(nodeId) {
-		const node = this.graph.nodes.find(n => n.id === nodeId);
-		if (node) {
-			node.fx = null;
-			node.fy = null;
-			this.simulation.alpha(0.3).restart();
-		}
-	}
 
-	/**
-	 * Unpin all nodes
-	 */
-	unpinAllNodes() {
-		this.graph.nodes.forEach(node => {
-			node.fx = null;
-			node.fy = null;
-		});
-		this.simulation.alpha(0.5).restart();
-	}
+    /**
+     * Unpin a node (allow it to move freely again)
+     */
+    unpinNode(nodeId) {
+        const node = this.graph.nodes.find(n => n.id === nodeId);
+        if (node) {
+            node.fx = null;
+            node.fy = null;
+            if (!this.isFrozen) {
+                this.simulation.alpha(0.3).restart();
+            }
+        }
+    }
+
+    /**
+     * Unpin all nodes
+     */
+    unpinAllNodes() {
+        this.graph.nodes.forEach(node => {
+            node.fx = null;
+            node.fy = null;
+        });
+        if (!this.isFrozen) {
+            this.simulation.alpha(0.5).restart();
+        }
+    }
 
     /**
      * Update node and edge positions on simulation tick
@@ -346,55 +581,106 @@ edgesMerge.select('path:last-child')
             .attr('transform', d => `translate(${d.x},${d.y})`);
 
         this.edgeGroup.selectAll('.edge').each(function(d) {
-    const path = self.calculateEdgePath(d);
-    d3.select(this).selectAll('path')
-        .attr('d', path);
-    
-    // Update edge label position and rotation
-    const source = d.source;
-    const target = d.target;
-    
-    if (typeof source !== 'string' && typeof target !== 'string') {
-        const midX = (source.x + target.x) / 2;
-        const midY = (source.y + target.y) / 2;
-        const dx = target.x - source.x;
-        const dy = target.y - source.y;
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        
-        // Keep text upright (flip if upside down)
-        const textAngle = (angle > 90 || angle < -90) ? angle + 180 : angle;
-        
-        d3.select(this).select('.edge-label')
-            .attr('x', midX)
-            .attr('y', midY)
-            .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
-    }
-});
+            const path = self.calculateEdgePath(d);
+            d3.select(this).selectAll('path')
+                .attr('d', path);
+            
+            // Update edge label position and rotation
+            const source = d.source;
+            const target = d.target;
+            
+            // Feature 10: Handle half-edges
+            let midX, midY, dx, dy;
+            
+            if (typeof source === 'object' && source !== null) {
+                // Source is a node
+                if (typeof target === 'object' && target !== null) {
+                    // Both ends are nodes
+                    midX = (source.x + target.x) / 2;
+                    midY = (source.y + target.y) / 2;
+                    dx = target.x - source.x;
+                    dy = target.y - source.y;
+                } else {
+                    // Target is free
+                    midX = (source.x + (d.targetX || source.x)) / 2;
+                    midY = (source.y + (d.targetY || source.y)) / 2;
+                    dx = (d.targetX || source.x) - source.x;
+                    dy = (d.targetY || source.y) - source.y;
+                }
+            } else {
+                // Source is free
+                if (typeof target === 'object' && target !== null) {
+                    midX = ((d.sourceX || target.x) + target.x) / 2;
+                    midY = ((d.sourceY || target.y) + target.y) / 2;
+                    dx = target.x - (d.sourceX || target.x);
+                    dy = target.y - (d.sourceY || target.y);
+                } else {
+                    // Both ends are free (shouldn't happen, but handle it)
+                    midX = ((d.sourceX || 0) + (d.targetX || 0)) / 2;
+                    midY = ((d.sourceY || 0) + (d.targetY || 0)) / 2;
+                    dx = (d.targetX || 0) - (d.sourceX || 0);
+                    dy = (d.targetY || 0) - (d.sourceY || 0);
+                }
+            }
+            
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            const textAngle = (angle > 90 || angle < -90) ? angle + 180 : angle;
+            
+            d3.select(this).select('.edge-label')
+                .attr('x', midX)
+                .attr('y', midY)
+                .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
+            
+            // Feature 10: Position break controls
+            if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
+                const sourceX = source.x + dx * 0.2;
+                const sourceY = source.y + dy * 0.2;
+                const targetX = target.x - dx * 0.2;
+                const targetY = target.y - dy * 0.2;
+                
+                d3.select(this).selectAll('.break-btn-source, .break-btn-source-icon')
+                    .attr('cx', sourceX)
+                    .attr('cy', sourceY)
+                    .attr('x', sourceX)
+                    .attr('y', sourceY);
+                
+                d3.select(this).selectAll('.break-btn-target, .break-btn-target-icon')
+                    .attr('cx', targetX)
+                    .attr('cy', targetY)
+                    .attr('x', targetX)
+                    .attr('y', targetY);
+            }
+        });
     }
 
     /**
      * Calculate edge path (straight or curved for multiple edges)
      */
     calculateEdgePath(edge) {
-        const source = edge.source;
-        const target = edge.target;
+        let sourceX, sourceY, targetX, targetY;
         
-        if (typeof source === 'string' || typeof target === 'string') {
-            return '';
+        // Feature 10: Handle half-edges
+        if (typeof edge.source === 'object' && edge.source !== null) {
+            const angle = edge.target ? Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
+            const sourceRadius = edge.source.properties.size || 10;
+            sourceX = edge.source.x + Math.cos(angle) * sourceRadius;
+            sourceY = edge.source.y + Math.sin(angle) * sourceRadius;
+        } else {
+            // Free source end
+            sourceX = edge.sourceX || 0;
+            sourceY = edge.sourceY || 0;
         }
-
-        const dx = target.x - source.x;
-        const dy = target.y - source.y;
-        const angle = Math.atan2(dy, dx);
         
-        // Calculate offset for node radius
-        const sourceRadius = source.properties.size || 10;
-        const targetRadius = target.properties.size || 10;
-        
-        const sourceX = source.x + Math.cos(angle) * sourceRadius;
-        const sourceY = source.y + Math.sin(angle) * sourceRadius;
-        const targetX = target.x - Math.cos(angle) * (targetRadius + 5);
-        const targetY = target.y - Math.sin(angle) * (targetRadius + 5);
+        if (typeof edge.target === 'object' && edge.target !== null) {
+            const angle = edge.source ? Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
+            const targetRadius = edge.target.properties.size || 10;
+            targetX = edge.target.x - Math.cos(angle) * (targetRadius + 5);
+            targetY = edge.target.y - Math.sin(angle) * (targetRadius + 5);
+        } else {
+            // Free target end
+            targetX = edge.targetX || 0;
+            targetY = edge.targetY || 0;
+        }
 
         return `M${sourceX},${sourceY} L${targetX},${targetY}`;
     }
@@ -429,13 +715,17 @@ edgesMerge.select('path:last-child')
      */
     updateSelection() {
         // Update node selection
-    this.nodeGroup.selectAll('.node')
-        .classed('selected', d => this.selectedNodes.has(d.id))
-        .select('circle')
-        .classed('selected', d => this.selectedNodes.has(d.id));
+        this.nodeGroup.selectAll('.node')
+            .classed('selected', d => this.selectedNodes.has(d.id))
+            .select('circle')
+            .classed('selected', d => this.selectedNodes.has(d.id));
 
         this.edgeGroup.selectAll('.edge path:first-child')
             .classed('selected', d => this.selectedEdges.has(d.id));
+        
+        // Feature 10: Show/hide break controls
+        this.edgeGroup.selectAll('.edge-break-controls')
+            .style('display', d => this.selectedEdges.has(d.id) ? 'block' : 'none');
     }
 
     /**
@@ -535,7 +825,9 @@ edgesMerge.select('path:last-child')
         
         // Update force center
         this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
-        this.simulation.alpha(0.3).restart();
+        if (!this.isFrozen) {
+            this.simulation.alpha(0.3).restart();
+        }
     }
 
     /**
@@ -549,7 +841,9 @@ edgesMerge.select('path:last-child')
      * Restart simulation
      */
     restartSimulation() {
-        this.simulation.alpha(0.3).restart();
+        if (!this.isFrozen) {
+            this.simulation.alpha(0.3).restart();
+        }
     }
 
     /**
