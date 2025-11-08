@@ -126,6 +126,7 @@ class Minimap {
 
     /**
      * Render minimap edges
+     * FIX: Guard against NaN coordinates when source/target are still string IDs
      */
     renderEdges(edges) {
         const self = this;
@@ -140,10 +141,54 @@ class Minimap {
             .append('line')
             .attr('class', 'minimap-edge')
             .merge(edgeElements)
-            .attr('x1', d => this.transformX(d.source.x || d.source))
-            .attr('y1', d => this.transformY(d.source.y || d.source))
-            .attr('x2', d => this.transformX(d.target.x || d.target))
-            .attr('y2', d => this.transformY(d.target.y || d.target));
+            .attr('x1', d => {
+                // Handle object references (after D3 conversion)
+                if (typeof d.source === 'object' && d.source !== null) {
+                    return this.transformX(d.source.x);
+                }
+                // Handle half-edges with free source end
+                if (d.sourceX !== undefined) {
+                    return this.transformX(d.sourceX);
+                }
+                // Skip rendering if source is still a string (pre-conversion)
+                return 0;
+            })
+            .attr('y1', d => {
+                if (typeof d.source === 'object' && d.source !== null) {
+                    return this.transformY(d.source.y);
+                }
+                if (d.sourceY !== undefined) {
+                    return this.transformY(d.sourceY);
+                }
+                return 0;
+            })
+            .attr('x2', d => {
+                // Handle object references (after D3 conversion)
+                if (typeof d.target === 'object' && d.target !== null) {
+                    return this.transformX(d.target.x);
+                }
+                // Handle half-edges with free target end
+                if (d.targetX !== undefined) {
+                    return this.transformX(d.targetX);
+                }
+                // Skip rendering if target is still a string (pre-conversion)
+                return 0;
+            })
+            .attr('y2', d => {
+                if (typeof d.target === 'object' && d.target !== null) {
+                    return this.transformY(d.target.y);
+                }
+                if (d.targetY !== undefined) {
+                    return this.transformY(d.targetY);
+                }
+                return 0;
+            })
+            .style('visibility', d => {
+                // Hide edge if source or target is still a string
+                const sourceValid = (typeof d.source === 'object' && d.source !== null) || d.sourceX !== undefined;
+                const targetValid = (typeof d.target === 'object' && d.target !== null) || d.targetX !== undefined;
+                return (sourceValid && targetValid) ? 'visible' : 'hidden';
+            });
     }
 
     /**
