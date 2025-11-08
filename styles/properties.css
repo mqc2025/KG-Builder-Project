@@ -110,6 +110,196 @@
     cursor: pointer;
 }
 
+.property-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+/* Empty State */
+.properties-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.properties-empty p {
+    margin-bottom: 20px;
+}
+
+/* Metadata Section */
+.metadata-section {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.metadata-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.metadata-item strong {
+    color: var(--text-primary);
+}
+
+.metadata-item span {
+    color: var(--text-secondary);
+}
+
+/* Connection Items */
+.connection-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+    background-color: var(--light-bg);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.connection-item:hover {
+    background-color: #e8eaed;
+    border-left-color: var(--secondary-color);
+}
+
+/* Connection item header (info + actions) */
+.connection-item > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.connection-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.connection-direction {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.connection-node {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.connection-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.connection-actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* Connection action buttons - Updated for three buttons */
+.btn-toggle-inline-edit,
+.btn-view-edge-details,
+.btn-delete-connection {
+    padding: 4px 8px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    min-width: 28px;
+    text-align: center;
+}
+
+.btn-toggle-inline-edit:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-view-edge-details:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.btn-delete-connection:hover {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+/* Inline editing section */
+.connection-inline-edit {
+    padding: 10px 10px 15px 10px;
+    border-top: 1px dashed var(--border-color);
+    background-color: #f8f9fa;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 200px;
+    }
+}
+
+.inline-edit-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inline-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-edit-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.inline-edit-select,
+.inline-edit-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: inherit;
+    background-color: white;
+    transition: border-color 0.2s;
+}
+
+.inline-edit-select:focus,
+.inline-edit-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.inline-edit-select {
+    cursor: pointer;
+}
+
+/* Property Actions */
 .property-actions {
     display: flex;
     gap: 10px;
@@ -210,113 +400,42 @@
     margin-left: 5px;
 }
 
-.property-hint {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 3px;
+/* Color Palette */
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
 }
 
-/* Empty State */
-.properties-empty {
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--text-secondary);
-}
-
-.properties-empty p {
-    margin-bottom: 20px;
-}
-
-/* Metadata Section */
-.metadata-section {
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-.metadata-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 13px;
-}
-
-.metadata-item strong {
-    color: var(--text-primary);
-}
-
-.metadata-item span {
-    color: var(--text-secondary);
-}
-
-/* Connection Items */
-.connection-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
-    background-color: var(--light-bg);
+.color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid transparent;
     border-radius: 4px;
-    border-left: 3px solid var(--primary-color);
-    transition: all 0.2s;
-}
-
-.connection-item:hover {
-    background-color: #e8eaed;
-    border-left-color: var(--secondary-color);
-}
-
-.connection-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-}
-
-.connection-direction {
-    font-size: 16px;
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-.connection-node {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 13px;
-}
-
-.connection-label {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-style: italic;
-}
-
-.connection-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.btn-edit-connection,
-.btn-delete-connection {
-    padding: 4px 8px;
-    background-color: transparent;
-    border: 1px solid var(--border-color);
-    border-radius: 3px;
     cursor: pointer;
-    font-size: 12px;
     transition: all 0.2s;
+    position: relative;
 }
 
-.btn-edit-connection:hover {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+.color-swatch:hover {
+    transform: scale(1.1);
+    border-color: var(--border-color);
 }
 
-.btn-delete-connection:hover {
-    background-color: var(--danger-color);
+.color-swatch.active {
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch.active::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: white;
-    border-color: var(--danger-color);
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
