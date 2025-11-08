@@ -211,10 +211,19 @@ class PropertiesPanel {
 
                 <div class="property-item">
                     <label class="property-label">Type</label>
-                    <input type="text" class="property-input" id="prop-type" value="${Utils.sanitizeHtml(edge.properties.type || '')}" list="edge-types">
-                    <datalist id="edge-types">
-                        ${allTypes.map(type => `<option value="${Utils.sanitizeHtml(type)}">`).join('')}
-                    </datalist>
+                    <select class="property-input" id="prop-type">
+                        ${allTypes.map(type => `
+                            <option value="${Utils.sanitizeHtml(type)}" ${edge.properties.type === type ? 'selected' : ''}>
+                                ${Utils.sanitizeHtml(type)}
+                            </option>
+                        `).join('')}
+                        <option value="__ADD_NEW__" style="font-weight: bold;">+ Add New Type</option>
+                    </select>
+                </div>
+
+                <div class="property-item">
+                    <label class="property-label">Weight</label>
+                    <input type="number" class="property-input" id="prop-weight" value="${edge.properties.weight || 1}" min="0" step="0.1">
                 </div>
 
                 <div class="property-item">
@@ -223,12 +232,7 @@ class PropertiesPanel {
                 </div>
 
                 <div class="property-item">
-                    <label class="property-label">Weight</label>
-                    <input type="number" class="property-input" id="prop-weight" value="${edge.properties.weight || 1}" min="0.1" step="0.1">
-                </div>
-
-                <div class="property-item">
-                    <label class="property-label">
+                    <label class="property-checkbox">
                         <input type="checkbox" id="prop-directed" ${edge.properties.directed ? 'checked' : ''}>
                         <span>Show arrow direction</span>
                     </label>
@@ -311,14 +315,13 @@ class PropertiesPanel {
             const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
             const otherNodeId = sourceId === nodeId ? targetId : sourceId;
             const direction = sourceId === nodeId ? '→' : '←';
-            
+            const displayText = otherNodeId || '(Free End)';
+
             return `
-                <div class="connection-item" data-edge-id="${Utils.sanitizeHtml(edge.id)}" data-node-id="${Utils.sanitizeHtml(otherNodeId)}">
-                    <span class="connection-text">
-                        ${direction} ${Utils.sanitizeHtml(otherNodeId || '(Free End)')}
-                    </span>
+                <div class="connection-item" data-edge-id="${edge.id}" data-node-id="${otherNodeId || ''}">
+                    <span class="connection-text">${direction} ${Utils.sanitizeHtml(displayText)}</span>
                     <div class="connection-actions">
-                        <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
+                        <button class="btn-toggle-inline-edit" title="Change connection">✎</button>
                         <button class="btn-view-edge-details" title="View edge details">⋯</button>
                         <button class="btn-delete-connection" title="Delete connection">✕</button>
                     </div>
@@ -328,10 +331,10 @@ class PropertiesPanel {
     }
 
     /**
-     * Attach property handlers to current panel
+     * Attach property handlers
      */
     attachPropertyHandlers() {
-        // Node ID editing
+        // Node ID input
         const nodeIdInput = document.getElementById('prop-node-id');
         if (nodeIdInput) {
             nodeIdInput.addEventListener('keypress', (e) => {
@@ -341,7 +344,7 @@ class PropertiesPanel {
             });
         }
 
-        // Edge ID editing
+        // Edge ID input
         const edgeIdInput = document.getElementById('prop-edge-id');
         if (edgeIdInput) {
             edgeIdInput.addEventListener('keypress', (e) => {
@@ -351,59 +354,105 @@ class PropertiesPanel {
             });
         }
 
-        // Color palette
+        // Color palette swatches
         const colorSwatches = document.querySelectorAll('.color-swatch');
         colorSwatches.forEach(swatch => {
             swatch.addEventListener('click', (e) => {
                 const color = e.target.dataset.color;
                 this.updateProperty('color', color);
-                document.getElementById('prop-color').value = color;
-            });
-        });
-
-        // Standard properties
-        const propertyInputs = ['prop-color', 'prop-size', 'prop-description', 
-                               'prop-priority', 'prop-deadline', 'prop-type', 'prop-weight'];
-        
-        propertyInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('change', (e) => {
-                    const key = id.replace('prop-', '');
-                    const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
-                    this.updateProperty(key, value);
-                });
-            }
-        });
-
-        // Custom properties - value changes
-        const customValueInputs = document.querySelectorAll('.custom-property-value');
-        customValueInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                const propertyDiv = e.target.closest('.custom-property');
-                const key = propertyDiv.dataset.key;
-                let value = e.target.value;
-                try {
-                    value = value && !isNaN(value) ? JSON.parse(value) : value;
-                } catch {
-                    // Keep as string if not valid JSON
-                }
-                this.updateProperty(key, value);
-            });
-        });
-
-        // Custom properties - key changes
-        const customKeyInputs = document.querySelectorAll('.custom-property-key');
-        customKeyInputs.forEach(input => {
-            input.addEventListener('change', (e) => {
-                const propertyDiv = e.target.closest('.custom-property');
-                const oldKey = propertyDiv.dataset.key;
-                const newKey = e.target.value.trim();
-                const valueInput = propertyDiv.querySelector('.custom-property-value');
-                let value = valueInput.value;
                 
+                // Update color input
+                const colorInput = document.getElementById('prop-color');
+                if (colorInput) colorInput.value = color;
+                
+                // Update active state
+                colorSwatches.forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+            });
+        });
+
+        // Color input
+        const colorInput = document.getElementById('prop-color');
+        if (colorInput) {
+            colorInput.addEventListener('change', (e) => {
+                this.updateProperty('color', e.target.value);
+            });
+        }
+
+        // Size input
+        const sizeInput = document.getElementById('prop-size');
+        if (sizeInput) {
+            sizeInput.addEventListener('change', (e) => {
+                this.updateProperty('size', parseInt(e.target.value));
+            });
+        }
+
+        // Description textarea
+        const descInput = document.getElementById('prop-description');
+        if (descInput) {
+            descInput.addEventListener('blur', (e) => {
+                this.updateProperty('description', e.target.value);
+            });
+        }
+
+        // Priority select
+        const priorityInput = document.getElementById('prop-priority');
+        if (priorityInput) {
+            priorityInput.addEventListener('change', (e) => {
+                this.updateProperty('priority', e.target.value);
+            });
+        }
+
+        // Deadline input
+        const deadlineInput = document.getElementById('prop-deadline');
+        if (deadlineInput) {
+            deadlineInput.addEventListener('change', (e) => {
+                this.updateProperty('deadline', e.target.value);
+            });
+        }
+
+        // Type select (for edges)
+        const typeSelect = document.getElementById('prop-type');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', (e) => {
+                if (e.target.value === '__ADD_NEW__') {
+                    const newType = prompt('Enter new edge type:');
+                    if (newType) {
+                        this.updateProperty('type', newType);
+                        this.showEdgeProperties(this.currentSelection);
+                    } else {
+                        e.target.value = this.graph.getEdge(this.currentSelection).properties.type;
+                    }
+                } else {
+                    this.updateProperty('type', e.target.value);
+                }
+            });
+        }
+
+        // Weight input
+        const weightInput = document.getElementById('prop-weight');
+        if (weightInput) {
+            weightInput.addEventListener('change', (e) => {
+                this.updateProperty('weight', parseFloat(e.target.value));
+            });
+        }
+
+        // Custom property inputs
+        const customKeys = document.querySelectorAll('.custom-property-key');
+        const customValues = document.querySelectorAll('.custom-property-value');
+
+        customKeys.forEach((keyInput, index) => {
+            keyInput.addEventListener('blur', () => {
+                const propertyDiv = keyInput.closest('.custom-property');
+                const oldKey = propertyDiv.dataset.key;
+                const newKey = keyInput.value.trim();
+                const valueInput = customValues[index];
+                let value = valueInput.value;
+
+                // Try to parse as JSON if it looks like JSON
                 try {
-                    value = value && !isNaN(value) ? JSON.parse(value) : value;
+                    value = value.startsWith('{') || value.startsWith('[') ? 
+                        JSON.parse(value) : value;
                 } catch {
                     // Keep as string
                 }
@@ -412,6 +461,24 @@ class PropertiesPanel {
                     this.renameProperty(oldKey, newKey, value);
                     propertyDiv.dataset.key = newKey;
                 }
+            });
+        });
+
+        customValues.forEach((valueInput, index) => {
+            valueInput.addEventListener('blur', () => {
+                const propertyDiv = valueInput.closest('.custom-property');
+                const key = propertyDiv.dataset.key;
+                let value = valueInput.value;
+
+                // Try to parse as JSON if it looks like JSON
+                try {
+                    value = value.startsWith('{') || value.startsWith('[') ? 
+                        JSON.parse(value) : value;
+                } catch {
+                    // Keep as string
+                }
+
+                this.updateProperty(key, value);
             });
         });
 
@@ -876,8 +943,8 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Create the connection modal DOM element
-     * Location: New helper method for modal creation
+     * MODIFIED: Create the connection modal DOM element
+     * Location: Modal creation with direction selection radio buttons added
      */
     createConnectModal() {
         const modal = document.createElement('div');
@@ -893,12 +960,29 @@ class PropertiesPanel {
                 </div>
                 <div class="modal-body">
                     <div class="property-item">
-                        <label class="property-label">Select target node:</label>
+                        <label class="property-label">Select node:</label>
                         <select id="connect-node-select" class="property-input" style="width: 100%;">
                             <option value="">-- Select a node --</option>
                         </select>
                         <p class="property-hint">Choose an existing node or create a new one</p>
                     </div>
+                    
+                    <!-- ✅ MODIFICATION #1: Added direction selection radio buttons -->
+                    <div class="property-item" style="margin-top: 15px;">
+                        <label class="property-label">Direction:</label>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                            <label class="property-checkbox" style="cursor: pointer;">
+                                <input type="radio" name="edge-direction" value="outgoing" checked style="margin-right: 8px;">
+                                <span><strong>Outgoing:</strong> <span id="selected-node-name" style="color: var(--primary-color);">[Selected Node]</span> → [Other Node]</span>
+                            </label>
+                            <label class="property-checkbox" style="cursor: pointer;">
+                                <input type="radio" name="edge-direction" value="incoming" style="margin-right: 8px;">
+                                <span><strong>Incoming:</strong> [Other Node] → <span id="selected-node-name-2" style="color: var(--primary-color);">[Selected Node]</span></span>
+                            </label>
+                        </div>
+                        <p class="property-hint" style="margin-top: 8px;">Choose whether the edge points away from or towards the selected node</p>
+                    </div>
+                    
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button id="connect-modal-confirm" class="modal-btn" style="flex: 1;" disabled>
                             Connect
@@ -959,8 +1043,8 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Connect to an existing node
-     * Location: New helper method extracted from old showConnectToNodeDialog
+     * MODIFIED: Connect to an existing node
+     * Location: Added direction logic to swap source/target based on user selection
      */
     connectToExistingNode(toNodeId) {
         if (!this.graph.getNode(toNodeId)) {
@@ -969,12 +1053,29 @@ class PropertiesPanel {
         }
 
         const fromNodeId = this.currentSelection;
-        const edgeId = `edge_${fromNodeId}_${toNodeId}`;
+        
+        // ✅ MODIFICATION #2: Read selected direction from radio buttons
+        const directionRadio = this.connectModal.querySelector('input[name="edge-direction"]:checked');
+        const direction = directionRadio ? directionRadio.value : 'outgoing';
+        
+        // Determine source and target based on direction
+        let sourceId, targetId;
+        if (direction === 'outgoing') {
+            // Selected node → Other node
+            sourceId = fromNodeId;
+            targetId = toNodeId;
+        } else {
+            // Other node → Selected node
+            sourceId = toNodeId;
+            targetId = fromNodeId;
+        }
+        
+        const edgeId = `edge_${sourceId}_${targetId}`;
         
         this.graph.addEdge({
             id: edgeId,
-            source: fromNodeId,
-            target: toNodeId,
+            source: sourceId,
+            target: targetId,
             properties: {
                 type: 'connection',
                 color: '#95a5a6'
@@ -987,13 +1088,13 @@ class PropertiesPanel {
         if (window.app) {
             window.app.updateStats();
             window.app.saveState();
-            window.app.updateStatus(`Connected ${fromNodeId} to ${toNodeId}`);
+            window.app.updateStatus(`Connected: ${sourceId} → ${targetId}`);
         }
     }
 
     /**
-     * NEW: Create a new node and connect to it
-     * Location: New method for creating nodes from connection modal
+     * MODIFIED: Create a new node and connect to it
+     * Location: Added direction logic to swap source/target based on user selection
      */
     createNewNodeAndConnect() {
         const fromNode = this.graph.getNode(this.currentSelection);
@@ -1023,12 +1124,28 @@ class PropertiesPanel {
         newNode.fx = newNode.x;
         newNode.fy = newNode.y;
 
+        // ✅ MODIFICATION #3: Read selected direction from radio buttons
+        const directionRadio = this.connectModal.querySelector('input[name="edge-direction"]:checked');
+        const direction = directionRadio ? directionRadio.value : 'outgoing';
+        
+        // Determine source and target based on direction
+        let sourceId, targetId;
+        if (direction === 'outgoing') {
+            // Selected node → New node
+            sourceId = this.currentSelection;
+            targetId = newNodeId;
+        } else {
+            // New node → Selected node
+            sourceId = newNodeId;
+            targetId = this.currentSelection;
+        }
+        
         // Create the edge
-        const edgeId = `edge_${this.currentSelection}_${newNodeId}`;
+        const edgeId = `edge_${sourceId}_${targetId}`;
         this.graph.addEdge({
             id: edgeId,
-            source: this.currentSelection,
-            target: newNodeId,
+            source: sourceId,
+            target: targetId,
             properties: {
                 type: 'connection',
                 color: '#95a5a6'
@@ -1041,7 +1158,7 @@ class PropertiesPanel {
         if (window.app) {
             window.app.updateStats();
             window.app.saveState();
-            window.app.updateStatus(`Created new node ${newNodeId} and connected`);
+            window.app.updateStatus(`Created new node ${newNodeId} and connected: ${sourceId} → ${targetId}`);
         }
     }
 }
