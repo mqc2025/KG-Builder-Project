@@ -67,9 +67,6 @@ class Renderer {
         this.highlightedNodes = new Set();
         this.highlightedEdges = new Set();
         
-        // Feature 10: Edge break controls
-        this.edgeBreakControls = new Map();
-        
         // Handle window resize
         window.addEventListener('resize', () => this.handleResize());
     }
@@ -212,6 +209,7 @@ class Renderer {
 
     /**
      * Render edges
+     * MODIFIED: Removed edge break controls (crosses on edges)
      */
     renderEdges(edgeData) {
         const self = this;
@@ -258,49 +256,6 @@ class Renderer {
             .style('user-select', 'none')
             .text(d => d.properties.type || d.id);
         
-        // Feature 10: Add break controls for selected edges
-        const breakGroup = edgesEnter.append('g')
-            .attr('class', 'edge-break-controls')
-            .style('display', 'none');
-        
-        // Source break button
-        breakGroup.append('circle')
-            .attr('class', 'break-btn break-btn-source')
-            .attr('r', 6)
-            .attr('fill', '#e74c3c')
-            .attr('stroke', 'white')
-            .attr('stroke-width', 2)
-            .style('cursor', 'pointer');
-        
-        breakGroup.append('text')
-            .attr('class', 'break-btn-icon break-btn-source-icon')
-            .attr('text-anchor', 'middle')
-            .attr('dy', 4)
-            .style('font-size', '10px')
-            .style('fill', 'white')
-            .style('pointer-events', 'none')
-            .style('font-weight', 'bold')
-            .text('✕');
-        
-        // Target break button
-        breakGroup.append('circle')
-            .attr('class', 'break-btn break-btn-target')
-            .attr('r', 6)
-            .attr('fill', '#e74c3c')
-            .attr('stroke', 'white')
-            .attr('stroke-width', 2)
-            .style('cursor', 'pointer');
-        
-        breakGroup.append('text')
-            .attr('class', 'break-btn-icon break-btn-target-icon')
-            .attr('text-anchor', 'middle')
-            .attr('dy', 4)
-            .style('font-size', '10px')
-            .style('fill', 'white')
-            .style('pointer-events', 'none')
-            .style('font-weight', 'bold')
-            .text('✕');
-            
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);
 
@@ -342,67 +297,8 @@ class Renderer {
                 }
             });
 
-        // Feature 10: Break button handlers
-        edgesMerge.select('.break-btn-source')
-            .on('click', function(event, d) {
-                event.stopPropagation();
-                self.breakEdgeAtSource(d);
-            });
-        
-        edgesMerge.select('.break-btn-target')
-            .on('click', function(event, d) {
-                event.stopPropagation();
-                self.breakEdgeAtTarget(d);
-            });
-        
-        // Show/hide break controls based on selection
-        edgesMerge.select('.edge-break-controls')
-            .style('display', d => this.selectedEdges.has(d.id) ? 'block' : 'none');
-
         // Define arrowhead marker
         this.defineArrowhead();
-    }
-
-    /**
-     * Feature 10: Break edge at source
-     */
-    breakEdgeAtSource(edgeData) {
-        if (!edgeData.source) return; // Already broken
-        
-        const sourceNode = this.graph.nodes.find(n => n.id === (typeof edgeData.source === 'object' ? edgeData.source.id : edgeData.source));
-        if (!sourceNode) return;
-        
-        // Break the edge in the graph model
-        this.graph.breakEdge(edgeData.id, 'source', sourceNode.x, sourceNode.y);
-        
-        // Re-render
-        this.render();
-        
-        if (window.app) {
-            window.app.saveState();
-            window.app.updateStatus(`Broke edge at source`);
-        }
-    }
-
-    /**
-     * Feature 10: Break edge at target
-     */
-    breakEdgeAtTarget(edgeData) {
-        if (!edgeData.target) return; // Already broken
-        
-        const targetNode = this.graph.nodes.find(n => n.id === (typeof edgeData.target === 'object' ? edgeData.target.id : edgeData.target));
-        if (!targetNode) return;
-        
-        // Break the edge in the graph model
-        this.graph.breakEdge(edgeData.id, 'target', targetNode.x, targetNode.y);
-        
-        // Re-render
-        this.render();
-        
-        if (window.app) {
-            window.app.saveState();
-            window.app.updateStatus(`Broke edge at target`);
-        }
     }
 
     /**
@@ -503,7 +399,7 @@ class Renderer {
             if (event.target === this.svg.node() || event.target.tagName === 'svg' || event.target.tagName === 'SVG') {
                 event.preventDefault();
                 if (this.onCanvasContextMenu) {
-                    this.onCanvasContextMenu(event);
+                    self.onCanvasContextMenu(event);
                 }
             }
         });
@@ -573,6 +469,7 @@ class Renderer {
 
     /**
      * Update node and edge positions on simulation tick
+     * MODIFIED: Removed positioning code for break buttons
      */
     updatePositions() {
         const self = this;
@@ -585,71 +482,24 @@ class Renderer {
             d3.select(this).selectAll('path')
                 .attr('d', path);
             
-            // Update edge label position and rotation
-            const source = d.source;
-            const target = d.target;
+            // Update edge label position
+            const source = typeof d.source === 'object' ? d.source : { x: d.sourceX || 0, y: d.sourceY || 0 };
+            const target = typeof d.target === 'object' ? d.target : { x: d.targetX || 0, y: d.targetY || 0 };
             
-            // Feature 10: Handle half-edges
-            let midX, midY, dx, dy;
+            const midX = (source.x + target.x) / 2;
+            const midY = (source.y + target.y) / 2;
             
-            if (typeof source === 'object' && source !== null) {
-                // Source is a node
-                if (typeof target === 'object' && target !== null) {
-                    // Both ends are nodes
-                    midX = (source.x + target.x) / 2;
-                    midY = (source.y + target.y) / 2;
-                    dx = target.x - source.x;
-                    dy = target.y - source.y;
-                } else {
-                    // Target is free
-                    midX = (source.x + (d.targetX || source.x)) / 2;
-                    midY = (source.y + (d.targetY || source.y)) / 2;
-                    dx = (d.targetX || source.x) - source.x;
-                    dy = (d.targetY || source.y) - source.y;
-                }
-            } else {
-                // Source is free
-                if (typeof target === 'object' && target !== null) {
-                    midX = ((d.sourceX || target.x) + target.x) / 2;
-                    midY = ((d.sourceY || target.y) + target.y) / 2;
-                    dx = target.x - (d.sourceX || target.x);
-                    dy = target.y - (d.sourceY || target.y);
-                } else {
-                    // Both ends are free (shouldn't happen, but handle it)
-                    midX = ((d.sourceX || 0) + (d.targetX || 0)) / 2;
-                    midY = ((d.sourceY || 0) + (d.targetY || 0)) / 2;
-                    dx = (d.targetX || 0) - (d.sourceX || 0);
-                    dy = (d.targetY || 0) - (d.sourceY || 0);
-                }
-            }
-            
+            const dx = target.x - source.x;
+            const dy = target.y - source.y;
             const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            const textAngle = (angle > 90 || angle < -90) ? angle + 180 : angle;
+            
+            // Rotate text to be readable (don't flip upside down)
+            const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
             
             d3.select(this).select('.edge-label')
                 .attr('x', midX)
                 .attr('y', midY)
                 .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
-            
-            // Feature 10: Position break controls
-            if (typeof source === 'object' && source !== null && typeof target === 'object' && target !== null) {
-                const sourceX = source.x + dx * 0.2;
-                const sourceY = source.y + dy * 0.2;
-                const targetX = target.x - dx * 0.2;
-                const targetY = target.y - dy * 0.2;
-                
-                d3.select(this).selectAll('.break-btn-source, .break-btn-source-icon')
-                    .attr('cx', sourceX)
-                    .attr('cy', sourceY)
-                    .attr('x', sourceX)
-                    .attr('y', sourceY);
-                
-                d3.select(this).selectAll('.break-btn-target, .break-btn-target-icon')
-                    .attr('cx', targetX)
-                    .attr('cy', targetY)
-                    .attr('x', targetX)
-                    .attr('y', targetY);
-            }
         });
     }
 
@@ -661,7 +511,8 @@ class Renderer {
         
         // Feature 10: Handle half-edges
         if (typeof edge.source === 'object' && edge.source !== null) {
-            const angle = edge.target ? Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
+            const angle = edge.target ? 
+                Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
             const sourceRadius = edge.source.properties.size || 10;
             sourceX = edge.source.x + Math.cos(angle) * sourceRadius;
             sourceY = edge.source.y + Math.sin(angle) * sourceRadius;
@@ -672,7 +523,8 @@ class Renderer {
         }
         
         if (typeof edge.target === 'object' && edge.target !== null) {
-            const angle = edge.source ? Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
+            const angle = edge.source ? 
+                Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
             const targetRadius = edge.target.properties.size || 10;
             targetX = edge.target.x - Math.cos(angle) * (targetRadius + 5);
             targetY = edge.target.y - Math.sin(angle) * (targetRadius + 5);
@@ -722,10 +574,6 @@ class Renderer {
 
         this.edgeGroup.selectAll('.edge path:first-child')
             .classed('selected', d => this.selectedEdges.has(d.id));
-        
-        // Feature 10: Show/hide break controls
-        this.edgeGroup.selectAll('.edge-break-controls')
-            .style('display', d => this.selectedEdges.has(d.id) ? 'block' : 'none');
     }
 
     /**
