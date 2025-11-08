@@ -328,6 +328,33 @@ class Graph {
         this.updateModifiedDate();
         return true;
     }
+	/**
+	 * Change edge source or target to a different node
+	 * @param {string} edgeId - Edge ID
+	 * @param {string} end - Which end to change ('source' or 'target')
+	 * @param {string} newNodeId - New node ID to connect to
+	 * @returns {boolean} Success
+	 */
+	changeEdgeEndpoint(edgeId, end, newNodeId) {
+		const edge = this.getEdge(edgeId);
+		if (!edge) return false;
+		
+		const newNode = this.getNode(newNodeId);
+		if (!newNode) return false;
+		
+		if (end === 'source') {
+			edge.source = newNodeId;
+			delete edge.sourceX;
+			delete edge.sourceY;
+		} else if (end === 'target') {
+			edge.target = newNodeId;
+			delete edge.targetX;
+			delete edge.targetY;
+		}
+		
+		this.updateModifiedDate();
+		return true;
+	}
 
     /**
      * Get all edges connected to a node
@@ -451,6 +478,13 @@ class Graph {
         });
         return Array.from(types).sort();
     }
+	/**
+	 * Get all node IDs for dropdowns
+	 * @returns {Array} Array of node IDs
+	 */
+	getAllNodeIds() {
+		return this.nodes.map(node => node.id);
+	}
 
     /**
      * Clear the graph

@@ -169,7 +169,9 @@ class PropertiesPanel {
         const sourceNode = this.graph.getNode(edge.source)?.id || edge.source || '(Free End)';
         const targetNode = this.graph.getNode(edge.target)?.id || edge.target || '(Free End)';
 
-        // Feature 11: Get all edge types for dropdown
+        // Get all node IDs for dropdowns
+		const allNodeIds = this.graph.getAllNodeIds();
+		// Feature 11: Get all edge types for dropdown
         const allTypes = this.graph.getAllEdgeTypes();
 
         const html = `
@@ -183,14 +185,28 @@ class PropertiesPanel {
                 </div>
 
                 <div class="property-item">
-                    <label class="property-label">Source</label>
-                    <input type="text" class="property-input" value="${Utils.sanitizeHtml(sourceNode)}" readonly>
-                </div>
+					<label class="property-label">Source</label>
+					<select class="property-input property-select" id="prop-source">
+						<option value="">(Free End)</option>
+						${allNodeIds.map(nodeId => `
+							<option value="${Utils.sanitizeHtml(nodeId)}" ${(edge.source === nodeId || (typeof edge.source === 'object' && edge.source.id === nodeId)) ? 'selected' : ''}>
+								${Utils.sanitizeHtml(nodeId)}
+							</option>
+						`).join('')}
+					</select>
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Target</label>
-                    <input type="text" class="property-input" value="${Utils.sanitizeHtml(targetNode)}" readonly>
-                </div>
+				<div class="property-item">
+					<label class="property-label">Target</label>
+					<select class="property-input property-select" id="prop-target">
+						<option value="">(Free End)</option>
+						${allNodeIds.map(nodeId => `
+							<option value="${Utils.sanitizeHtml(nodeId)}" ${(edge.target === nodeId || (typeof edge.target === 'object' && edge.target.id === nodeId)) ? 'selected' : ''}>
+								${Utils.sanitizeHtml(nodeId)}
+							</option>
+						`).join('')}
+					</select>
+				</div>
 
                 <div class="property-item">
                     <label class="property-label">Type (Feature 11: Dropdown)</label>
@@ -281,7 +297,23 @@ class PropertiesPanel {
         // Feature 2: Editable IDs
         const nodeIdInput = document.getElementById('prop-node-id');
         const edgeIdInput = document.getElementById('prop-edge-id');
-        
+				// Source/Target dropdown handlers
+		const sourceInput = document.getElementById('prop-source');
+		const targetInput = document.getElementById('prop-target');
+
+		if (sourceInput) {
+			sourceInput.addEventListener('change', (e) => {
+				const newSourceId = e.target.value;
+				this.changeEdgeEndpoint('source', newSourceId);
+			});
+		}
+
+		if (targetInput) {
+			targetInput.addEventListener('change', (e) => {
+				const newTargetId = e.target.value;
+				this.changeEdgeEndpoint('target', newTargetId);
+			});
+		}
         if (nodeIdInput) {
             nodeIdInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -475,6 +507,63 @@ class PropertiesPanel {
         }
     }
 
+	/**
+	 * Change edge source or target endpoint
+	 * @param {string} end - 'source' or 'target'
+	 * @param {string} newNodeId - New node ID (empty string for free end)
+	 */
+	changeEdgeEndpoint(end, newNodeId) {
+		if (!this.currentSelection || this.currentType !== 'edge') return;
+		
+		const edge = this.graph.getEdge(this.currentSelection);
+		if (!edge) return;
+		
+		// Handle free end (empty string)
+		if (newNodeId === '') {
+			// Break the edge at this end
+			const coords = this.getEdgeEndCoordinates(edge, end);
+			this.graph.breakEdge(this.currentSelection, end, coords.x, coords.y);
+		} else {
+			// Connect to the selected node
+			const success = this.graph.changeEdgeEndpoint(this.currentSelection, end, newNodeId);
+			
+			if (!success) {
+				alert(`Failed to change edge ${end}. Node may not exist.`);
+				return;
+			}
+		}
+		
+		this.renderer.render();
+		this.showEdgeProperties(this.currentSelection);
+		
+		if (window.app) {
+			window.app.saveState();
+			window.app.updateStatus(`Changed edge ${end} to: ${newNodeId || '(Free End)'}`);
+		}
+	}
+
+	/**
+	 * Get coordinates for edge endpoint (for breaking)
+	 * @param {Object} edge - Edge object
+	 * @param {string} end - 'source' or 'target'
+	 * @returns {Object} {x, y} coordinates
+	 */
+	getEdgeEndCoordinates(edge, end) {
+		if (end === 'source') {
+			if (typeof edge.source === 'object' && edge.source !== null) {
+				return { x: edge.source.x, y: edge.source.y };
+			} else {
+				return { x: edge.sourceX || 0, y: edge.sourceY || 0 };
+			}
+		} else {
+			if (typeof edge.target === 'object' && edge.target !== null) {
+				return { x: edge.target.x, y: edge.target.y };
+			} else {
+				return { x: edge.targetX || 0, y: edge.targetY || 0 };
+			}
+		}
+	}
+	
     /**
      * Update a standard property
      */
