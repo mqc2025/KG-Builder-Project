@@ -159,8 +159,9 @@ class PropertiesPanel {
 
         const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
         const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+        
         const allNodeIds = this.graph.getAllNodeIds();
-        const allTypes = [...new Set(this.graph.edges.map(e => e.properties.type).filter(t => t))];
+        const allTypes = [...new Set(this.graph.edges.map(e => e.properties.type).filter(Boolean))];
 
         const html = `
             <div class="property-group">
@@ -299,6 +300,7 @@ class PropertiesPanel {
                 <div class="connection-item" data-edge-id="${Utils.sanitizeHtml(edge.id)}" data-node-id="${Utils.sanitizeHtml(otherNodeId)}">
                     <span class="connection-text">
                         ${direction} ${Utils.sanitizeHtml(otherNodeId || '(Free End)')}
+                        ${edge.properties.type ? `<span style="color: var(--text-secondary); font-style: italic;"> (${Utils.sanitizeHtml(edge.properties.type)})</span>` : ''}
                     </span>
                     <div class="connection-actions">
                         <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
@@ -421,7 +423,7 @@ class PropertiesPanel {
             deleteBtn.addEventListener('click', () => this.deleteSelected());
         }
         
-        // Break edge button (NEW)
+        // Break edge button
         const breakEdgeBtn = document.getElementById('btn-break-edge');
         if (breakEdgeBtn) {
             breakEdgeBtn.addEventListener('click', () => this.breakEdgeWithNodes());
@@ -450,7 +452,7 @@ class PropertiesPanel {
                     if (Utils.confirm('Delete this connection?')) {
                         this.graph.removeEdge(edgeId);
                         this.renderer.render();
-                        this.showNodeProperties(nodeId);
+                        this.showNodeProperties(this.currentSelection);
                         if (window.app) {
                             window.app.updateStats();
                             window.app.saveState();
@@ -460,7 +462,7 @@ class PropertiesPanel {
             });
         }
 
-        // Connect to node button - UPDATED to use modal
+        // Connect to node button
         const connectBtn = document.getElementById('btn-connect-to-node');
         if (connectBtn) {
             connectBtn.addEventListener('click', () => {
@@ -720,7 +722,7 @@ class PropertiesPanel {
         newNode.fx = midX;
         newNode.fy = midY;
 
-        // Create two new edges - FIXED: Using correct parameter format
+        // Create two new edges
         const edge1Id = `${edge.id}_1`;
         const edge2Id = `${edge.id}_2`;
 
@@ -748,11 +750,20 @@ class PropertiesPanel {
     }
 
     /**
-     * Toggle inline editing for connection
+     * MODIFIED: Toggle inline editing for connection with full form
+     * Location: In PropertiesPanel class, after breakEdgeWithNodes method
      */
     toggleConnectionInlineEdit(edgeId, otherNodeId) {
         const connectionItem = document.querySelector(`.connection-item[data-edge-id="${edgeId}"]`);
         if (!connectionItem) return;
+
+        // Check if inline edit already exists - if so, remove it (toggle off)
+        const existingEdit = connectionItem.querySelector('.connection-inline-edit');
+        if (existingEdit) {
+            existingEdit.remove();
+            this.pendingInlineEdit = null;
+            return;
+        }
 
         const edge = this.graph.getEdge(edgeId);
         if (!edge) return;
@@ -760,44 +771,165 @@ class PropertiesPanel {
         const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
         const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
         const isSource = sourceId === this.currentSelection;
-        const end = isSource ? 'target' : 'source';
+        const currentEnd = isSource ? 'target' : 'source';
+        const currentDirection = isSource ? '→' : '←';
 
-        const existingSelect = connectionItem.querySelector('.inline-edit-select');
-        if (existingSelect) {
-            existingSelect.remove();
-            this.pendingInlineEdit = null;
-            return;
-        }
-
+        // Get all available nodes
         const allNodeIds = this.graph.getAllNodeIds();
-        const select = document.createElement('select');
-        select.className = 'inline-edit-select property-input';
-        select.style.marginTop = '5px';
 
-        select.innerHTML = `
-            <option value="">(Free End)</option>
-            ${allNodeIds.map(id => `
-                <option value="${Utils.sanitizeHtml(id)}" ${id === otherNodeId ? 'selected' : ''}>
-                    ${Utils.sanitizeHtml(id)}
-                </option>
-            `).join('')}
+        // Get all edge types for datalist
+        const allTypes = [...new Set(this.graph.edges.map(e => e.properties.type).filter(Boolean))];
+
+        // Create inline edit form
+        const inlineEditDiv = document.createElement('div');
+        inlineEditDiv.className = 'connection-inline-edit';
+        inlineEditDiv.innerHTML = `
+            <div class="inline-edit-controls">
+                <div class="inline-edit-row">
+                    <label class="inline-edit-label">Node:</label>
+                    <select class="inline-edit-select" data-field="node">
+                        <option value="">(Free End)</option>
+                        ${allNodeIds.map(id => `
+                            <option value="${Utils.sanitizeHtml(id)}" ${id === otherNodeId ? 'selected' : ''}>
+                                ${Utils.sanitizeHtml(id)}
+                            </option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div class="inline-edit-row">
+                    <label class="inline-edit-label">Direction:</label>
+                    <select class="inline-edit-select" data-field="direction">
+                        <option value="→" ${currentDirection === '→' ? 'selected' : ''}>→ (current node to target)</option>
+                        <option value="←" ${currentDirection === '←' ? 'selected' : ''}>← (source to current node)</option>
+                    </select>
+                </div>
+                <div class="inline-edit-row">
+                    <label class="inline-edit-label">Edge Type:</label>
+                    <input type="text" class="inline-edit-input" data-field="type" 
+                           value="${Utils.sanitizeHtml(edge.properties.type || '')}" 
+                           list="inline-edge-types-${edgeId}" 
+                           placeholder="Optional">
+                    <datalist id="inline-edge-types-${edgeId}">
+                        ${allTypes.map(type => `<option value="${Utils.sanitizeHtml(type)}">`).join('')}
+                    </datalist>
+                </div>
+                <div class="inline-edit-actions">
+                    <button class="btn-inline-save" data-edge-id="${Utils.sanitizeHtml(edgeId)}">
+                        ✓ Save
+                    </button>
+                    <button class="btn-inline-cancel">
+                        ✕ Cancel
+                    </button>
+                </div>
+            </div>
         `;
 
-        select.addEventListener('change', (e) => {
-            this.changeEdgeEndpoint(end, e.target.value);
-            select.remove();
-            this.pendingInlineEdit = null;
+        connectionItem.appendChild(inlineEditDiv);
+
+        // Store pending edit info
+        this.pendingInlineEdit = {
+            edgeId: edgeId,
+            currentEnd: currentEnd,
+            connectionItem: connectionItem
+        };
+
+        // Attach event handlers for Save and Cancel buttons
+        const saveBtn = inlineEditDiv.querySelector('.btn-inline-save');
+        const cancelBtn = inlineEditDiv.querySelector('.btn-inline-cancel');
+
+        saveBtn.addEventListener('click', () => {
+            this.saveConnectionInlineEdit(inlineEditDiv);
         });
 
-        connectionItem.appendChild(select);
-        select.focus();
-
-        this.pendingInlineEdit = { edgeId, end, select };
+        cancelBtn.addEventListener('click', () => {
+            this.cancelConnectionInlineEdit(inlineEditDiv);
+        });
     }
 
     /**
-     * UPDATED: Show modal dialog to connect current node to another node
-     * Location: This method replaces the old prompt-based showConnectToNodeDialog
+     * NEW: Save connection inline edit
+     * Location: New helper method after toggleConnectionInlineEdit
+     */
+    saveConnectionInlineEdit(inlineEditDiv) {
+        if (!this.pendingInlineEdit) return;
+
+        const { edgeId, currentEnd, connectionItem } = this.pendingInlineEdit;
+        const edge = this.graph.getEdge(edgeId);
+        if (!edge) return;
+
+        // Get values from form
+        const nodeSelect = inlineEditDiv.querySelector('[data-field="node"]');
+        const directionSelect = inlineEditDiv.querySelector('[data-field="direction"]');
+        const typeInput = inlineEditDiv.querySelector('[data-field="type"]');
+
+        const newNodeId = nodeSelect.value;
+        const newDirection = directionSelect.value;
+        const newType = typeInput.value.trim();
+
+        // Get current source and target
+        const currentSourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+        const currentTargetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+        const isCurrentlySource = currentSourceId === this.currentSelection;
+
+        // Determine what changed
+        let needsDirectionSwap = false;
+        if (isCurrentlySource && newDirection === '←') {
+            needsDirectionSwap = true;
+        } else if (!isCurrentlySource && newDirection === '→') {
+            needsDirectionSwap = true;
+        }
+
+        // If direction needs to swap, we need to swap source and target
+        if (needsDirectionSwap) {
+            const tempSource = edge.source;
+            edge.source = edge.target;
+            edge.target = tempSource;
+        }
+
+        // Now update the endpoint (the "other" node)
+        const endToChange = (newDirection === '→') ? 'target' : 'source';
+        if (newNodeId === '') {
+            // Disconnect: create free end
+            const node = this.graph.getNode(this.currentSelection);
+            if (node) {
+                this.graph.breakEdge(edgeId, endToChange, node.x + 50, node.y);
+            }
+        } else {
+            // Connect to the selected node
+            this.graph.changeEdgeEndpoint(edgeId, endToChange, newNodeId);
+        }
+
+        // Update edge type if changed
+        if (newType !== edge.properties.type) {
+            edge.properties.type = newType;
+        }
+
+        // Remove inline edit UI
+        inlineEditDiv.remove();
+        this.pendingInlineEdit = null;
+
+        // Refresh and render
+        this.renderer.render();
+        this.showNodeProperties(this.currentSelection);
+
+        if (window.app) {
+            window.app.saveState();
+            window.app.updateStatus(`Updated connection`);
+        }
+    }
+
+    /**
+     * NEW: Cancel connection inline edit
+     * Location: New helper method after saveConnectionInlineEdit
+     */
+    cancelConnectionInlineEdit(inlineEditDiv) {
+        // Simply remove the inline edit UI without saving changes
+        inlineEditDiv.remove();
+        this.pendingInlineEdit = null;
+    }
+
+    /**
+     * Show modal dialog to connect current node to another node
      */
     showConnectToNodeModal(fromNodeId) {
         const allNodeIds = this.graph.getAllNodeIds().filter(id => id !== fromNodeId);
@@ -828,14 +960,13 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Create the connection modal DOM element
-     * Location: New helper method for modal creation
+     * Create the connection modal DOM element
      */
     createConnectModal() {
         const modal = document.createElement('div');
         modal.id = 'connect-node-modal';
         modal.className = 'modal hidden';
-        modal.style.zIndex = '2500'; // Higher than properties panel
+        modal.style.zIndex = '2500';
 
         modal.innerHTML = `
             <div class="modal-content" style="margin-top: 80px; margin-right: 380px; min-width: 350px; max-width: 350px;">
@@ -885,17 +1016,14 @@ class PropertiesPanel {
         const cancelBtn = modal.querySelector('#connect-modal-cancel');
         const closeBtn = modal.querySelector('#connect-modal-close');
 
-        // Enable/disable connect button based on selection
         dropdown.addEventListener('change', () => {
             confirmBtn.disabled = !dropdown.value;
         });
 
-        // Confirm connection
         confirmBtn.addEventListener('click', () => {
             const selectedValue = dropdown.value;
             if (!selectedValue) return;
 
-            // Get the selected direction
             const directionRadio = modal.querySelector('input[name="connect-direction"]:checked');
             const direction = directionRadio ? directionRadio.value : 'target';
 
@@ -908,17 +1036,14 @@ class PropertiesPanel {
             modal.classList.add('hidden');
         });
 
-        // Cancel button
         cancelBtn.addEventListener('click', () => {
             modal.classList.add('hidden');
         });
 
-        // Close button
         closeBtn.addEventListener('click', () => {
             modal.classList.add('hidden');
         });
 
-        // Click outside to close (but not on modal content)
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
@@ -929,8 +1054,7 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Connect to an existing node - FIXED: Using correct addEdge parameter format
-     * Location: New helper method extracted from old showConnectToNodeDialog
+     * Connect to an existing node
      */
     connectToExistingNode(toNodeId, direction = 'target') {
         if (!this.graph.getNode(toNodeId)) {
@@ -940,21 +1064,17 @@ class PropertiesPanel {
 
         const fromNodeId = this.currentSelection;
         
-        // Determine source and target based on direction
         let sourceId, targetId, edgeId;
         if (direction === 'target') {
-            // Current node → Selected node (selected is target)
             sourceId = fromNodeId;
             targetId = toNodeId;
             edgeId = `edge_${fromNodeId}_${toNodeId}`;
         } else {
-            // Selected node → Current node (selected is source)
             sourceId = toNodeId;
             targetId = fromNodeId;
             edgeId = `edge_${toNodeId}_${fromNodeId}`;
         }
         
-        // FIXED: Changed from passing single object to passing three parameters
         this.graph.addEdge(sourceId, targetId, {
             id: edgeId,
             type: 'connection',
@@ -972,14 +1092,12 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Create a new node and connect to it - FIXED: Using correct addEdge parameter format
-     * Location: New method for creating nodes from connection modal
+     * Create a new node and connect to it
      */
     createNewNodeAndConnect(direction = 'target') {
         const fromNode = this.graph.getNode(this.currentSelection);
         if (!fromNode) return;
 
-        // Generate a unique ID for the new node
         let newNodeId = `node_${Date.now()}`;
         let counter = 1;
         while (this.graph.getNode(newNodeId)) {
@@ -987,7 +1105,6 @@ class PropertiesPanel {
             counter++;
         }
 
-        // Create new node positioned near the source node
         const offsetX = 100;
         const offsetY = 0;
         const newNode = this.graph.addNode({
@@ -1003,21 +1120,17 @@ class PropertiesPanel {
         newNode.fx = newNode.x;
         newNode.fy = newNode.y;
 
-        // Determine source and target based on direction
         let sourceId, targetId, edgeId;
         if (direction === 'target') {
-            // Current node → New node (new node is target)
             sourceId = this.currentSelection;
             targetId = newNodeId;
             edgeId = `edge_${this.currentSelection}_${newNodeId}`;
         } else {
-            // New node → Current node (new node is source)
             sourceId = newNodeId;
             targetId = this.currentSelection;
             edgeId = `edge_${newNodeId}_${this.currentSelection}`;
         }
 
-        // Create the edge - FIXED: Changed from passing single object to passing three parameters
         this.graph.addEdge(sourceId, targetId, {
             id: edgeId,
             type: 'connection',
