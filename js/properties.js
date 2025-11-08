@@ -23,6 +23,9 @@ class PropertiesPanel {
             '#95a5a6'  // Light Gray
         ];
         
+        // NEW: Store pending inline edit changes
+        this.pendingInlineEdit = null;
+        
         this.setupEventListeners();
     }
 
@@ -79,8 +82,7 @@ class PropertiesPanel {
                             <button class="color-swatch ${node.properties.color === color ? 'active' : ''}" 
                                     data-color="${color}" 
                                     style="background-color: ${color};"
-                                    title="${color}">
-                            </button>
+                                    title="${color}"></button>
                         `).join('')}
                     </div>
                     <input type="color" class="property-input" id="prop-color" value="${node.properties.color || '#3498db'}">
@@ -88,7 +90,7 @@ class PropertiesPanel {
 
                 <div class="property-item">
                     <label class="property-label">Size</label>
-                    <input type="number" class="property-input" id="prop-size" value="${node.properties.size || 10}" min="5" max="30">
+                    <input type="number" class="property-input" id="prop-size" value="${node.properties.size || 5}" min="1" max="50">
                 </div>
 
                 <div class="property-item">
@@ -102,7 +104,7 @@ class PropertiesPanel {
                 
                 <div class="property-item">
                     <label class="property-label">Priority</label>
-                    <select class="property-select" id="prop-priority">
+                    <select class="property-input" id="prop-priority">
                         <option value="" ${!node.properties.priority ? 'selected' : ''}>-- None --</option>
                         <option value="high" ${node.properties.priority === 'high' ? 'selected' : ''}>High</option>
                         <option value="medium" ${node.properties.priority === 'medium' ? 'selected' : ''}>Medium</option>
@@ -171,17 +173,15 @@ class PropertiesPanel {
         this.currentType = 'edge';
         this.show();
 
-        const sourceNode = this.graph.getNode(edge.source)?.id || edge.source || '(Free End)';
-        const targetNode = this.graph.getNode(edge.target)?.id || edge.target || '(Free End)';
+        const sourceNode = this.graph.getNode(edge.source?.id || edge.source);
+        const targetNode = this.graph.getNode(edge.target?.id || edge.target);
 
-        // Get all node IDs for dropdowns
-		const allNodeIds = this.graph.getAllNodeIds();
-		// Feature 11: Get all edge types for dropdown
+        const allNodeIds = this.graph.getAllNodeIds();
         const allTypes = this.graph.getAllEdgeTypes();
 
         const html = `
             <div class="property-group">
-                <div class="property-group-title">Edge: ${Utils.sanitizeHtml(sourceNode)} → ${Utils.sanitizeHtml(targetNode)}</div>
+                <div class="property-group-title">Edge Information</div>
                 
                 <div class="property-item">
                     <label class="property-label">ID (Feature 2: Editable)</label>
@@ -190,60 +190,49 @@ class PropertiesPanel {
                 </div>
 
                 <div class="property-item">
-					<label class="property-label">Source</label>
-					<select class="property-input property-select" id="prop-source">
-						<option value="">(Free End)</option>
-						${allNodeIds.map(nodeId => `
-							<option value="${Utils.sanitizeHtml(nodeId)}" ${(edge.source === nodeId || (typeof edge.source === 'object' && edge.source.id === nodeId)) ? 'selected' : ''}>
-								${Utils.sanitizeHtml(nodeId)}
-							</option>
-						`).join('')}
-					</select>
-				</div>
+                    <label class="property-label">Source</label>
+                    <select class="property-input" id="prop-source">
+                        <option value="">(Free End)</option>
+                        ${allNodeIds.map(id => {
+                            const sourceId = edge.source?.id || edge.source;
+                            return `<option value="${Utils.sanitizeHtml(id)}" ${id === sourceId ? 'selected' : ''}>${Utils.sanitizeHtml(id)}</option>`;
+                        }).join('')}
+                    </select>
+                </div>
 
-				<div class="property-item">
-					<label class="property-label">Target</label>
-					<select class="property-input property-select" id="prop-target">
-						<option value="">(Free End)</option>
-						${allNodeIds.map(nodeId => `
-							<option value="${Utils.sanitizeHtml(nodeId)}" ${(edge.target === nodeId || (typeof edge.target === 'object' && edge.target.id === nodeId)) ? 'selected' : ''}>
-								${Utils.sanitizeHtml(nodeId)}
-							</option>
-						`).join('')}
-					</select>
-				</div>
+                <div class="property-item">
+                    <label class="property-label">Target</label>
+                    <select class="property-input" id="prop-target">
+                        <option value="">(Free End)</option>
+                        ${allNodeIds.map(id => {
+                            const targetId = edge.target?.id || edge.target;
+                            return `<option value="${Utils.sanitizeHtml(id)}" ${id === targetId ? 'selected' : ''}>${Utils.sanitizeHtml(id)}</option>`;
+                        }).join('')}
+                    </select>
+                </div>
 
                 <div class="property-item">
                     <label class="property-label">Type (Feature 11: Dropdown)</label>
-                    <input list="edge-types-datalist" type="text" class="property-input" id="prop-type" value="${Utils.sanitizeHtml(edge.properties.type || 'related')}">
-                    <datalist id="edge-types-datalist">
+                    <input list="edge-types" type="text" class="property-input" id="prop-type" value="${Utils.sanitizeHtml(edge.properties.type || 'related')}">
+                    <datalist id="edge-types">
                         ${allTypes.map(type => `<option value="${Utils.sanitizeHtml(type)}">`).join('')}
                     </datalist>
                 </div>
 
                 <div class="property-item">
+                    <label class="property-label">Weight</label>
+                    <input type="number" class="property-input" id="prop-weight" value="${edge.properties.weight || 1}" min="0" step="0.1">
+                </div>
+
+                <div class="property-item">
                     <label class="property-label">Color</label>
-                    <div class="color-palette">
-                        ${this.colorPalette.map(color => `
-                            <button class="color-swatch ${edge.properties.color === color ? 'active' : ''}" 
-                                    data-color="${color}" 
-                                    style="background-color: ${color};"
-                                    title="${color}">
-                            </button>
-                        `).join('')}
-                    </div>
                     <input type="color" class="property-input" id="prop-color" value="${edge.properties.color || '#95a5a6'}">
                 </div>
 
                 <div class="property-item">
-                    <label class="property-label">Weight</label>
-                    <input type="number" class="property-input" id="prop-weight" value="${edge.properties.weight || 1}" min="0.1" max="10" step="0.1">
-                </div>
-
-                <div class="property-item">
-                    <label class="property-label">Arrow Direction</label>
-                    <div class="property-checkbox-container">
-                        <input type="checkbox" class="property-checkbox" id="prop-directed" ${edge.properties.directed !== false ? 'checked' : ''}>
+                    <label class="property-label"></label>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="prop-directed" ${edge.properties.directed ? 'checked' : ''}>
                         <span>Show arrow direction</span>
                     </div>
                 </div>
@@ -308,15 +297,15 @@ class PropertiesPanel {
     }
 
     /**
-     * Render connections list for a node
+     * Render connections list
      */
     renderConnections(nodeId) {
         const edges = this.getNodeEdges(nodeId);
         
         if (edges.length === 0) {
-            return '<p style="color: var(--text-secondary); font-size: 13px;">No connections</p>';
+            return '<p style="color: var(--text-secondary); font-size: 13px; padding: 10px;">No connections</p>';
         }
-        
+
         return edges.map(edge => {
             const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
             const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
@@ -347,7 +336,7 @@ class PropertiesPanel {
     }
 
     /**
-     * Toggle inline editing for a connection
+     * Toggle inline editing for a connection (WITH SAVE/CANCEL BUTTONS)
      */
     toggleConnectionInlineEdit(edgeId, nodeId) {
         const inlineEditDiv = document.getElementById(`inline-edit-${edgeId}`);
@@ -357,6 +346,7 @@ class PropertiesPanel {
         if (inlineEditDiv.style.display !== 'none') {
             inlineEditDiv.style.display = 'none';
             inlineEditDiv.innerHTML = '';
+            this.pendingInlineEdit = null;
             return;
         }
 
@@ -365,6 +355,7 @@ class PropertiesPanel {
             div.style.display = 'none';
             div.innerHTML = '';
         });
+        this.pendingInlineEdit = null;
 
         // Get edge data
         const edge = this.graph.getEdge(edgeId);
@@ -379,7 +370,7 @@ class PropertiesPanel {
         const allTypes = this.graph.getAllEdgeTypes();
         const currentType = edge.properties.type || 'related';
 
-        // Build inline editing HTML
+        // Build inline editing HTML with Save/Cancel buttons
         const inlineHTML = `
             <div class="inline-edit-controls">
                 <div class="inline-edit-row">
@@ -411,152 +402,138 @@ class PropertiesPanel {
                         ${allTypes.map(type => `<option value="${Utils.sanitizeHtml(type)}">`).join('')}
                     </datalist>
                 </div>
+                <div class="inline-edit-actions">
+                    <button class="btn-inline-save" id="btn-save-${edgeId}">✓ Save</button>
+                    <button class="btn-inline-cancel" id="btn-cancel-${edgeId}">✕ Cancel</button>
+                </div>
             </div>
         `;
 
         inlineEditDiv.innerHTML = inlineHTML;
         inlineEditDiv.style.display = 'block';
 
-        // Attach event listeners for inline edits
+        // Attach event listeners for inline edit buttons
         this.attachInlineEditHandlers(edgeId, nodeId);
     }
 
     /**
-     * Attach event listeners for inline editing controls
+     * Attach event listeners for inline editing controls (NO IMMEDIATE CHANGES)
      */
     attachInlineEditHandlers(edgeId, nodeId) {
         const directionSelect = document.getElementById(`inline-direction-${edgeId}`);
         const nodeSelect = document.getElementById(`inline-node-${edgeId}`);
         const typeInput = document.getElementById(`inline-type-${edgeId}`);
+        const saveBtn = document.getElementById(`btn-save-${edgeId}`);
+        const cancelBtn = document.getElementById(`btn-cancel-${edgeId}`);
 
-        if (!directionSelect || !nodeSelect || !typeInput) return;
+        if (!directionSelect || !nodeSelect || !typeInput || !saveBtn || !cancelBtn) return;
 
-        // Handle direction change
-        directionSelect.addEventListener('change', () => {
+        // Store initial values
+        const initialValues = {
+            direction: directionSelect.value,
+            node: nodeSelect.value,
+            type: typeInput.value
+        };
+
+        // Save button handler - applies all changes at once
+        saveBtn.addEventListener('click', () => {
             const newDirection = directionSelect.value;
             const selectedNode = nodeSelect.value;
-            
-            if (selectedNode) {
-                this.updateConnectionDirection(edgeId, nodeId, newDirection, selectedNode);
-            }
-        });
-
-        // Handle node change
-        nodeSelect.addEventListener('change', () => {
-            const newDirection = directionSelect.value;
-            const selectedNode = nodeSelect.value;
-            
-            this.updateConnectionNode(edgeId, nodeId, newDirection, selectedNode);
-        });
-
-        // Handle type change
-        typeInput.addEventListener('change', () => {
             const newType = typeInput.value.trim();
+
+            // Apply direction and node changes
+            if (newDirection === 'outgoing') {
+                this.graph.changeEdgeEndpoint(edgeId, 'source', nodeId);
+                this.graph.changeEdgeEndpoint(edgeId, 'target', selectedNode || '');
+            } else {
+                this.graph.changeEdgeEndpoint(edgeId, 'source', selectedNode || '');
+                this.graph.changeEdgeEndpoint(edgeId, 'target', nodeId);
+            }
+
+            // Apply type change
             if (newType) {
                 this.graph.updateEdge(edgeId, { type: newType });
-                this.renderer.render();
-                
-                if (window.app) {
-                    window.app.saveState();
-                    window.app.updateStatus(`Updated edge type to: ${newType}`);
-                }
+            }
 
-                // Refresh the connections list
-                this.showNodeProperties(nodeId);
+            // Update display
+            this.renderer.render();
+
+            if (window.app) {
+                window.app.saveState();
+                window.app.updateStatus('Connection updated successfully');
+            }
+
+            // Close the inline editor and refresh
+            const inlineEditDiv = document.getElementById(`inline-edit-${edgeId}`);
+            if (inlineEditDiv) {
+                inlineEditDiv.style.display = 'none';
+                inlineEditDiv.innerHTML = '';
+            }
+            this.pendingInlineEdit = null;
+
+            // Refresh the connections list
+            this.showNodeProperties(nodeId);
+        });
+
+        // Cancel button handler - just closes without changes
+        cancelBtn.addEventListener('click', () => {
+            const inlineEditDiv = document.getElementById(`inline-edit-${edgeId}`);
+            if (inlineEditDiv) {
+                inlineEditDiv.style.display = 'none';
+                inlineEditDiv.innerHTML = '';
+            }
+            this.pendingInlineEdit = null;
+
+            if (window.app) {
+                window.app.updateStatus('Edit cancelled');
             }
         });
+
+        // Store pending edit reference
+        this.pendingInlineEdit = {
+            edgeId,
+            nodeId,
+            initialValues
+        };
     }
 
     /**
-     * Update connection direction
-     */
-    updateConnectionDirection(edgeId, currentNodeId, newDirection, otherNodeId) {
-        const edge = this.graph.getEdge(edgeId);
-        if (!edge) return;
-
-        if (newDirection === 'outgoing') {
-            // Current node should be source
-            this.graph.changeEdgeEndpoint(edgeId, 'source', currentNodeId);
-            this.graph.changeEdgeEndpoint(edgeId, 'target', otherNodeId || '');
-        } else {
-            // Current node should be target
-            this.graph.changeEdgeEndpoint(edgeId, 'source', otherNodeId || '');
-            this.graph.changeEdgeEndpoint(edgeId, 'target', currentNodeId);
-        }
-
-        this.renderer.render();
-        
-        if (window.app) {
-            window.app.saveState();
-            window.app.updateStatus(`Updated connection direction`);
-        }
-
-        // Refresh the connections list
-        this.showNodeProperties(currentNodeId);
-    }
-
-    /**
-     * Update connection node
-     */
-    updateConnectionNode(edgeId, currentNodeId, direction, newNodeId) {
-        const edge = this.graph.getEdge(edgeId);
-        if (!edge) return;
-
-        if (direction === 'outgoing') {
-            // Update target
-            this.graph.changeEdgeEndpoint(edgeId, 'target', newNodeId || '');
-        } else {
-            // Update source
-            this.graph.changeEdgeEndpoint(edgeId, 'source', newNodeId || '');
-        }
-
-        this.renderer.render();
-        
-        if (window.app) {
-            window.app.saveState();
-            window.app.updateStatus(`Updated connection to: ${newNodeId || '(Free End)'}`);
-        }
-
-        // Refresh the connections list
-        this.showNodeProperties(currentNodeId);
-    }
-
-    /**
-     * Show connection to node dialog (Feature 7: Fixed selection reset)
+     * Show dialog to connect current node to another node
      */
     showConnectToNodeDialog(sourceNodeId) {
-        const availableNodes = this.graph.nodes
-            .filter(n => n.id !== sourceNodeId)
-            .map(n => n.id)
-            .sort();
+        const allNodeIds = this.graph.getAllNodeIds().filter(id => id !== sourceNodeId);
         
-        if (availableNodes.length === 0) {
-            alert('No other nodes available to connect to');
+        if (allNodeIds.length === 0) {
+            alert('No other nodes available to connect to.');
             return;
         }
-        
+
         const dropdownHTML = `
-            <div class="connection-selector" style="margin-top: 15px; padding: 15px; background: var(--light-bg); border-radius: 6px;">
-                <label class="property-label">Select target node:</label>
-                <select id="target-node-dropdown" class="property-select" style="margin-bottom: 10px;">
-                    <option value="">-- Choose a node --</option>
-                    ${availableNodes.map(id => `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(id)}</option>`).join('')}
-                </select>
+            <div class="connection-selector">
+                <h4 style="margin: 0 0 10px 0;">Connect to Node</h4>
                 
-                <label class="property-label" style="margin-top: 10px;">Connection direction:</label>
-                <div style="display: flex; gap: 15px; margin-bottom: 10px; padding: 10px; background: white; border-radius: 4px;">
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                        <input type="radio" name="connection-direction" value="outgoing" checked style="cursor: pointer;">
-                        <span style="font-size: 13px;">
-                            <strong>${Utils.sanitizeHtml(sourceNodeId)}</strong> → Target (Outgoing)
-                        </span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                        <input type="radio" name="connection-direction" value="incoming" style="cursor: pointer;">
-                        <span style="font-size: 13px;">
-                            Target → <strong>${Utils.sanitizeHtml(sourceNodeId)}</strong> (Incoming)
-                        </span>
-                    </label>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Direction:</label>
+                    <div style="display: flex; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="connection-direction" value="outgoing" checked>
+                            <span>→ Outgoing</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="connection-direction" value="incoming">
+                            <span>← Incoming</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Target Node:</label>
+                    <select id="target-node-dropdown" class="property-input" style="width: 100%;">
+                        <option value="">-- Select Node --</option>
+                        ${allNodeIds.map(id => 
+                            `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(id)}</option>`
+                        ).join('')}
+                    </select>
                 </div>
                 
                 <div style="display: flex; gap: 10px;">
@@ -720,7 +697,7 @@ class PropertiesPanel {
         if (customContainer) {
             customContainer.addEventListener('change', (e) => {
                 if (e.target.classList.contains('custom-property-key') || 
-                    e.target.classList.contains('custom-property-value')) {
+                  e.target.classList.contains('custom-property-value')) {
                     this.updateCustomProperty(e.target);
                 }
             });
@@ -747,7 +724,7 @@ class PropertiesPanel {
             deleteBtn.addEventListener('click', () => this.deleteSelected());
         }
         
-        // NEW: Connection handlers with three buttons
+        // Connection handlers with three buttons
         const connectionsContainer = document.getElementById('connections-container');
         if (connectionsContainer) {
             connectionsContainer.addEventListener('click', (e) => {
