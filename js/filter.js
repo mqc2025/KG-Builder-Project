@@ -142,10 +142,10 @@ class FilterManager {
     updateFilterButtonState() {
         if (this.isFilterActive) {
             this.filterBtn?.classList.add('active');
-            this.filterBtn?.title = `Filter active (${this.currentFilter.propertyKey}: ${this.currentFilter.propertyValue})`;
+            this.filterBtn.title = `Filter active (${this.currentFilter.propertyKey}: ${this.currentFilter.propertyValue})`;
         } else {
             this.filterBtn?.classList.remove('active');
-            this.filterBtn?.title = 'Filter Graph';
+            this.filterBtn.title = 'Filter Graph';
         }
     }
 
