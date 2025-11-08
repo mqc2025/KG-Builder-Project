@@ -26,6 +26,9 @@ class PropertiesPanel {
         // NEW: Store pending inline edit changes
         this.pendingInlineEdit = null;
         
+        // NEW: Store connect modal reference
+        this.connectModal = null;
+        
         this.setupEventListeners();
     }
 
@@ -79,14 +82,12 @@ class PropertiesPanel {
                     <label class="property-label">Color (Feature 8: Palette)</label>
                     <div class="color-palette">
                         ${this.colorPalette.map(color => `
-                            <button class="color-swatch ${node.properties.color === color ? 'selected' : ''}" 
-                                    data-color="${color}" 
-                                    style="background-color: ${color};"
-                                    title="${color}">
-                            </button>
+                            <button class="color-swatch ${node.properties.color === color ? 'active' : ''}" 
+                                    style="background-color: ${color};" 
+                                    data-color="${color}"></button>
                         `).join('')}
                     </div>
-                    <input type="color" class="property-input" id="prop-color" value="${node.properties.color || '#3498db'}">
+                    <input type="color" class="property-input" id="prop-color" value="${node.properties.color || '#3498db'}" style="margin-top: 8px;">
                 </div>
 
                 <div class="property-item">
@@ -98,16 +99,22 @@ class PropertiesPanel {
                     <label class="property-label">Description</label>
                     <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(node.properties.description || '')}</textarea>
                 </div>
+            </div>
+
+            <div class="property-group">
+                <div class="property-group-title">Planning & Tracking</div>
                 
-                <!-- Feature 11: Priority and Deadline -->
                 <div class="property-item">
-                    <label class="property-label">Priority (1-5)</label>
-                    <input type="number" class="property-input" id="prop-priority" value="${node.properties.priority || ''}" min="1" max="5" placeholder="Optional">
-                    <p class="property-hint">1=Highest, 5=Lowest</p>
+                    <label class="property-label">Priority (Feature 3)</label>
+                    <select class="property-input" id="prop-priority">
+                        <option value="low" ${node.properties.priority === 'low' ? 'selected' : ''}>Low</option>
+                        <option value="medium" ${node.properties.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="high" ${node.properties.priority === 'high' ? 'selected' : ''}>High</option>
+                    </select>
                 </div>
-                
+
                 <div class="property-item">
-                    <label class="property-label">Deadline</label>
+                    <label class="property-label">Deadline (Feature 3)</label>
                     <input type="date" class="property-input" id="prop-deadline" value="${node.properties.deadline || ''}">
                 </div>
             </div>
@@ -304,17 +311,16 @@ class PropertiesPanel {
             const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
             const otherNodeId = sourceId === nodeId ? targetId : sourceId;
             const direction = sourceId === nodeId ? '→' : '←';
-
+            
             return `
                 <div class="connection-item" data-edge-id="${Utils.sanitizeHtml(edge.id)}" data-node-id="${Utils.sanitizeHtml(otherNodeId)}">
-                    <span class="connection-info">
-                        <strong>${direction} ${Utils.sanitizeHtml(otherNodeId || '(Free End)')}</strong>
-                        <small style="color: var(--text-secondary);">${edge.properties.type || edge.id}</small>
+                    <span class="connection-text">
+                        ${direction} ${Utils.sanitizeHtml(otherNodeId || '(Free End)')}
                     </span>
                     <div class="connection-actions">
-                        <button class="btn-icon btn-toggle-inline-edit" title="Edit edge endpoint">✎</button>
-                        <button class="btn-icon btn-view-edge-details" title="View edge details">⋯</button>
-                        <button class="btn-icon btn-delete-connection" title="Delete connection">✕</button>
+                        <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
+                        <button class="btn-view-edge-details" title="View edge details">⋯</button>
+                        <button class="btn-delete-connection" title="Delete connection">✕</button>
                     </div>
                 </div>
             `;
@@ -322,10 +328,10 @@ class PropertiesPanel {
     }
 
     /**
-     * Attach event handlers to property inputs
+     * Attach property handlers to current panel
      */
     attachPropertyHandlers() {
-        // Node ID rename
+        // Node ID editing
         const nodeIdInput = document.getElementById('prop-node-id');
         if (nodeIdInput) {
             nodeIdInput.addEventListener('keypress', (e) => {
@@ -335,7 +341,7 @@ class PropertiesPanel {
             });
         }
 
-        // Edge ID rename
+        // Edge ID editing
         const edgeIdInput = document.getElementById('prop-edge-id');
         if (edgeIdInput) {
             edgeIdInput.addEventListener('keypress', (e) => {
@@ -356,89 +362,68 @@ class PropertiesPanel {
         });
 
         // Standard properties
-        const propertyInputs = [
-            { id: 'prop-color', key: 'color' },
-            { id: 'prop-size', key: 'size', parse: parseFloat },
-            { id: 'prop-type', key: 'type' },
-            { id: 'prop-weight', key: 'weight', parse: parseFloat },
-            { id: 'prop-description', key: 'description' },
-            { id: 'prop-priority', key: 'priority', parse: parseInt },
-            { id: 'prop-deadline', key: 'deadline' }
-        ];
-
-        propertyInputs.forEach(({ id, key, parse }) => {
+        const propertyInputs = ['prop-color', 'prop-size', 'prop-description', 
+                               'prop-priority', 'prop-deadline', 'prop-type', 'prop-weight'];
+        
+        propertyInputs.forEach(id => {
             const input = document.getElementById(id);
             if (input) {
                 input.addEventListener('change', (e) => {
-                    const value = parse ? parse(e.target.value) : e.target.value;
+                    const key = id.replace('prop-', '');
+                    const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
                     this.updateProperty(key, value);
                 });
             }
         });
 
-        // Directed checkbox
-        const directedCheckbox = document.getElementById('prop-directed');
-        if (directedCheckbox) {
-            directedCheckbox.addEventListener('change', (e) => {
-                this.updateProperty('directed', e.target.checked);
+        // Custom properties - value changes
+        const customValueInputs = document.querySelectorAll('.custom-property-value');
+        customValueInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                const propertyDiv = e.target.closest('.custom-property');
+                const key = propertyDiv.dataset.key;
+                let value = e.target.value;
+                try {
+                    value = value && !isNaN(value) ? JSON.parse(value) : value;
+                } catch {
+                    // Keep as string if not valid JSON
+                }
+                this.updateProperty(key, value);
             });
-        }
+        });
 
-        // Edge source/target dropdowns
-        const sourceSelect = document.getElementById('prop-source');
-        if (sourceSelect) {
-            sourceSelect.addEventListener('change', (e) => {
-                this.changeEdgeEndpoint('source', e.target.value);
-            });
-        }
+        // Custom properties - key changes
+        const customKeyInputs = document.querySelectorAll('.custom-property-key');
+        customKeyInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                const propertyDiv = e.target.closest('.custom-property');
+                const oldKey = propertyDiv.dataset.key;
+                const newKey = e.target.value.trim();
+                const valueInput = propertyDiv.querySelector('.custom-property-value');
+                let value = valueInput.value;
+                
+                try {
+                    value = value && !isNaN(value) ? JSON.parse(value) : value;
+                } catch {
+                    // Keep as string
+                }
 
-        const targetSelect = document.getElementById('prop-target');
-        if (targetSelect) {
-            targetSelect.addEventListener('change', (e) => {
-                this.changeEdgeEndpoint('target', e.target.value);
-            });
-        }
-
-        // Custom properties
-        const customContainer = document.getElementById('custom-properties-container');
-        if (customContainer) {
-            customContainer.addEventListener('change', (e) => {
-                if (e.target.classList.contains('custom-property-key') || 
-                    e.target.classList.contains('custom-property-value')) {
-                    const propertyDiv = e.target.closest('.custom-property');
-                    const oldKey = propertyDiv.dataset.key;
-                    const newKey = propertyDiv.querySelector('.custom-property-key').value.trim();
-                    const newValue = propertyDiv.querySelector('.custom-property-value').value;
-
-                    if (newKey && oldKey !== newKey) {
-                        if (this.currentType === 'node') {
-                            const node = this.graph.getNode(this.currentSelection);
-                            delete node.properties[oldKey];
-                            node.properties[newKey] = newValue;
-                        } else if (this.currentType === 'edge') {
-                            const edge = this.graph.getEdge(this.currentSelection);
-                            delete edge.properties[oldKey];
-                            edge.properties[newKey] = newValue;
-                        }
-                        propertyDiv.dataset.key = newKey;
-                    } else if (newKey) {
-                        this.updateProperty(newKey, newValue);
-                    }
-
-                    if (window.app) {
-                        window.app.saveState();
-                    }
+                if (newKey && newKey !== oldKey) {
+                    this.renameProperty(oldKey, newKey, value);
+                    propertyDiv.dataset.key = newKey;
                 }
             });
+        });
 
-            customContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('btn-remove-property')) {
-                    const propertyDiv = e.target.closest('.custom-property');
-                    const key = propertyDiv.dataset.key;
-                    this.removeCustomProperty(key);
-                }
+        // Remove property buttons
+        const removeButtons = document.querySelectorAll('.btn-remove-property');
+        removeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const propertyDiv = e.target.closest('.custom-property');
+                const key = propertyDiv.dataset.key;
+                this.removeProperty(key);
             });
-        }
+        });
 
         // Add custom property button
         const addBtn = document.getElementById('btn-add-custom-property');
@@ -492,11 +477,34 @@ class PropertiesPanel {
             });
         }
 
-        // Connect to node button
+        // Connect to node button - UPDATED to use modal
         const connectBtn = document.getElementById('btn-connect-to-node');
         if (connectBtn) {
             connectBtn.addEventListener('click', () => {
-                this.showConnectToNodeDialog(this.currentSelection);
+                this.showConnectToNodeModal(this.currentSelection);
+            });
+        }
+
+        // Directed checkbox
+        const directedCheckbox = document.getElementById('prop-directed');
+        if (directedCheckbox) {
+            directedCheckbox.addEventListener('change', (e) => {
+                this.updateProperty('directed', e.target.checked);
+            });
+        }
+
+        // Edge source/target dropdowns
+        const sourceSelect = document.getElementById('prop-source');
+        if (sourceSelect) {
+            sourceSelect.addEventListener('change', (e) => {
+                this.changeEdgeEndpoint('source', e.target.value);
+            });
+        }
+
+        const targetSelect = document.getElementById('prop-target');
+        if (targetSelect) {
+            targetSelect.addEventListener('change', (e) => {
+                this.changeEdgeEndpoint('target', e.target.value);
             });
         }
     }
@@ -515,8 +523,8 @@ class PropertiesPanel {
         }
         
         this.currentSelection = newId;
-        this.renderer.render();
         this.showNodeProperties(newId);
+        this.renderer.render();
         
         if (window.app) {
             window.app.saveState();
@@ -538,8 +546,8 @@ class PropertiesPanel {
         }
         
         this.currentSelection = newId;
-        this.renderer.render();
         this.showEdgeProperties(newId);
+        this.renderer.render();
         
         if (window.app) {
             window.app.saveState();
@@ -547,237 +555,57 @@ class PropertiesPanel {
         }
     }
 
-	/**
-	 * Change edge source or target endpoint
-	 * @param {string} end - 'source' or 'target'
-	 * @param {string} newNodeId - New node ID (empty string for free end)
-	 */
-	changeEdgeEndpoint(end, newNodeId) {
-		if (!this.currentSelection || this.currentType !== 'edge') return;
-		
-		const edge = this.graph.getEdge(this.currentSelection);
-		if (!edge) return;
-		
-		// Handle free end (empty string)
-		if (newNodeId === '') {
-			// Break the edge at this end
-			const coords = this.getEdgeEndCoordinates(edge, end);
-			this.graph.breakEdge(this.currentSelection, end, coords.x, coords.y);
-		} else {
-			// Connect to the selected node
-			const success = this.graph.changeEdgeEndpoint(this.currentSelection, end, newNodeId);
-			
-			if (!success) {
-				alert(`Failed to change edge ${end}. Node may not exist.`);
-				return;
-			}
-		}
-		
-		this.renderer.render();
-		this.showEdgeProperties(this.currentSelection);
-		
-		if (window.app) {
-			window.app.saveState();
-			window.app.updateStatus(`Changed edge ${end} to: ${newNodeId || '(Free End)'}`);
-		}
-	}
-
-	/**
-	 * Get coordinates for edge endpoint (for breaking)
-	 * @param {Object} edge - Edge object
-	 * @param {string} end - 'source' or 'target'
-	 * @returns {Object} {x, y} coordinates
-	 */
-	getEdgeEndCoordinates(edge, end) {
-		if (end === 'source') {
-			if (typeof edge.source === 'object' && edge.source !== null) {
-				return { x: edge.source.x, y: edge.source.y };
-			} else {
-				return { x: edge.sourceX || 0, y: edge.sourceY || 0 };
-			}
-		} else {
-			if (typeof edge.target === 'object' && edge.target !== null) {
-				return { x: edge.target.x, y: edge.target.y };
-			} else {
-				return { x: edge.targetX || 0, y: edge.targetY || 0 };
-			}
-		}
-	}
-	
-	/**
-	 * NEW: Break edge by creating two intermediate nodes (NOT connected to each other)
-	 * Creates nodes named: node_edge#{edgeId}_side1 and node_edge#{edgeId}_side2
-	 * Creates edges named: {edgeId}_side1 (source → node1) and {edgeId}_side2 (node2 → target)
-	 * This literally "breaks" the edge into two separate disconnected pieces
-	 */
-	breakEdgeWithNodes() {
-		if (!this.currentSelection || this.currentType !== 'edge') return;
-		
-		const edge = this.graph.getEdge(this.currentSelection);
-		if (!edge) {
-			alert('Edge not found.');
-			return;
-		}
-		
-		// Verify edge has both endpoints connected
-		const sourceNode = this.graph.getNode(edge.source?.id || edge.source);
-		const targetNode = this.graph.getNode(edge.target?.id || edge.target);
-		
-		if (!sourceNode || !targetNode) {
-			alert('Cannot break edge: both source and target must be connected to nodes.');
-			return;
-		}
-		
-		// Calculate positions for new nodes (at 33% and 66% along the edge)
-		const sourceX = sourceNode.x;
-		const sourceY = sourceNode.y;
-		const targetX = targetNode.x;
-		const targetY = targetNode.y;
-		
-		const node1X = sourceX + (targetX - sourceX) * 0.33;
-		const node1Y = sourceY + (targetY - sourceY) * 0.33;
-		const node2X = sourceX + (targetX - sourceX) * 0.67;
-		const node2Y = sourceY + (targetY - sourceY) * 0.67;
-		
-		// Generate node IDs
-		const node1Id = `node_edge#${edge.id}_side1`;
-		const node2Id = `node_edge#${edge.id}_side2`;
-		
-		// Check if IDs already exist
-		if (this.graph.getNode(node1Id) || this.graph.getNode(node2Id)) {
-			alert('Cannot break edge: generated node IDs already exist. Try renaming existing nodes first.');
-			return;
-		}
-		
-		// Store original edge properties
-		const edgeColor = edge.properties.color || '#95a5a6';
-		const edgeType = edge.properties.type || '';
-		const edgeWeight = edge.properties.weight || 1;
-		const isDirected = edge.properties.directed || false;
-		
-		// Create two new nodes and pin them at their calculated positions
-		const newNode1 = this.graph.addNode({
-			id: node1Id,
-			color: edgeColor,
-			size: 8,
-			description: `Break node from edge ${edge.id} (side 1)`
-		});
-		newNode1.x = node1X;
-		newNode1.y = node1Y;
-		newNode1.fx = node1X;
-		newNode1.fy = node1Y;
-		
-		const newNode2 = this.graph.addNode({
-			id: node2Id,
-			color: edgeColor,
-			size: 8,
-			description: `Break node from edge ${edge.id} (side 2)`
-		});
-		newNode2.x = node2X;
-		newNode2.y = node2Y;
-		newNode2.fx = node2X;
-		newNode2.fy = node2Y;
-		
-		// Create TWO new edges (not three) - this breaks the edge into two separate pieces
-		// Edge 1: source → node1 (side1)
-		const edge1Id = `${edge.id}_side1`;
-		
-		// Edge 2: node2 → target (side2)
-		const edge2Id = `${edge.id}_side2`;
-		
-		// NOTE: graph.addEdge expects (source, target, properties) as separate parameters
-		const edge1 = this.graph.addEdge(sourceNode.id, node1Id, {
-			id: edge1Id,
-			color: edgeColor,
-			type: edgeType,
-			weight: edgeWeight,
-			directed: isDirected,
-			description: `Side 1 of broken edge ${edge.id}`
-		});
-		
-		const edge2 = this.graph.addEdge(node2Id, targetNode.id, {
-			id: edge2Id,
-			color: edgeColor,
-			type: edgeType,
-			weight: edgeWeight,
-			directed: isDirected,
-			description: `Side 2 of broken edge ${edge.id}`
-		});
-		
-		// Check if both edges were created successfully
-		if (!edge1 || !edge2) {
-			alert('Error creating edge segments. Operation aborted.');
-			// Clean up any partially created nodes
-			if (this.graph.getNode(node1Id)) this.graph.removeNode(node1Id);
-			if (this.graph.getNode(node2Id)) this.graph.removeNode(node2Id);
-			return;
-		}
-		
-		// Remove the original edge
-		this.graph.removeEdge(edge.id);
-		
-		// Render and update UI with proper simulation restart
-		this.renderer.render();
-		
-		// Restart simulation to properly integrate new nodes and edges
-		if (!this.renderer.isFrozen) {
-			this.renderer.simulation.alpha(0.5).restart();
-		}
-		
-		this.hide();
-		
-		if (window.app) {
-			window.app.updateStats();
-			window.app.saveState();
-			window.app.updateStatus(`Broke edge ${edge.id} into 2 separate pieces with nodes: ${node1Id}, ${node2Id}`);
-		}
-	}
-	
     /**
-     * Update a standard property
+     * Update a property value
      */
     updateProperty(key, value) {
-        if (!this.currentSelection) return;
-
         if (this.currentType === 'node') {
-            this.graph.updateNode(this.currentSelection, { [key]: value });
+            const node = this.graph.getNode(this.currentSelection);
+            if (!node) return;
+            
+            node.properties[key] = value;
+            this.graph.updateModifiedDate();
+            
+            if (key === 'color' || key === 'size') {
+                this.renderer.render();
+            }
         } else if (this.currentType === 'edge') {
-            this.graph.updateEdge(this.currentSelection, { [key]: value });
+            const edge = this.graph.getEdge(this.currentSelection);
+            if (!edge) return;
+            
+            edge.properties[key] = value;
+            this.graph.updateModifiedDate();
+            
+            if (key === 'color' || key === 'weight' || key === 'directed') {
+                this.renderer.render();
+            }
         }
-
-        this.renderer.render();
         
-        if (this.currentType === 'edge' && key === 'type') {
-            this.renderer.edgeGroup.selectAll('.edge-label')
-                .filter(d => d.id === this.currentSelection)
-                .text(value || this.currentSelection);
-        }
-
         if (window.app) {
             window.app.saveState();
         }
     }
 
     /**
-     * Add a custom property
+     * Rename a property (change key)
      */
-    addCustomProperty() {
-        if (!this.currentSelection) return;
-
-        const key = prompt('Property name:');
-        if (!key) return;
-
-        const value = prompt('Property value:');
-        if (value === null) return;
-
+    renameProperty(oldKey, newKey, value) {
         if (this.currentType === 'node') {
-            this.graph.updateNode(this.currentSelection, { [key]: value });
-            this.showNodeProperties(this.currentSelection);
+            const node = this.graph.getNode(this.currentSelection);
+            if (!node) return;
+            
+            delete node.properties[oldKey];
+            node.properties[newKey] = value;
+            this.graph.updateModifiedDate();
         } else if (this.currentType === 'edge') {
-            this.graph.updateEdge(this.currentSelection, { [key]: value });
-            this.showEdgeProperties(this.currentSelection);
+            const edge = this.graph.getEdge(this.currentSelection);
+            if (!edge) return;
+            
+            delete edge.properties[oldKey];
+            edge.properties[newKey] = value;
+            this.graph.updateModifiedDate();
         }
-
+        
         if (window.app) {
             window.app.saveState();
         }
@@ -786,32 +614,93 @@ class PropertiesPanel {
     /**
      * Remove a custom property
      */
-    removeCustomProperty(key) {
-        if (!this.currentSelection) return;
-
-        if (!Utils.confirm(`Delete property "${key}"?`)) return;
-
+    removeProperty(key) {
         if (this.currentType === 'node') {
             const node = this.graph.getNode(this.currentSelection);
+            if (!node) return;
+            
             delete node.properties[key];
+            this.graph.updateModifiedDate();
             this.showNodeProperties(this.currentSelection);
         } else if (this.currentType === 'edge') {
             const edge = this.graph.getEdge(this.currentSelection);
+            if (!edge) return;
+            
             delete edge.properties[key];
+            this.graph.updateModifiedDate();
             this.showEdgeProperties(this.currentSelection);
         }
-
+        
         if (window.app) {
             window.app.saveState();
         }
     }
 
     /**
-     * Delete selected node or edge
+     * Add a new custom property
+     */
+    addCustomProperty() {
+        const key = prompt('Enter property name:');
+        if (!key) return;
+        
+        const value = prompt('Enter property value:');
+        if (value === null) return;
+        
+        this.updateProperty(key, value);
+        
+        if (this.currentType === 'node') {
+            this.showNodeProperties(this.currentSelection);
+        } else if (this.currentType === 'edge') {
+            this.showEdgeProperties(this.currentSelection);
+        }
+    }
+
+    /**
+     * Change edge endpoint (source or target)
+     */
+    changeEdgeEndpoint(end, nodeId) {
+        const edge = this.graph.getEdge(this.currentSelection);
+        if (!edge) return;
+        
+        if (nodeId === '') {
+            // Convert to half-edge
+            const node = this.graph.getNode(edge[end]?.id || edge[end]);
+            if (node) {
+                if (end === 'source') {
+                    edge.source = null;
+                    edge.sourceX = node.x;
+                    edge.sourceY = node.y;
+                } else {
+                    edge.target = null;
+                    edge.targetX = node.x;
+                    edge.targetY = node.y;
+                }
+            }
+        } else {
+            // Connect to node
+            edge[end] = nodeId;
+            if (end === 'source') {
+                delete edge.sourceX;
+                delete edge.sourceY;
+            } else {
+                delete edge.targetX;
+                delete edge.targetY;
+            }
+        }
+        
+        this.graph.updateModifiedDate();
+        this.renderer.render();
+        this.showEdgeProperties(this.currentSelection);
+        
+        if (window.app) {
+            window.app.saveState();
+        }
+    }
+
+    /**
+     * Delete currently selected node or edge
      */
     deleteSelected() {
-        if (!this.currentSelection) return;
-
         const confirmMsg = this.currentType === 'node' 
             ? `Delete node "${this.currentSelection}"?`
             : `Delete edge "${this.currentSelection}"?`;
@@ -830,6 +719,79 @@ class PropertiesPanel {
         if (window.app) {
             window.app.updateStats();
             window.app.saveState();
+        }
+    }
+
+    /**
+     * Break edge with new nodes at free ends
+     */
+    breakEdgeWithNodes() {
+        const edge = this.graph.getEdge(this.currentSelection);
+        if (!edge) return;
+
+        const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+        const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+        if (!sourceId || !targetId) {
+            alert('Cannot break an edge that already has a free end.');
+            return;
+        }
+
+        const sourceNode = this.graph.getNode(sourceId);
+        const targetNode = this.graph.getNode(targetId);
+
+        if (!sourceNode || !targetNode) {
+            alert('Cannot find connected nodes.');
+            return;
+        }
+
+        // Calculate midpoint
+        const midX = (sourceNode.x + targetNode.x) / 2;
+        const midY = (sourceNode.y + targetNode.y) / 2;
+
+        // Create new node at midpoint
+        const newNodeId = `mid_${Date.now()}`;
+        const newNode = this.graph.addNode({
+            id: newNodeId,
+            properties: {
+                description: `Created by breaking edge ${edge.id}`,
+                color: '#9b59b6'
+            }
+        });
+
+        newNode.x = midX;
+        newNode.y = midY;
+        newNode.fx = midX;
+        newNode.fy = midY;
+
+        // Create two new edges
+        const edge1Id = `${edge.id}_1`;
+        const edge2Id = `${edge.id}_2`;
+
+        this.graph.addEdge({
+            id: edge1Id,
+            source: sourceId,
+            target: newNodeId,
+            properties: { ...edge.properties }
+        });
+
+        this.graph.addEdge({
+            id: edge2Id,
+            source: newNodeId,
+            target: targetId,
+            properties: { ...edge.properties }
+        });
+
+        // Remove original edge
+        this.graph.removeEdge(edge.id);
+
+        this.hide();
+        this.renderer.render();
+
+        if (window.app) {
+            window.app.updateStats();
+            window.app.saveState();
+            window.app.updateStatus(`Edge broken into 2 pieces with new node: ${newNodeId}`);
         }
     }
 
@@ -882,9 +844,10 @@ class PropertiesPanel {
     }
 
     /**
-     * Show dialog to connect current node to another node
+     * UPDATED: Show modal dialog to connect current node to another node
+     * Location: This method replaces the old prompt-based showConnectToNodeDialog
      */
-    showConnectToNodeDialog(fromNodeId) {
+    showConnectToNodeModal(fromNodeId) {
         const allNodeIds = this.graph.getAllNodeIds().filter(id => id !== fromNodeId);
         
         if (allNodeIds.length === 0) {
@@ -892,14 +855,120 @@ class PropertiesPanel {
             return;
         }
 
-        const toNodeId = prompt('Enter target node ID:\n\n' + allNodeIds.join('\n'));
-        if (!toNodeId) return;
+        // Create modal if it doesn't exist
+        if (!this.connectModal) {
+            this.connectModal = this.createConnectModal();
+        }
 
+        // Populate dropdown with available nodes
+        const dropdown = this.connectModal.querySelector('#connect-node-select');
+        dropdown.innerHTML = `
+            <option value="">-- Select a node --</option>
+            ${allNodeIds.map(id => `
+                <option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(id)}</option>
+            `).join('')}
+            <option value="__CREATE_NEW__" style="font-weight: bold; color: var(--primary-color);">+ Create New Node</option>
+        `;
+
+        // Show the modal
+        this.connectModal.classList.remove('hidden');
+        dropdown.focus();
+    }
+
+    /**
+     * NEW: Create the connection modal DOM element
+     * Location: New helper method for modal creation
+     */
+    createConnectModal() {
+        const modal = document.createElement('div');
+        modal.id = 'connect-node-modal';
+        modal.className = 'modal hidden';
+        modal.style.zIndex = '2500'; // Higher than properties panel
+
+        modal.innerHTML = `
+            <div class="modal-content" style="margin-top: 80px; margin-right: 380px; min-width: 350px; max-width: 350px;">
+                <div class="modal-header">
+                    <h3>Connect to Node</h3>
+                    <button class="modal-close" id="connect-modal-close">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="property-item">
+                        <label class="property-label">Select target node:</label>
+                        <select id="connect-node-select" class="property-input" style="width: 100%;">
+                            <option value="">-- Select a node --</option>
+                        </select>
+                        <p class="property-hint">Choose an existing node or create a new one</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button id="connect-modal-confirm" class="modal-btn" style="flex: 1;" disabled>
+                            Connect
+                        </button>
+                        <button id="connect-modal-cancel" class="modal-btn" style="flex: 1; background-color: var(--border-color);">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Event listeners
+        const dropdown = modal.querySelector('#connect-node-select');
+        const confirmBtn = modal.querySelector('#connect-modal-confirm');
+        const cancelBtn = modal.querySelector('#connect-modal-cancel');
+        const closeBtn = modal.querySelector('#connect-modal-close');
+
+        // Enable/disable connect button based on selection
+        dropdown.addEventListener('change', () => {
+            confirmBtn.disabled = !dropdown.value;
+        });
+
+        // Confirm connection
+        confirmBtn.addEventListener('click', () => {
+            const selectedValue = dropdown.value;
+            if (!selectedValue) return;
+
+            if (selectedValue === '__CREATE_NEW__') {
+                this.createNewNodeAndConnect();
+            } else {
+                this.connectToExistingNode(selectedValue);
+            }
+
+            modal.classList.add('hidden');
+        });
+
+        // Cancel button
+        cancelBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Close button
+        closeBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Click outside to close (but not on modal content)
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        return modal;
+    }
+
+    /**
+     * NEW: Connect to an existing node
+     * Location: New helper method extracted from old showConnectToNodeDialog
+     */
+    connectToExistingNode(toNodeId) {
         if (!this.graph.getNode(toNodeId)) {
             alert('Target node does not exist.');
             return;
         }
 
+        const fromNodeId = this.currentSelection;
         const edgeId = `edge_${fromNodeId}_${toNodeId}`;
         
         this.graph.addEdge({
@@ -919,6 +988,60 @@ class PropertiesPanel {
             window.app.updateStats();
             window.app.saveState();
             window.app.updateStatus(`Connected ${fromNodeId} to ${toNodeId}`);
+        }
+    }
+
+    /**
+     * NEW: Create a new node and connect to it
+     * Location: New method for creating nodes from connection modal
+     */
+    createNewNodeAndConnect() {
+        const fromNode = this.graph.getNode(this.currentSelection);
+        if (!fromNode) return;
+
+        // Generate a unique ID for the new node
+        let newNodeId = `node_${Date.now()}`;
+        let counter = 1;
+        while (this.graph.getNode(newNodeId)) {
+            newNodeId = `node_${Date.now()}_${counter}`;
+            counter++;
+        }
+
+        // Create new node positioned near the source node
+        const offsetX = 100;
+        const offsetY = 0;
+        const newNode = this.graph.addNode({
+            id: newNodeId,
+            properties: {
+                description: `Created from ${this.currentSelection}`,
+                color: '#3498db'
+            }
+        });
+
+        newNode.x = fromNode.x + offsetX;
+        newNode.y = fromNode.y + offsetY;
+        newNode.fx = newNode.x;
+        newNode.fy = newNode.y;
+
+        // Create the edge
+        const edgeId = `edge_${this.currentSelection}_${newNodeId}`;
+        this.graph.addEdge({
+            id: edgeId,
+            source: this.currentSelection,
+            target: newNodeId,
+            properties: {
+                type: 'connection',
+                color: '#95a5a6'
+            }
+        });
+
+        this.renderer.render();
+        this.showNodeProperties(this.currentSelection);
+
+        if (window.app) {
+            window.app.updateStats();
+            window.app.saveState();
+            window.app.updateStatus(`Created new node ${newNodeId} and connected`);
         }
     }
 }
