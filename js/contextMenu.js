@@ -282,13 +282,16 @@ class ContextMenuManager {
     }
 
     /**
-     * Start connection from node
+     * Start connection from node - Shows modal dialog
      */
     startConnectFrom(node) {
-        this.app.setTool('add-edge');
-        this.app.edgeSourceNode = node.id;
-        this.app.renderer.selectNodes([node.id]);
-        this.app.updateStatus(`Source selected. Click on target node to create edge.`);
+        // Open the properties panel for the node first to set context
+        this.app.propertiesPanel.showNodeProperties(node.id);
+        
+        // Then show the connect modal dialog
+        this.app.propertiesPanel.showConnectToNodeModal(node.id);
+        
+        this.app.updateStatus(`Select node to connect to ${node.id}`);
     }
 
     /**
