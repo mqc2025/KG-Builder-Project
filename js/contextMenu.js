@@ -46,11 +46,6 @@ class ContextMenuManager {
                 action: () => this.app.propertiesPanel.showNodeProperties(node.id)
             },
             {
-                icon: '🎨',
-                label: 'Change Color',
-                submenu: this.getColorSubmenu(node)
-            },
-            {
                 icon: '📌',
                 label: node.fx ? 'Unpin Position' : 'Pin Position',
                 action: () => this.togglePin(node)
@@ -59,17 +54,6 @@ class ContextMenuManager {
                 icon: '→',
                 label: 'Connect To...',
                 action: () => this.startConnectFrom(node)
-            },
-            { separator: true },
-            {
-                icon: '📋',
-                label: 'Duplicate Node',
-                action: () => this.duplicateNode(node)
-            },
-            {
-                icon: '⊗',
-                label: 'Merge with...',
-                action: () => this.startMergeNode(node)
             },
             { separator: true },
             {
@@ -233,28 +217,6 @@ class ContextMenuManager {
     }
 
     /**
-     * Get color submenu items (Feature 8)
-     */
-    getColorSubmenu(node) {
-        const colors = [
-            { color: '#3498db', name: 'Blue' },
-            { color: '#2ecc71', name: 'Green' },
-            { color: '#e74c3c', name: 'Red' },
-            { color: '#f39c12', name: 'Orange' },
-            { color: '#9b59b6', name: 'Purple' },
-            { color: '#1abc9c', name: 'Teal' },
-            { color: '#34495e', name: 'Dark Gray' },
-            { color: '#95a5a6', name: 'Light Gray' }
-        ];
-
-        return colors.map(c => ({
-            icon: '●',
-            label: c.name,
-            action: () => this.changeNodeColor(node, c.color)
-        }));
-    }
-
-    /**
      * Toggle pin position
      */
     togglePin(node) {
@@ -272,16 +234,6 @@ class ContextMenuManager {
     }
 
     /**
-     * Change node color (Feature 8)
-     */
-    changeNodeColor(node, color) {
-        this.app.graph.updateNode(node.id, { color });
-        this.app.renderer.render();
-        this.app.saveState();
-        this.app.updateStatus(`Changed color: ${node.id}`);
-    }
-
-    /**
      * Start connection from node - Shows modal dialog
      */
     startConnectFrom(node) {
@@ -292,45 +244,6 @@ class ContextMenuManager {
         this.app.propertiesPanel.showConnectToNodeModal(node.id);
         
         this.app.updateStatus(`Select node to connect to ${node.id}`);
-    }
-
-    /**
-     * Duplicate node
-     */
-    duplicateNode(node) {
-        const newId = prompt('Enter ID for duplicated node:', `${node.id}_copy`);
-        if (!newId) return;
-
-        if (this.app.graph.getNode(newId)) {
-            alert('A node with this ID already exists');
-            return;
-        }
-
-        const newNode = this.app.graph.addNode({
-            id: newId,
-            ...node.properties
-        });
-
-        // Position near original
-        newNode.x = node.x + 50;
-        newNode.y = node.y + 50;
-        newNode.fx = newNode.x;
-        newNode.fy = newNode.y;
-
-        this.app.renderer.render();
-        this.app.updateStats();
-        this.app.saveState();
-        this.app.updateStatus(`Duplicated node: ${newId}`);
-    }
-
-    /**
-     * Start merge node process (Feature 13)
-     */
-    startMergeNode(node) {
-        this.app.setTool('select');
-        this.app.mergingNode = node.id;
-        this.app.renderer.selectNodes([node.id]);
-        this.app.updateStatus(`Select second node to merge with ${node.id}`);
     }
 
     /**
