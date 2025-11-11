@@ -85,18 +85,6 @@ class ContextMenuManager {
                 label: 'Reverse Direction',
                 action: () => this.reverseEdge(edge)
             },
-            {
-                icon: '✂️',
-                label: 'Break at Source',
-                action: () => this.app.renderer.breakEdgeAtSource(edge),
-                disabled: !edge.source
-            },
-            {
-                icon: '✂️',
-                label: 'Break at Target',
-                action: () => this.app.renderer.breakEdgeAtTarget(edge),
-                disabled: !edge.target
-            },
             { separator: true },
             {
                 icon: '🗑️',
@@ -182,11 +170,13 @@ class ContextMenuManager {
         // Show menu
         this.menu.classList.remove('hidden');
 
-        // Attach event listeners
-        this.menu.querySelectorAll('.context-menu-item').forEach((item, index) => {
-            if (!item.classList.contains('disabled')) {
-                item.addEventListener('click', () => {
-                    const menuItem = items[index];
+        // FIXED: Attach event listeners using data-action attribute instead of forEach index
+        this.menu.querySelectorAll('.context-menu-item').forEach((button) => {
+            if (!button.classList.contains('disabled')) {
+                button.addEventListener('click', () => {
+                    // Get the actual index from data-action attribute
+                    const actionIndex = parseInt(button.getAttribute('data-action'));
+                    const menuItem = items[actionIndex];
                     if (menuItem && menuItem.action) {
                         menuItem.action();
                         this.hide();
