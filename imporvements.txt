@@ -1,0 +1,19 @@
+I need these improvements, let's plan for them: The option to import and combine with the current graph with Import button.
+
+1. For the path finder, can I have the start and end nodes as a dropdown boxes with type search (to eventuallly select form the dowpdown)?
+2. can I have a hover effect that when hovering a node or an edge, thier the description, prioroty, deadline and custom properties be listed (the description and custom properties for an edge)?
+3. add another JSON file to combine with the current graph with Import button.
+4. Size of a node to be related to the number of edges it has.
+5. Physics force intensity setting during visualization.
+6.1 Properties panel for edges; the type is not what I like. I like it to be a dropdown boxes with type search (to eventuallly select form the dowpdown)
+6.2. reverse direction option.
+7.1 Right-click "Delete Edge" is not working
+7.2 Right-click "Reverse direction" is not working
+7.3 Remove the Break at Source and Break at Target.
+8. Right-click on node "Change Color" and "Delete Node " are not working. remove duplicates and merge with. 
+9. Connect to Node with a searchable dropdown
+10. Search improvement with visual clues and the node being selected.
+11. remove Cluster and Merge off of left panel.
+
+
+
