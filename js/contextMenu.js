@@ -253,20 +253,29 @@ class ContextMenuManager {
 
     /**
      * Reverse edge direction
+     * FIXED: Get the actual edge from graph and swap on that object
      */
     reverseEdge(edge) {
-        const temp = edge.source;
-        edge.source = edge.target;
-        edge.target = temp;
+        // Get the actual edge object from the graph (not the D3-enhanced one)
+        const graphEdge = this.app.graph.getEdge(edge.id);
+        if (!graphEdge) {
+            console.error('Edge not found in graph:', edge.id);
+            return;
+        }
+
+        // Swap source and target on the actual graph edge
+        const temp = graphEdge.source;
+        graphEdge.source = graphEdge.target;
+        graphEdge.target = temp;
 
         // Also swap any half-edge coordinates
-        if (edge.sourceX !== undefined || edge.targetX !== undefined) {
-            const tempX = edge.sourceX;
-            const tempY = edge.sourceY;
-            edge.sourceX = edge.targetX;
-            edge.sourceY = edge.targetY;
-            edge.targetX = tempX;
-            edge.targetY = tempY;
+        if (graphEdge.sourceX !== undefined || graphEdge.targetX !== undefined) {
+            const tempX = graphEdge.sourceX;
+            const tempY = graphEdge.sourceY;
+            graphEdge.sourceX = graphEdge.targetX;
+            graphEdge.sourceY = graphEdge.targetY;
+            graphEdge.targetX = tempX;
+            graphEdge.targetY = tempY;
         }
 
         this.app.renderer.render();
