@@ -233,6 +233,9 @@ class PropertiesPanel {
             </div>
 
             <div class="property-actions">
+                <button class="btn-secondary" id="btn-reverse-edge" style="margin-bottom: 10px;">
+                    ↔️ Reverse Direction
+                </button>
                 <button class="btn-secondary" id="btn-break-edge" style="margin-bottom: 10px;">
                     Break Edge into 2 Pieces
                 </button>
@@ -427,6 +430,12 @@ class PropertiesPanel {
         const breakEdgeBtn = document.getElementById('btn-break-edge');
         if (breakEdgeBtn) {
             breakEdgeBtn.addEventListener('click', () => this.breakEdgeWithNodes());
+        }
+		
+		// Reverse edge button
+        const reverseEdgeBtn = document.getElementById('btn-reverse-edge');
+        if (reverseEdgeBtn) {
+            reverseEdgeBtn.addEventListener('click', () => this.reverseEdgeDirection());
         }
         
         // Connection handlers with three buttons
@@ -746,6 +755,38 @@ class PropertiesPanel {
             window.app.updateStats();
             window.app.saveState();
             window.app.updateStatus(`Edge broken into 2 pieces with new node: ${newNodeId}`);
+        }
+    }
+	
+	/**
+     * Reverse edge direction from properties panel
+     */
+    reverseEdgeDirection() {
+        const edge = this.graph.getEdge(this.currentSelection);
+        if (!edge) return;
+
+        // Swap source and target
+        const temp = edge.source;
+        edge.source = edge.target;
+        edge.target = temp;
+
+        // Also swap any half-edge coordinates
+        if (edge.sourceX !== undefined || edge.targetX !== undefined) {
+            const tempX = edge.sourceX;
+            const tempY = edge.sourceY;
+            edge.sourceX = edge.targetX;
+            edge.sourceY = edge.targetY;
+            edge.targetX = tempX;
+            edge.targetY = tempY;
+        }
+
+        // Refresh the properties panel to show updated source/target
+        this.showEdgeProperties(this.currentSelection);
+        this.renderer.render();
+
+        if (window.app) {
+            window.app.saveState();
+            window.app.updateStatus('Reversed edge direction');
         }
     }
 
