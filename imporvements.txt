@@ -6,7 +6,6 @@ I need these improvements, let's plan for them: The option to import and combine
 4. Size of a node to be related to the number of edges it has.
 5. Physics force intensity setting during visualization.
 6.1 Properties panel for edges; the type is not what I like. I like it to be a dropdown boxes with type search (to eventuallly select form the dowpdown)
-6.2. reverse direction option.
 7.1 Right-click "Delete Edge" is not working
 7.2 Right-click "Reverse direction" is not working
 7.3 Remove the Break at Source and Break at Target.

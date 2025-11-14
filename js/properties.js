@@ -195,10 +195,15 @@ class PropertiesPanel {
 
                 <div class="property-item">
                     <label class="property-label">Type</label>
-                    <input type="text" class="property-input" id="prop-type" value="${Utils.sanitizeHtml(edge.properties.type || '')}" list="edge-types">
-                    <datalist id="edge-types">
-                        ${allTypes.map(type => `<option value="${Utils.sanitizeHtml(type)}">`).join('')}
-                    </datalist>
+                    <select class="property-input" id="prop-type">
+                        <option value="">(No Type)</option>
+                        ${allTypes.map(type => `
+                            <option value="${Utils.sanitizeHtml(type)}" ${edge.properties.type === type ? 'selected' : ''}>
+                                ${Utils.sanitizeHtml(type)}
+                            </option>
+                        `).join('')}
+                        <option value="__custom__">(Add New Type...)</option>
+                    </select>
                 </div>
 
                 <div class="property-item">
@@ -349,20 +354,44 @@ class PropertiesPanel {
             });
         });
 
-        // Standard properties
+        // Standard properties (removed 'prop-type' from this array)
         const propertyInputs = ['prop-color', 'prop-size', 'prop-description', 
-                               'prop-priority', 'prop-deadline', 'prop-type', 'prop-weight'];
+                               'prop-priority', 'prop-deadline', 'prop-weight'];
         
         propertyInputs.forEach(id => {
             const input = document.getElementById(id);
             if (input) {
                 input.addEventListener('change', (e) => {
                     const key = id.replace('prop-', '');
-                    const value = e.target.type === 'number' ? parseFloat(e.target.value) : e.target.value;
+                    const value = e.target.type === 'number' ? 
+                        parseFloat(e.target.value) : e.target.value;
                     this.updateProperty(key, value);
                 });
             }
         });
+        
+        // Special handler for type dropdown
+        const typeSelect = document.getElementById('prop-type');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', (e) => {
+                if (e.target.value === '__custom__') {
+                    // User selected "Add New Type"
+                    const customType = prompt('Enter new edge type:');
+                    if (customType && customType.trim()) {
+                        this.updateProperty('type', customType.trim());
+                        // Refresh the panel to show the new type
+                        this.showEdgeProperties(this.currentSelection);
+                    } else {
+                        // Reset to previous value if cancelled
+                        const edge = this.graph.getEdge(this.currentSelection);
+                        e.target.value = edge.properties.type || '';
+                    }
+                } else {
+                    // Normal type selection or empty
+                    this.updateProperty('type', e.target.value);
+                }
+            });
+        }
 
         // Custom properties - value changes
         const customValueInputs = document.querySelectorAll('.custom-property-value');
