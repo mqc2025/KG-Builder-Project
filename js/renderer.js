@@ -26,6 +26,7 @@ class Renderer {
                 this.updateZoomStatus();
                 // Feature 9: Update font sizes relative to zoom
                 this.updateFontSizes();
+				this.updatePositions();
             })
             .filter(function(event) {
                 // Disable zoom on double-click
@@ -349,11 +350,11 @@ class Renderer {
 
         // Add label
         nodesEnter.append('text')
-            .attr('dy', -15)
-            .attr('text-anchor', 'middle')
-            .style('fill', '#2c3e50')
-            .style('font-weight', '600')
-            .text(d => d.id);
+			.attr('dy', -15)
+			.attr('text-anchor', 'middle')
+			.style('fill', '#2c3e50')
+			.style('font-weight', '600')
+			.text(d => d.name || d.id);  // ← FIX: show name first, fallback to id
 
         // Merge and update
         const nodesMerge = nodes.merge(nodesEnter);
@@ -366,7 +367,7 @@ class Renderer {
             .classed('path-highlight', d => this.highlightedNodes.has(d.id));
 
         nodesMerge.select('text')
-            .text(d => d.id);
+			.text(d => d.name || d.id);
 
         // Click handler
         nodesMerge.on('click', function(event, d) {

@@ -1,0 +1,42 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "Sample Knowledge Graph",
+      "title": "AI and Machine Learning Concepts",
+      "description": "A sample graph showing relationships between AI/ML concepts",
+      "created": "2025-11-01",
+      "modified": "2025-11-16"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "node_1",
+        "properties": {
+          "color": "#3498db",
+          "size": 10,
+          "description": "",
+          "priority": "Medium",
+          "deadline": "",
+          "userDate": "",
+          "createdDate": "2025-11-16T15:29:37.113Z",
+          "modifiedDate": "2025-11-16T15:29:37.113Z"
+        },
+        "x": 441.72858623486604,
+        "y": 486.96020111098915,
+        "fx": 441.72858623486604,
+        "fy": 486.96020111098915
+      }
+    ],
+    "edges": []
+  }
+}
