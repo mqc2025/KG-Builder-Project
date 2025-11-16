@@ -488,3 +488,153 @@
         transform: translateY(0);
     }
 }
+
+/* Modal Overlay - For Connect to Node Dialog */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000; /* Higher than status bar and properties panel */
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-overlay .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 24px;
+    min-width: 400px;
+    max-width: 500px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-overlay .modal-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+/* Direction Radio Group for Connection Modal */
+.direction-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.radio-option:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+}
+
+.radio-option input[type="radio"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.radio-option input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.radio-option span {
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+/* Form group styling for modal */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+/* Modal actions styling */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.modal-actions .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.modal-actions .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.modal-actions .btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-actions .btn-secondary:hover {
+    background-color: #95a5a6;
+    color: white;
+}

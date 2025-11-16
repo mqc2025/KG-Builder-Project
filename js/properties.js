@@ -983,80 +983,122 @@ class PropertiesPanel {
     }
 
     /**
-     * Show modal dialog to connect current node to another node
-     */
-    showConnectToNodeModal(fromNodeId) {
-        const allNodeIds = this.graph.getAllNodeIds().filter(id => id !== fromNodeId);
-        
-        if (allNodeIds.length === 0) {
-            alert('No other nodes available to connect to.');
-            return;
-        }
+	 * Show modal dialog to connect current node to another node
+	 */
+	showConnectToNodeModal(fromNodeId) {
+		const allNodeIds = this.graph.getAllNodeIds().filter(id => id !== fromNodeId);
+		
+		if (allNodeIds.length === 0) {
+			alert('No other nodes available to connect to.');
+			return;
+		}
 
-        // Create modal
-        const modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>Connect to Node</h3>
-                <div class="form-group">
-                    <label>Target Node:</label>
-                    <select id="connect-target-node" class="property-input">
-                        ${allNodeIds.map(id => {
-                            const node = this.graph.getNode(id);
-                            const displayName = node ? (node.name || id) : id;
-                            return `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(displayName)}</option>`;
-                        }).join('')}
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-primary" id="btn-confirm-connect">Connect</button>
-                    <button class="btn-secondary" id="btn-cancel-connect">Cancel</button>
-                </div>
-            </div>
-        `;
+		// Create modal
+		const modal = document.createElement('div');
+		modal.className = 'modal-overlay';
+		modal.innerHTML = `
+			<div class="modal-content">
+				<h3>Connect to Node</h3>
+				<div class="form-group">
+					<label>Target Node:</label>
+					<select id="connect-target-node" class="property-input">
+						${allNodeIds.map(id => {
+							const node = this.graph.getNode(id);
+							const displayName = node ? (node.name || id) : id;
+							return `<option value="${Utils.sanitizeHtml(id)}">${Utils.sanitizeHtml(displayName)}</option>`;
+						}).join('')}
+					</select>
+				</div>
+				<div class="form-group">
+					<label>Direction:</label>
+					<div class="direction-radio-group">
+						<label class="radio-option">
+							<input type="radio" name="connection-direction" value="outgoing" checked>
+							<span>→ Outgoing (from this node)</span>
+						</label>
+						<label class="radio-option">
+							<input type="radio" name="connection-direction" value="incoming">
+							<span>← Incoming (to this node)</span>
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Relationship (optional):</label>
+					<input type="text" id="connect-relationship" class="property-input" placeholder="e.g., depends on, leads to, part of...">
+				</div>
+				<div class="modal-actions">
+					<button class="btn-primary" id="btn-confirm-connect">Connect</button>
+					<button class="btn-secondary" id="btn-cancel-connect">Cancel</button>
+				</div>
+			</div>
+		`;
 
-        document.body.appendChild(modal);
+		document.body.appendChild(modal);
 
-        const confirmBtn = modal.querySelector('#btn-confirm-connect');
-        const cancelBtn = modal.querySelector('#btn-cancel-connect');
-        const targetSelect = modal.querySelector('#connect-target-node');
+		const confirmBtn = modal.querySelector('#btn-confirm-connect');
+		const cancelBtn = modal.querySelector('#btn-cancel-connect');
+		const targetSelect = modal.querySelector('#connect-target-node');
+		const relationshipInput = modal.querySelector('#connect-relationship');
 
-        confirmBtn.addEventListener('click', async () => {
-            const targetId = targetSelect.value;
-            if (targetId) {
-                const timestamp = Date.now();
-                const edgeName = `edge_${timestamp}`;
-                
-                await this.graph.addEdge({
-                    name: edgeName,
-                    source: fromNodeId,
-                    target: targetId,
-                    directed: true
-                });
+		confirmBtn.addEventListener('click', async () => {
+			const targetId = targetSelect.value;
+			const directionRadio = modal.querySelector('input[name="connection-direction"]:checked');
+			const direction = directionRadio ? directionRadio.value : 'outgoing';
+			const relationship = relationshipInput.value.trim();
+			
+			if (targetId) {
+				const timestamp = Date.now();
+				const edgeName = `edge_${timestamp}`;
+				
+				// Determine source and target based on direction
+				let sourceId, targetNodeId;
+				if (direction === 'outgoing') {
+					// → : From current node to selected node
+					sourceId = fromNodeId;
+					targetNodeId = targetId;
+				} else {
+					// ← : From selected node to current node
+					sourceId = targetId;
+					targetNodeId = fromNodeId;
+				}
+				
+				// Create edge object with optional relationship
+				const edgeData = {
+					name: edgeName,
+					source: sourceId,
+					target: targetNodeId,
+					directed: true
+				};
+				
+				// Add relationship if provided
+				if (relationship) {
+					edgeData.relationship = relationship;
+				}
+				
+				await this.graph.addEdge(edgeData);
 
-                this.renderer.render();
-                this.showNodeProperties(fromNodeId);
+				this.renderer.render();
+				this.showNodeProperties(fromNodeId);
 
-                if (window.app) {
-                    window.app.saveState();
-                    window.app.updateStats();
-                    window.app.updateStatus('Connected nodes');
-                }
-            }
-            document.body.removeChild(modal);
-        });
+				if (window.app) {
+					window.app.saveState();
+					window.app.updateStats();
+					window.app.updateStatus('Connected nodes');
+				}
+			}
+			document.body.removeChild(modal);
+		});
 
-        cancelBtn.addEventListener('click', () => {
-            document.body.removeChild(modal);
-        });
+		cancelBtn.addEventListener('click', () => {
+			document.body.removeChild(modal);
+		});
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                document.body.removeChild(modal);
-            }
-        });
-    }
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) {
+				document.body.removeChild(modal);
+			}
+		});
+	}
 }
 
 // Export for use in other modules
