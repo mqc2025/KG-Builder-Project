@@ -16,6 +16,9 @@ class Renderer {
         
         // Feature 3: Freeze state
         this.isFrozen = false;
+		// Auto-freeze timer
+		this.autoFreezeTimer = null;
+		this.autoFreezeDelay = 10000; // 10 seconds
         
         // Initialize zoom behavior
         this.zoom = d3.zoom()
@@ -72,23 +75,25 @@ class Renderer {
         window.addEventListener('resize', () => this.handleResize());
     }
 
-    /**
-     * Feature 3: Freeze simulation
-     */
-    freezeSimulation() {
-        this.isFrozen = true;
-        this.simulation.stop();
-        this.updateSimulationStatus();
-    }
+	/**
+	 * Feature 3: Freeze simulation
+	 */
+	freezeSimulation() {
+		this.isFrozen = true;
+		this.simulation.stop();
+		this.clearAutoFreezeTimer();
+		this.updateSimulationStatus();
+	}
 
-    /**
-     * Feature 3: Unfreeze simulation
-     */
-    unfreezeSimulation() {
-        this.isFrozen = false;
-        this.simulation.alpha(0.3).restart();
-        this.updateSimulationStatus();
-    }
+	/**
+	 * Feature 3: Unfreeze simulation
+	 */
+	unfreezeSimulation() {
+		this.isFrozen = false;
+		this.simulation.alpha(0.3).restart();
+		this.startAutoFreezeTimer();
+		this.updateSimulationStatus();
+	}
 
     /**
      * Feature 3: Toggle freeze state
@@ -110,6 +115,39 @@ class Renderer {
             statusElem.textContent = `Simulation: ${this.isFrozen ? 'Frozen' : 'Active'}`;
         }
     }
+	
+	/**
+	 * Start auto-freeze timer (10 seconds)
+	 */
+	startAutoFreezeTimer() {
+		this.clearAutoFreezeTimer();
+		this.autoFreezeTimer = setTimeout(() => {
+			if (!this.isFrozen) {
+				this.freezeSimulation();
+				this.updateSimulationStatus();
+				// Update freeze button UI if app exists
+				if (window.app) {
+					const freezeBtn = document.getElementById('btn-freeze');
+					if (freezeBtn) {
+						freezeBtn.classList.add('active');
+						freezeBtn.title = 'Unfreeze Simulation (F)';
+					}
+					window.app.updateStatus('Simulation auto-frozen after 10 seconds');
+				}
+			}
+		}, this.autoFreezeDelay);
+	}
+
+	/**
+	 * Clear auto-freeze timer
+	 */
+	clearAutoFreezeTimer() {
+		if (this.autoFreezeTimer) {
+			clearTimeout(this.autoFreezeTimer);
+			this.autoFreezeTimer = null;
+		}
+	}
+
 
     /**
      * Feature 4: Update world boundary force
@@ -189,9 +227,10 @@ class Renderer {
         this.simulation.force('link').links(edgeData);
         
         // Feature 3: Only restart if not frozen
-        if (!this.isFrozen) {
-            this.simulation.alpha(0.3).restart();
-        }
+			if (!this.isFrozen) {
+				this.simulation.alpha(0.3).restart();
+				this.startAutoFreezeTimer();
+			}
 
         // Render edges
         this.renderEdges(edgeData);
@@ -419,21 +458,32 @@ class Renderer {
         }
 
         function dragged(event, d) {
-            d.fx = event.x;
-            d.fy = event.y;
-        }
+			d.fx = event.x;
+			d.fy = event.y;
+			
+			// Update visual position immediately, even when frozen
+			if (self.isFrozen) {
+				d.x = event.x;
+				d.y = event.y;
+				self.updatePositions();
+			}
+		}
 
         function dragended(event, d) {
-            if (!event.active && !self.isFrozen) {
-                self.simulation.alphaTarget(0).restart();
-            }
-            
-            self.simulation.alpha(0.3).restart();
-            
-            if (self.onNodeDragEnd) {
-                self.onNodeDragEnd(d);
-            }
-        }
+			if (!event.active && !self.isFrozen) {
+				self.simulation.alphaTarget(0);
+			}
+			
+			// Only restart simulation if not frozen
+			if (!self.isFrozen) {
+				self.simulation.alpha(0.3).restart();
+				self.startAutoFreezeTimer();
+			}
+			
+			if (self.onNodeDragEnd) {
+				self.onNodeDragEnd(d);
+			}
+		}
 
         return d3.drag()
             .on('start', dragstarted)
@@ -669,15 +719,16 @@ class Renderer {
      * Handle window resize
      */
     handleResize() {
-        this.width = this.svg.node().clientWidth;
-        this.height = this.svg.node().clientHeight;
-        
-        // Update force center
-        this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
-        if (!this.isFrozen) {
-            this.simulation.alpha(0.3).restart();
-        }
-    }
+		this.width = this.svg.node().clientWidth;
+		this.height = this.svg.node().clientHeight;
+		
+		// Update force center
+		this.simulation.force('center', d3.forceCenter(this.width / 2, this.height / 2));
+		if (!this.isFrozen) {
+			this.simulation.alpha(0.3).restart();
+			this.startAutoFreezeTimer();
+		}
+	}
 
     /**
      * Stop simulation
