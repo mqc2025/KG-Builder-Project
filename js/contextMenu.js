@@ -110,12 +110,6 @@ class ContextMenuManager {
                 label: 'Add Node Here',
                 action: () => this.addNodeAtPosition(event)
             },
-            { separator: true },
-            {
-                icon: '◯',
-                label: 'Select All',
-                action: () => this.selectAll()
-            },
             {
                 icon: '⊞',
                 label: 'Fit to View',
@@ -211,36 +205,26 @@ class ContextMenuManager {
      */
     togglePin(node) {
         if (node.fx !== null && node.fy !== null) {
-            // Unpin
             this.app.renderer.unpinNode(node.id);
             this.app.updateStatus(`Unpinned: ${node.id}`);
         } else {
-            // Pin
-            node.fx = node.x;
-            node.fy = node.y;
+            this.app.renderer.pinNode(node.id);
             this.app.updateStatus(`Pinned: ${node.id}`);
         }
-        this.app.saveState();
     }
 
     /**
-     * Start connection from node - Shows modal dialog
+     * Start connecting from a node
      */
     startConnectFrom(node) {
-        // Open the properties panel for the node first to set context
-        this.app.propertiesPanel.showNodeProperties(node.id);
-        
-        // Then show the connect modal dialog
         this.app.propertiesPanel.showConnectToNodeModal(node.id);
-        
-        this.app.updateStatus(`Select node to connect to ${node.id}`);
     }
 
     /**
      * Delete node
      */
     deleteNode(node) {
-        if (!Utils.confirm(`Delete node "${node.id}" and all connected edges?`)) return;
+        if (!Utils.confirm(`Delete node "${node.name || node.id}"?`)) return;
 
         this.app.graph.removeNode(node.id);
         this.app.renderer.clearSelection();
@@ -248,22 +232,17 @@ class ContextMenuManager {
         this.app.renderer.render();
         this.app.updateStats();
         this.app.saveState();
-        this.app.updateStatus(`Deleted node: ${node.id}`);
+        this.app.updateStatus(`Deleted node: ${node.name || node.id}`);
     }
 
     /**
      * Reverse edge direction
-     * FIXED: Get the actual edge from graph and swap on that object
      */
     reverseEdge(edge) {
-        // Get the actual edge object from the graph (not the D3-enhanced one)
         const graphEdge = this.app.graph.getEdge(edge.id);
-        if (!graphEdge) {
-            console.error('Edge not found in graph:', edge.id);
-            return;
-        }
+        if (!graphEdge) return;
 
-        // Swap source and target on the actual graph edge
+        // Swap source and target
         const temp = graphEdge.source;
         graphEdge.source = graphEdge.target;
         graphEdge.target = temp;
@@ -312,15 +291,6 @@ class ContextMenuManager {
 
 		this.app.addNode(x, y);
 	}
-
-    /**
-     * Select all nodes
-     */
-    selectAll() {
-        const allNodeIds = this.app.graph.nodes.map(n => n.id);
-        this.app.renderer.selectNodes(allNodeIds);
-        this.app.updateStatus(`Selected ${allNodeIds.length} nodes`);
-    }
 }
 
 // Export
