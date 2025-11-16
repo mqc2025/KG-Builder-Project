@@ -82,22 +82,22 @@ class PropertiesPanel {
                     <label class="property-label">Color (Feature 8: Palette)</label>
                     <div class="color-palette">
                         ${this.colorPalette.map(color => `
-                            <button class="color-swatch ${node.properties.color === color ? 'active' : ''}" 
+                            <button class="color-swatch ${node.color === color ? 'active' : ''}" 
                                     style="background-color: ${color};" 
                                     data-color="${color}"></button>
                         `).join('')}
                     </div>
-                    <input type="color" class="property-input" id="prop-color" value="${node.properties.color || '#3498db'}" style="margin-top: 8px;">
+                    <input type="color" class="property-input" id="prop-color" value="${node.color || '#3498db'}" style="margin-top: 8px;">
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">Size</label>
-                    <input type="number" class="property-input" id="prop-size" value="${node.properties.size || 10}" min="5" max="50">
+                    <input type="number" class="property-input" id="prop-size" value="${node.size || 10}" min="5" max="50">
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">Description</label>
-                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(node.properties.description || '')}</textarea>
+                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(node.description || '')}</textarea>
                 </div>
             </div>
 
@@ -107,15 +107,15 @@ class PropertiesPanel {
                 <div class="property-item">
                     <label class="property-label">Priority (Feature 3)</label>
                     <select class="property-input" id="prop-priority">
-                        <option value="low" ${node.properties.priority === 'low' ? 'selected' : ''}>Low</option>
-                        <option value="medium" ${node.properties.priority === 'medium' ? 'selected' : ''}>Medium</option>
-                        <option value="high" ${node.properties.priority === 'high' ? 'selected' : ''}>High</option>
+                        <option value="low" ${node.priority === 'low' ? 'selected' : ''}>Low</option>
+                        <option value="medium" ${node.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="high" ${node.priority === 'high' ? 'selected' : ''}>High</option>
                     </select>
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">Deadline (Feature 3)</label>
-                    <input type="date" class="property-input" id="prop-deadline" value="${node.properties.deadline || ''}">
+                    <input type="date" class="property-input" id="prop-deadline" value="${node.deadline || ''}">
                 </div>
             </div>
 
@@ -132,7 +132,7 @@ class PropertiesPanel {
             <div class="property-group">
                 <div class="property-group-title">Custom Properties</div>
                 <div id="custom-properties-container">
-                    ${this.renderCustomProperties(node.properties)}
+                    ${this.renderCustomProperties(node)}
                 </div>
                 <button class="btn-add-property" id="btn-add-custom-property">+ Add Property</button>
             </div>
@@ -161,7 +161,7 @@ class PropertiesPanel {
         const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
         
         const allNodeIds = this.graph.getAllNodeIds();
-        const allTypes = [...new Set(this.graph.edges.map(e => e.properties.type).filter(Boolean))];
+        const allTypes = [...new Set(this.graph.edges.map(e => e.type).filter(Boolean))];
 
         const html = `
             <div class="property-group">
@@ -198,7 +198,7 @@ class PropertiesPanel {
                     <select class="property-input" id="prop-type">
                         <option value="">(No Type)</option>
                         ${allTypes.map(type => `
-                            <option value="${Utils.sanitizeHtml(type)}" ${edge.properties.type === type ? 'selected' : ''}>
+                            <option value="${Utils.sanitizeHtml(type)}" ${edge.type === type ? 'selected' : ''}>
                                 ${Utils.sanitizeHtml(type)}
                             </option>
                         `).join('')}
@@ -208,31 +208,31 @@ class PropertiesPanel {
 
                 <div class="property-item">
                     <label class="property-label">Color</label>
-                    <input type="color" class="property-input" id="prop-color" value="${edge.properties.color || '#95a5a6'}">
+                    <input type="color" class="property-input" id="prop-color" value="${edge.color || '#95a5a6'}">
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">Weight</label>
-                    <input type="number" class="property-input" id="prop-weight" value="${edge.properties.weight || 1}" min="0.1" step="0.1">
+                    <input type="number" class="property-input" id="prop-weight" value="${edge.weight || 1}" min="0.1" step="0.1">
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">
-                        <input type="checkbox" id="prop-directed" ${edge.properties.directed ? 'checked' : ''}>
+                        <input type="checkbox" id="prop-directed" ${edge.directed ? 'checked' : ''}>
                         <span>Show arrow direction</span>
                     </label>
                 </div>
 
                 <div class="property-item">
                     <label class="property-label">Description</label>
-                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(edge.properties.description || '')}</textarea>
+                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(edge.description || '')}</textarea>
                 </div>
             </div>
 
             <div class="property-group">
                 <div class="property-group-title">Custom Properties</div>
                 <div id="custom-properties-container">
-                    ${this.renderCustomProperties(edge.properties)}
+                    ${this.renderCustomProperties(edge)}
                 </div>
                 <button class="btn-add-property" id="btn-add-custom-property">+ Add Property</button>
             </div>
@@ -255,12 +255,14 @@ class PropertiesPanel {
     /**
      * Render custom properties
      */
-    renderCustomProperties(properties) {
-        const standardProps = ['color', 'size', 'description', 'type', 'weight', 'directed', 
-                               'priority', 'deadline', 'userDate', 'createdDate', 'modifiedDate'];
-        const customProps = Object.entries(properties).filter(([key]) => 
-            !standardProps.includes(key) && !key.startsWith('_') && !key.startsWith('merged_')
-        );
+    renderCustomProperties(nodeOrEdge) {
+		const standardProps = ['id', 'x', 'y', 'fx', 'fy', 'vx', 'vy', 'index',
+							   'source', 'target', 'sourceX', 'sourceY', 'targetX', 'targetY',
+							   'color', 'size', 'description', 'type', 'weight', 'directed', 
+							   'priority', 'deadline', 'userDate', 'createdDate', 'modifiedDate'];
+		const customProps = Object.entries(nodeOrEdge).filter(([key]) => 
+			!standardProps.includes(key) && !key.startsWith('_') && !key.startsWith('merged_')
+		);
 
         if (customProps.length === 0) {
             return '<p style="color: var(--text-secondary); font-size: 13px;">No custom properties</p>';
@@ -308,7 +310,7 @@ class PropertiesPanel {
                 <div class="connection-item" data-edge-id="${Utils.sanitizeHtml(edge.id)}" data-node-id="${Utils.sanitizeHtml(otherNodeId)}">
                     <span class="connection-text">
                         ${direction} ${Utils.sanitizeHtml(otherNodeId || '(Free End)')}
-                        ${edge.properties.type ? `<span style="color: var(--text-secondary); font-style: italic;"> (${Utils.sanitizeHtml(edge.properties.type)})</span>` : ''}
+                        ${edge.type ? `<span style="color: var(--text-secondary); font-style: italic;"> (${Utils.sanitizeHtml(edge.type)})</span>` : ''}
                     </span>
                     <div class="connection-actions">
                         <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
@@ -384,7 +386,7 @@ class PropertiesPanel {
                     } else {
                         // Reset to previous value if cancelled
                         const edge = this.graph.getEdge(this.currentSelection);
-                        e.target.value = edge.properties.type || '';
+                        e.target.value = edge.type || '';
                     }
                 } else {
                     // Normal type selection or empty
@@ -748,12 +750,10 @@ class PropertiesPanel {
         // Create new node at midpoint
         const newNodeId = `mid_${Date.now()}`;
         const newNode = this.graph.addNode({
-            id: newNodeId,
-            properties: {
-                description: `Created by breaking edge ${edge.id}`,
-                color: '#9b59b6'
-            }
-        });
+			id: newNodeId,
+			description: `Created by breaking edge ${edge.id}`,
+			color: '#9b59b6'
+		});
 
         newNode.x = midX;
         newNode.y = midY;
@@ -764,15 +764,25 @@ class PropertiesPanel {
         const edge1Id = `${edge.id}_1`;
         const edge2Id = `${edge.id}_2`;
 
-        this.graph.addEdge(sourceId, newNodeId, {
-            id: edge1Id,
-            ...edge.properties
-        });
+        // Copy all edge properties except structural ones
+		const edgeProps = { ...edge };
+		delete edgeProps.id;
+		delete edgeProps.source;
+		delete edgeProps.target;
+		delete edgeProps.sourceX;
+		delete edgeProps.sourceY;
+		delete edgeProps.targetX;
+		delete edgeProps.targetY;
 
-        this.graph.addEdge(newNodeId, targetId, {
-            id: edge2Id,
-            ...edge.properties
-        });
+		this.graph.addEdge(sourceId, newNodeId, {
+			id: edge1Id,
+			...edgeProps
+		});
+
+		this.graph.addEdge(newNodeId, targetId, {
+			id: edge2Id,
+			...edgeProps
+		});
 
         // Remove original edge
         this.graph.removeEdge(edge.id);
@@ -848,7 +858,7 @@ class PropertiesPanel {
         const allNodeIds = this.graph.getAllNodeIds();
 
         // Get all edge types for datalist
-        const allTypes = [...new Set(this.graph.edges.map(e => e.properties.type).filter(Boolean))];
+        const allTypes = [...new Set(this.graph.edges.map(e => e.type).filter(Boolean))];
 
         // Create inline edit form
         const inlineEditDiv = document.createElement('div');
@@ -876,7 +886,7 @@ class PropertiesPanel {
                 <div class="inline-edit-row">
                     <label class="inline-edit-label">Edge Type:</label>
                     <input type="text" class="inline-edit-input" data-field="type" 
-                           value="${Utils.sanitizeHtml(edge.properties.type || '')}" 
+                           value="${Utils.sanitizeHtml(edge.type || '')}" 
                            list="inline-edge-types-${edgeId}" 
                            placeholder="Optional">
                     <datalist id="inline-edge-types-${edgeId}">
@@ -970,8 +980,8 @@ class PropertiesPanel {
         }
 
         // Update edge type if changed
-        if (newType !== edge.properties.type) {
-            edge.properties.type = newType;
+        if (newType !== edge.type) {
+            edge.type = newType;
         }
 
         // Remove inline edit UI

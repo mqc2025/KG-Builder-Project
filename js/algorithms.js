@@ -60,12 +60,12 @@ const Algorithms = {
                 let neighborId = null;
                 if (edge.source === currentId) {
                     neighborId = edge.target;
-                } else if (edge.target === currentId && !edge.properties.directed) {
+                } else if (edge.target === currentId && !edge.directed) {
                     neighborId = edge.source;
                 }
 
                 if (neighborId && unvisited.has(neighborId)) {
-                    const weight = edge.properties.weight || 1;
+                    const weight = edge.weight || 1;
                     const newDistance = distances[currentId] + weight;
 
                     if (newDistance < distances[neighborId]) {

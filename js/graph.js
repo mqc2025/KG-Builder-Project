@@ -38,23 +38,17 @@ class Graph {
         const now = new Date().toISOString();
         
         const node = {
-            id: cleanProps.id || Utils.generateId('node'),
-            properties: {
-                color: cleanProps.color || '#3498db',
-                size: cleanProps.size || 10,
-                description: cleanProps.description || '',
-                // Feature 5: Priority and dates
-                priority: cleanProps.priority || 'Medium',
-                deadline: cleanProps.deadline || '',
-                userDate: cleanProps.userDate || '',
-                createdDate: cleanProps.createdDate || now,
-                modifiedDate: now,
-                ...cleanProps
-            }
-        };
-        
-        // Remove id from properties if it exists
-        delete node.properties.id;
+			id: cleanProps.id || Utils.generateId('node'),
+			color: cleanProps.color || '#3498db',
+			size: cleanProps.size || 10,
+			description: cleanProps.description || '',
+			priority: cleanProps.priority || 'Medium',
+			deadline: cleanProps.deadline || '',
+			userDate: cleanProps.userDate || '',
+			createdDate: cleanProps.createdDate || now,
+			modifiedDate: now,
+			...cleanProps
+		};
         
         this.nodes.push(node);
         this.updateModifiedDate();
@@ -98,19 +92,19 @@ class Graph {
      * @returns {boolean} Success
      */
     updateNode(nodeId, properties) {
-        const node = this.getNode(nodeId);
-        if (!node) return false;
+		const node = this.getNode(nodeId);
+		if (!node) return false;
 
-        // Filter out D3 simulation properties before updating
-        const cleanProperties = this.stripD3Properties(properties);
-        
-        // Update modifiedDate
-        cleanProperties.modifiedDate = new Date().toISOString();
-        
-        Object.assign(node.properties, cleanProperties);
-        this.updateModifiedDate();
-        return true;
-    }
+		// Filter out D3 simulation properties before updating
+		const cleanProperties = this.stripD3Properties(properties);
+		
+		// Update modifiedDate
+		cleanProperties.modifiedDate = new Date().toISOString();
+		
+		Object.assign(node, cleanProperties);
+		this.updateModifiedDate();
+		return true;
+	}
 
     /**
      * Rename a node (Feature 2)
@@ -182,33 +176,26 @@ class Graph {
         const cleanProps = this.stripD3Properties(properties);
 
         const edge = {
-            id: cleanProps.id || Utils.generateId('edge'),
-            source,
-            target,
-            properties: {
-                description: cleanProps.description || '',
-                type: cleanProps.type || 'related',
-                color: cleanProps.color || '#95a5a6',
-                weight: cleanProps.weight || 1,
-                directed: cleanProps.directed !== undefined ? cleanProps.directed : true,
-                ...cleanProps
-            }
-        };
-        
-        // Feature 10: Store free end coordinates for half-edges
-        if (!source && properties.sourceX !== undefined) {
-            edge.sourceX = properties.sourceX;
-            edge.sourceY = properties.sourceY;
-        }
-        if (!target && properties.targetX !== undefined) {
-            edge.targetX = properties.targetX;
-            edge.targetY = properties.targetY;
-        }
+			id: cleanProps.id || Utils.generateId('edge'),
+			source,
+			target,
+			description: cleanProps.description || '',
+			type: cleanProps.type || 'related',
+			color: cleanProps.color || '#95a5a6',
+			weight: cleanProps.weight || 1,
+			directed: cleanProps.directed !== undefined ? cleanProps.directed : true,
+			...cleanProps
+		};
 
-        // Remove id, source, target from properties if they exist
-        delete edge.properties.id;
-        delete edge.properties.source;
-        delete edge.properties.target;
+		// Feature 10: Store free end coordinates for half-edges
+		if (!source && properties.sourceX !== undefined) {
+			edge.sourceX = properties.sourceX;
+			edge.sourceY = properties.sourceY;
+		}
+		if (!target && properties.targetX !== undefined) {
+			edge.targetX = properties.targetX;
+			edge.targetY = properties.targetY;
+		}
 
         this.edges.push(edge);
         this.updateModifiedDate();
@@ -245,15 +232,16 @@ class Graph {
      * @returns {boolean} Success
      */
     updateEdge(edgeId, properties) {
-        const edge = this.getEdge(edgeId);
-        if (!edge) return false;
+		const edge = this.getEdge(edgeId);
+		if (!edge) return false;
 
-        // Filter out D3 simulation properties before updating
-        const cleanProperties = this.stripD3Properties(properties);
-        Object.assign(edge.properties, cleanProperties);
-        this.updateModifiedDate();
-        return true;
-    }
+		// Filter out D3 simulation properties before updating
+		const cleanProperties = this.stripD3Properties(properties);
+		
+		Object.assign(edge, cleanProperties);
+		this.updateModifiedDate();
+		return true;
+	}
 
     /**
      * Rename an edge (Feature 2)
@@ -384,7 +372,7 @@ class Graph {
             if (sourceId === nodeId && targetId) {
                 neighbors.add(targetId);
             }
-            if (targetId === nodeId && sourceId && !edge.properties.directed) {
+            if (targetId === nodeId && sourceId && !edge.directed) {
                 neighbors.add(sourceId);
             }
         });
@@ -409,23 +397,28 @@ class Graph {
         const deleteNode = keepId === nodeId1 ? node2 : node1;
         const deleteId = keepId === nodeId1 ? nodeId2 : nodeId1;
         
-        // Merge properties (preserve all information with prefixes)
-        for (const [key, value] of Object.entries(deleteNode.properties)) {
-            if (key === 'createdDate') {
-                // Keep the earliest creation date
-                const keepDate = new Date(keepNode.properties.createdDate);
-                const deleteDate = new Date(value);
-                if (deleteDate < keepDate) {
-                    keepNode.properties.createdDate = value;
-                }
-            } else if (keepNode.properties[key] !== undefined && keepNode.properties[key] !== value) {
-                // Conflict: prefix the property
-                keepNode.properties[`merged_${deleteId}_${key}`] = value;
-            } else if (keepNode.properties[key] === undefined) {
-                // No conflict: just add it
-                keepNode.properties[key] = value;
-            }
-        }
+        // Define standard properties to merge (excluding structural properties)
+		const structuralProps = ['id', 'x', 'y', 'fx', 'fy', 'vx', 'vy', 'index'];
+
+		// Merge properties (preserve all information with prefixes)
+		for (const [key, value] of Object.entries(deleteNode)) {
+			if (structuralProps.includes(key)) continue; // Skip structural properties
+			
+			if (key === 'createdDate') {
+				// Keep the earliest creation date
+				const keepDate = new Date(keepNode.createdDate);
+				const deleteDate = new Date(value);
+				if (deleteDate < keepDate) {
+					keepNode.createdDate = value;
+				}
+			} else if (keepNode[key] !== undefined && keepNode[key] !== value) {
+				// Conflict: prefix the property
+				keepNode[`merged_${deleteId}_${key}`] = value;
+			} else if (keepNode[key] === undefined) {
+				// No conflict: just add it
+				keepNode[key] = value;
+			}
+}
         
         // Redirect all edges from deleted node to kept node
         this.edges.forEach(edge => {
@@ -472,8 +465,8 @@ class Graph {
     getAllEdgeTypes() {
         const types = new Set();
         this.edges.forEach(edge => {
-            if (edge.properties.type) {
-                types.add(edge.properties.type);
+            if (edge.type) {
+                types.add(edge.type);
             }
         });
         return Array.from(types).sort();
@@ -527,36 +520,19 @@ class Graph {
     toJSON() {
         // Save nodes with position properties (x, y, fx, fy) but strip other D3 properties
         const cleanNodes = this.nodes.map(node => {
-            const nodeData = {
-                id: node.id,
-                properties: this.stripD3Properties(node.properties)
-            };
-            
-            // Preserve position properties (x, y) and pin status (fx, fy)
-            if (node.x !== undefined) nodeData.x = node.x;
-            if (node.y !== undefined) nodeData.y = node.y;
-            if (node.fx !== undefined) nodeData.fx = node.fx;
-            if (node.fy !== undefined) nodeData.fy = node.fy;
-            
-            return nodeData;
-        });
+			const nodeData = this.stripD3Properties(node);
+			return nodeData;
+		});
 
         const cleanEdges = this.edges.map(edge => {
-            const edgeData = {
-                id: edge.id,
-                source: typeof edge.source === 'object' ? edge.source.id : edge.source,
-                target: typeof edge.target === 'object' ? edge.target.id : edge.target,
-                properties: this.stripD3Properties(edge.properties)
-            };
-            
-            // Feature 10: Preserve half-edge coordinates
-            if (edge.sourceX !== undefined) edgeData.sourceX = edge.sourceX;
-            if (edge.sourceY !== undefined) edgeData.sourceY = edge.sourceY;
-            if (edge.targetX !== undefined) edgeData.targetX = edge.targetX;
-            if (edge.targetY !== undefined) edgeData.targetY = edge.targetY;
-            
-            return edgeData;
-        });
+			const edgeData = this.stripD3Properties(edge);
+			
+			// Convert source/target object references to IDs
+			edgeData.source = typeof edge.source === 'object' ? edge.source.id : edge.source;
+			edgeData.target = typeof edge.target === 'object' ? edge.target.id : edge.target;
+			
+			return edgeData;
+		});
 
         return {
             graph: {
@@ -605,49 +581,51 @@ class Graph {
 
             // Validate nodes have required structure and restore position properties
             this.nodes = this.nodes.filter(node => {
-                if (!node.id || !node.properties) return false;
-                
-                // Clean D3 properties from properties object if they exist
-                node.properties = this.stripD3Properties(node.properties);
-                
-                // Ensure required properties exist
-                node.properties.color = node.properties.color || '#3498db';
-                node.properties.size = node.properties.size || 10;
-                node.properties.description = node.properties.description || '';
-                
-                // Feature 5: Ensure date/priority properties exist
-                const now = new Date().toISOString();
-                node.properties.priority = node.properties.priority || 'Medium';
-                node.properties.deadline = node.properties.deadline || '';
-                node.properties.userDate = node.properties.userDate || '';
-                node.properties.createdDate = node.properties.createdDate || now;
-                node.properties.modifiedDate = node.properties.modifiedDate || now;
-                
-                return true;
-            });
+				if (!node.id) return false;
+				
+				// Clean D3 properties if they exist
+				const cleaned = this.stripD3Properties(node);
+				Object.assign(node, cleaned);
+				
+				// Ensure required properties exist
+				node.color = node.color || '#3498db';
+				node.size = node.size || 10;
+				node.description = node.description || '';
+				
+				// Feature 5: Ensure date/priority properties exist
+				const now = new Date().toISOString();
+				node.priority = node.priority || 'Medium';
+				node.deadline = node.deadline || '';
+				node.userDate = node.userDate || '';
+				node.createdDate = node.createdDate || now;
+				node.modifiedDate = node.modifiedDate || now;
+				
+				return true;
+			});
 
             // Validate edges and clean D3 properties
             this.edges = this.edges.filter(edge => {
-                if (!edge.id || !edge.properties) return false;
-                
-                // Feature 10: Half-edges are allowed (source or target can be null)
-                if (!edge.source && !edge.target) return false;
-                
-                // Check if connected nodes exist
-                if (edge.source && !this.getNode(edge.source)) return false;
-                if (edge.target && !this.getNode(edge.target)) return false;
-                
-                // Clean D3 properties if they exist
-                edge.properties = this.stripD3Properties(edge.properties);
-                
-                // Ensure required properties exist
-                edge.properties.type = edge.properties.type || 'related';
-                edge.properties.color = edge.properties.color || '#95a5a6';
-                edge.properties.weight = edge.properties.weight || 1;
-                edge.properties.directed = edge.properties.directed !== undefined ? edge.properties.directed : true;
-                edge.properties.description = edge.properties.description || '';
-                return true;
-            });
+				if (!edge.id) return false;
+				
+				// Feature 10: Half-edges are allowed (source or target can be null)
+				if (!edge.source && !edge.target) return false;
+				
+				// Check if connected nodes exist
+				if (edge.source && !this.getNode(edge.source)) return false;
+				if (edge.target && !this.getNode(edge.target)) return false;
+				
+				// Clean D3 properties if they exist
+				const cleaned = this.stripD3Properties(edge);
+				Object.assign(edge, cleaned);
+				
+				// Ensure required properties exist
+				edge.type = edge.type || 'related';
+				edge.color = edge.color || '#95a5a6';
+				edge.weight = edge.weight || 1;
+				edge.directed = edge.directed !== undefined ? edge.directed : true;
+				edge.description = edge.description || '';
+				return true;
+			});
 
             this.updateModifiedDate();
             return true;
@@ -677,22 +655,25 @@ class Graph {
      * @returns {Array} Matching nodes
      */
     searchNodes(query) {
-        if (!query) return this.nodes;
+		if (!query) return this.nodes;
 
-        const lowerQuery = query.toLowerCase();
-        return this.nodes.filter(node => {
-            // Search in node ID
-            if (node.id.toLowerCase().includes(lowerQuery)) return true;
+		const lowerQuery = query.toLowerCase();
+		const structuralProps = ['x', 'y', 'fx', 'fy', 'vx', 'vy', 'index'];
+		
+		return this.nodes.filter(node => {
+			// Search in node ID
+			if (node.id.toLowerCase().includes(lowerQuery)) return true;
 
-            // Search in properties
-            for (const [key, value] of Object.entries(node.properties)) {
-                if (String(value).toLowerCase().includes(lowerQuery)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
+			// Search in all properties (except structural)
+			for (const [key, value] of Object.entries(node)) {
+				if (key === 'id' || structuralProps.includes(key)) continue;
+				if (String(value).toLowerCase().includes(lowerQuery)) {
+					return true;
+				}
+			}
+			return false;
+		});
+	}
 
     /**
      * Filter nodes by property (Feature 1)
@@ -702,27 +683,27 @@ class Graph {
      * @returns {Array} Matching nodes
      */
     filterNodes(propertyKey, propertyValue, matchType = 'exact') {
-        if (!propertyKey || !propertyValue) return this.nodes;
-        
-        const lowerValue = propertyValue.toLowerCase();
-        
-        return this.nodes.filter(node => {
-            const nodePropValue = String(node.properties[propertyKey] || '').toLowerCase();
-            
-            switch (matchType) {
-                case 'exact':
-                    return nodePropValue === lowerValue;
-                case 'contains':
-                    return nodePropValue.includes(lowerValue);
-                case 'starts':
-                    return nodePropValue.startsWith(lowerValue);
-                case 'ends':
-                    return nodePropValue.endsWith(lowerValue);
-                default:
-                    return nodePropValue === lowerValue;
-            }
-        });
-    }
+		if (!propertyKey || !propertyValue) return this.nodes;
+		
+		const lowerValue = propertyValue.toLowerCase();
+		
+		return this.nodes.filter(node => {
+			const nodePropValue = String(node[propertyKey] || '').toLowerCase();
+			
+			switch (matchType) {
+				case 'exact':
+					return nodePropValue === lowerValue;
+				case 'contains':
+					return nodePropValue.includes(lowerValue);
+				case 'starts':
+					return nodePropValue.startsWith(lowerValue);
+				case 'ends':
+					return nodePropValue.endsWith(lowerValue);
+				default:
+					return nodePropValue === lowerValue;
+			}
+		});
+	}
 }
 
 // Export

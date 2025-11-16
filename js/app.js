@@ -490,7 +490,7 @@ class KnowledgeGraphApp {
         } else if (selectedEdge) {
             const edge = this.graph.getEdge(selectedEdge);
             if (edge) {
-                selectionText = `Edge: ${edge.properties.type || selectedEdge}`;
+                selectionText = `Edge: ${edge.type || selectedEdge}`;
             } else {
                 selectionText = `Edge: ${selectedEdge}`;
             }

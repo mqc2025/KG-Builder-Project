@@ -229,10 +229,10 @@ class Renderer {
 
         // Add path for edge
         edgesEnter.append('path')
-            .attr('stroke', d => d.properties.color || '#95a5a6')
+            .attr('stroke', d => d.color || '#95a5a6')
             .attr('stroke-width', 2)
             .attr('fill', 'none')
-            .attr('marker-end', d => d.properties.directed ? 'url(#arrowhead)' : '')
+            .attr('marker-end', d => d.directed ? 'url(#arrowhead)' : '')
             // Feature 10: Half-edges have dashed stroke
             .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none');
 
@@ -254,13 +254,13 @@ class Renderer {
             .style('font-weight', '600')
             .style('pointer-events', 'none')
             .style('user-select', 'none')
-            .text(d => d.properties.type || d.id);
+            .text(d => d.type || d.id);
         
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);
 
         edgesMerge.select('path:first-child')
-            .attr('stroke', d => d.properties.color || '#95a5a6')
+            .attr('stroke', d => d.color || '#95a5a6')
             .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none')
             .classed('selected', d => this.selectedEdges.has(d.id))
             .classed('highlighted', d => this.highlightedEdges.has(d.id))
@@ -344,8 +344,8 @@ class Renderer {
 
         // Add circle
         nodesEnter.append('circle')
-            .attr('r', d => d.properties.size || 10)
-            .attr('fill', d => d.properties.color || '#3498db');
+            .attr('r', d => d.size || 10)
+            .attr('fill', d => d.color || '#3498db');
 
         // Add label
         nodesEnter.append('text')
@@ -359,8 +359,8 @@ class Renderer {
         const nodesMerge = nodes.merge(nodesEnter);
 
         nodesMerge.select('circle')
-            .attr('r', d => d.properties.size || 10)
-            .attr('fill', d => d.properties.color || '#3498db')
+            .attr('r', d => d.size || 10)
+            .attr('fill', d => d.color || '#3498db')
             .classed('selected', d => this.selectedNodes.has(d.id))
             .classed('highlighted', d => this.highlightedNodes.has(d.id))
             .classed('path-highlight', d => this.highlightedNodes.has(d.id));
@@ -513,7 +513,7 @@ class Renderer {
         if (typeof edge.source === 'object' && edge.source !== null) {
             const angle = edge.target ? 
                 Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
-            const sourceRadius = edge.source.properties.size || 10;
+            const sourceRadius = edge.source.size || 10;
             sourceX = edge.source.x + Math.cos(angle) * sourceRadius;
             sourceY = edge.source.y + Math.sin(angle) * sourceRadius;
         } else {
@@ -525,7 +525,7 @@ class Renderer {
         if (typeof edge.target === 'object' && edge.target !== null) {
             const angle = edge.source ? 
                 Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
-            const targetRadius = edge.target.properties.size || 10;
+            const targetRadius = edge.target.size || 10;
             targetX = edge.target.x - Math.cos(angle) * (targetRadius + 5);
             targetY = edge.target.y - Math.sin(angle) * (targetRadius + 5);
         } else {
