@@ -298,21 +298,20 @@ class ContextMenuManager {
         this.app.updateStatus(`Deleted edge: ${edge.id}`);
     }
 
-    /**
-     * Add node at position
-     */
-    addNodeAtPosition(event) {
-        const svgElement = document.getElementById('graph-canvas');
-        const pt = svgElement.createSVGPoint();
-        pt.x = event.clientX;
-        pt.y = event.clientY;
+	 /**
+	 * Add node at position
+	 */
+	addNodeAtPosition(event) {
+		const svgElement = document.getElementById('graph-canvas');
+		const rect = svgElement.getBoundingClientRect();
+		
+		// Convert click position to SVG coordinates
+		const transform = this.app.renderer.currentTransform;
+		const x = (event.clientX - rect.left - transform.x) / transform.k;
+		const y = (event.clientY - rect.top - transform.y) / transform.k;
 
-        const transform = this.app.renderer.currentTransform;
-        const x = (pt.x - transform.x) / transform.k;
-        const y = (pt.y - transform.y) / transform.k;
-
-        this.app.addNode(x, y);
-    }
+		this.app.addNode(x, y);
+	}
 
     /**
      * Select all nodes

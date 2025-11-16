@@ -62,6 +62,8 @@ class Renderer {
         this.onNodeContextMenu = null;
         this.onEdgeContextMenu = null;
         this.onCanvasContextMenu = null;
+		// Setup canvas event handlers immediately
+		this.setupCanvasEventHandlers();
         
         // Selection tracking
         this.selectedNodes = new Set();
@@ -425,24 +427,7 @@ class Renderer {
             }
         });
 
-        // Canvas click (deselect)
-        this.svg.on('click', (event) => {
-            if (event.target === this.svg.node()) {
-                if (this.onCanvasClick) {
-                    this.onCanvasClick();
-                }
-            }
-        });
         
-        // Canvas context menu (Feature 12)
-        this.svg.on('contextmenu', (event) => {
-            if (event.target === this.svg.node() || event.target.tagName === 'svg' || event.target.tagName === 'SVG') {
-                event.preventDefault();
-                if (this.onCanvasContextMenu) {
-                    self.onCanvasContextMenu(event);
-                }
-            }
-        });
     }
 
     /**
@@ -759,6 +744,34 @@ class Renderer {
     setTransform(transform) {
         this.svg.call(this.zoom.transform, transform);
     }
+	
+	/**
+	 * Setup canvas event handlers (called once during initialization)
+	 */
+	setupCanvasEventHandlers() {
+		const self = this;
+		
+		// Canvas click (deselect)
+		this.svg.on('click', (event) => {
+			if (event.target === this.svg.node()) {
+				if (self.onCanvasClick) {
+					self.onCanvasClick();
+				}
+			}
+		});
+		
+		// Canvas context menu
+		this.svg.on('contextmenu', (event) => {
+			if (event.target === this.svg.node() || event.target.tagName === 'svg' || event.target.tagName === 'SVG') {
+				event.preventDefault();
+				if (self.onCanvasContextMenu) {
+					self.onCanvasContextMenu(event);
+				}
+			}
+		});
+	}
+	
+	
 }
 
 // Export
