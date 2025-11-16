@@ -335,17 +335,19 @@ class KnowledgeGraphApp {
     /**
      * Add a new node
      */
-    addNode(x, y) {
-        const nodeId = prompt('Enter node ID:', `node_${this.graph.nodes.length + 1}`);
-        if (!nodeId) return;
+    async addNode(x, y) {
+        const nodeName = prompt('Enter node name:', `Node ${this.graph.nodes.length + 1}`);
+        if (!nodeName) return;
 
-        if (this.graph.getNode(nodeId)) {
-            alert('A node with this ID already exists');
+        // Check if node with this name already exists
+        const existingId = await Utils.generateSHA256(nodeName);
+        if (this.graph.getNode(existingId)) {
+            alert('A node with this name already exists');
             return;
         }
 
-        const node = this.graph.addNode({
-            id: nodeId,
+        const node = await this.graph.addNode({
+            name: nodeName,
             color: '#3498db',
             size: 10,
             description: ''
@@ -359,20 +361,27 @@ class KnowledgeGraphApp {
         this.renderer.render();
         this.updateStats();
         this.saveState();
-        this.updateStatus(`Node ${nodeId} created`);
+        this.updateStatus(`Node ${nodeName} created`);
     }
 
     /**
      * Add a new edge
      */
-    addEdge(sourceId, targetId) {
+    async addEdge(sourceId, targetId) {
         if (sourceId === targetId) {
             alert('Cannot create self-loop edges');
             return;
         }
 
-        const edge = this.graph.addEdge(sourceId, targetId, {
-            type: 'related',
+        // Generate a unique edge name
+        const timestamp = Date.now();
+        const edgeName = `edge_${timestamp}`;
+
+        const edge = await this.graph.addEdge({
+            name: edgeName,
+            source: sourceId,
+            target: targetId,
+            relationship: '',
             color: '#95a5a6',
             weight: 1,
             directed: true,

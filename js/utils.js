@@ -2,7 +2,21 @@
 
 const Utils = {
     /**
-     * Generate a unique ID
+     * Generate SHA256 hash from a string
+     * @param {string} str - String to hash
+     * @returns {Promise<string>} SHA256 hash in hexadecimal
+     */
+    async generateSHA256(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    },
+
+    /**
+     * Generate a unique ID (legacy method, kept for backward compatibility)
      * @param {string} prefix - Optional prefix for the ID
      * @returns {string} Unique ID
      */

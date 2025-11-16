@@ -28,27 +28,43 @@ class Graph {
 
     /**
      * Add a new node to the graph
-     * @param {Object} properties - Node properties
-     * @returns {Object} Created node
+     * @param {Object} properties - Node properties (must include 'name')
+     * @returns {Promise<Object>} Created node
      */
-    addNode(properties = {}) {
+    async addNode(properties = {}) {
         // Strip D3 properties before creating node
         const cleanProps = this.stripD3Properties(properties);
         
         const now = new Date().toISOString();
         
+        // Generate ID from name using SHA256
+        let nodeId;
+        if (cleanProps.name) {
+            nodeId = await Utils.generateSHA256(cleanProps.name);
+        } else {
+            // Fallback for nodes without name (backward compatibility)
+            nodeId = cleanProps.id || Utils.generateId('node');
+        }
+        
         const node = {
-			id: cleanProps.id || Utils.generateId('node'),
-			color: cleanProps.color || '#3498db',
-			size: cleanProps.size || 10,
-			description: cleanProps.description || '',
-			priority: cleanProps.priority || 'Medium',
-			deadline: cleanProps.deadline || '',
-			userDate: cleanProps.userDate || '',
-			createdDate: cleanProps.createdDate || now,
-			modifiedDate: now,
-			...cleanProps
-		};
+            id: nodeId,
+            name: cleanProps.name || nodeId,
+            color: cleanProps.color || '#3498db',
+            size: cleanProps.size || 10,
+            description: cleanProps.description || '',
+            category: cleanProps.category || '',
+            subCat: cleanProps.subCat || '',
+            link1: cleanProps.link1 || '',
+            link2: cleanProps.link2 || '',
+            link3: cleanProps.link3 || '',
+            link4: cleanProps.link4 || '',
+            priority: cleanProps.priority || 'Medium',
+            deadline: cleanProps.deadline || '',
+            userDate: cleanProps.userDate || '',
+            createdDate: cleanProps.createdDate || now,
+            modifiedDate: now,
+            ...cleanProps
+        };
         
         this.nodes.push(node);
         this.updateModifiedDate();
@@ -77,9 +93,9 @@ class Graph {
     }
 
     /**
-     * Get node by ID
-     * @param {string} nodeId - Node ID
-     * @returns {Object|null} Node object
+     * Get a node by ID
+     * @param {string} nodeId - ID of node to retrieve
+     * @returns {Object|null} Node object or null
      */
     getNode(nodeId) {
         return this.nodes.find(n => n.id === nodeId) || null;
@@ -87,116 +103,91 @@ class Graph {
 
     /**
      * Update node properties
-     * @param {string} nodeId - Node ID
+     * @param {string} nodeId - ID of node to update
      * @param {Object} properties - Properties to update
      * @returns {boolean} Success
      */
     updateNode(nodeId, properties) {
-		const node = this.getNode(nodeId);
-		if (!node) return false;
+        const node = this.getNode(nodeId);
+        if (!node) return false;
 
-		// Filter out D3 simulation properties before updating
-		const cleanProperties = this.stripD3Properties(properties);
-		
-		// Update modifiedDate
-		cleanProperties.modifiedDate = new Date().toISOString();
-		
-		Object.assign(node, cleanProperties);
-		this.updateModifiedDate();
-		return true;
-	}
+        Object.assign(node, this.stripD3Properties(properties));
+        node.modifiedDate = new Date().toISOString();
+        this.updateModifiedDate();
+        return true;
+    }
 
     /**
-     * Rename a node (Feature 2)
+     * Rename a node (updates ID based on new name)
      * @param {string} oldId - Current node ID
-     * @param {string} newId - New node ID
-     * @returns {boolean} Success
+     * @param {string} newName - New node name
+     * @returns {Promise<boolean>} Success
      */
-    renameNode(oldId, newId) {
-        // Check if newId already exists
-        if (oldId === newId) return true;
-        if (this.getNode(newId)) {
-            return false; // Duplicate ID
-        }
-        
+    async renameNode(oldId, newName) {
         const node = this.getNode(oldId);
         if (!node) return false;
+
+        // Generate new ID from new name
+        const newId = await Utils.generateSHA256(newName);
         
-        // Update node ID
+        // Check if new ID already exists
+        if (newId !== oldId && this.getNode(newId)) {
+            throw new Error('A node with this name already exists');
+        }
+
+        // Update node
         node.id = newId;
-        
-        // Update all edge references
+        node.name = newName;
+        node.modifiedDate = new Date().toISOString();
+
+        // Update edges that reference this node
         this.edges.forEach(edge => {
-            if (typeof edge.source === 'object' && edge.source.id === oldId) {
-                edge.source.id = newId;
-            } else if (edge.source === oldId) {
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+            
+            if (sourceId === oldId) {
                 edge.source = newId;
             }
-            
-            if (typeof edge.target === 'object' && edge.target.id === oldId) {
-                edge.target.id = newId;
-            } else if (edge.target === oldId) {
+            if (targetId === oldId) {
                 edge.target = newId;
             }
         });
-        
+
         this.updateModifiedDate();
         return true;
     }
 
     /**
      * Add a new edge to the graph
-     * @param {string} source - Source node ID (or null for half-edge)
-     * @param {string} target - Target node ID (or null for half-edge)
-     * @param {Object} properties - Edge properties
-     * @returns {Object|null} Created edge or null if invalid
+     * @param {Object} properties - Edge properties (must include 'name', optionally 'source' and 'target')
+     * @returns {Promise<Object>} Created edge
      */
-    addEdge(source, target, properties = {}) {
-        // Feature 10: Allow half-edges (source or target can be null)
-        // Validate at least one end is connected
-        if (!source && !target) {
-            return null;
-        }
-        
-        // Validate connected nodes exist
-        if (source && !this.getNode(source)) return null;
-        if (target && !this.getNode(target)) return null;
-
-        // Check for duplicate edges (only if both ends are defined)
-        if (source && target) {
-            const exists = this.edges.some(e => {
-                const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
-                const targetId = typeof e.target === 'object' ? e.target.id : e.target;
-                return sourceId === source && targetId === target;
-            });
-            if (exists) return null;
-        }
-
+    async addEdge(properties = {}) {
         // Strip D3 properties before creating edge
         const cleanProps = this.stripD3Properties(properties);
-
+        
+        // Generate ID from name using SHA256
+        let edgeId;
+        if (cleanProps.name) {
+            edgeId = await Utils.generateSHA256(cleanProps.name);
+        } else {
+            // Fallback for edges without name (backward compatibility)
+            edgeId = cleanProps.id || Utils.generateId('edge');
+        }
+        
         const edge = {
-			id: cleanProps.id || Utils.generateId('edge'),
-			source,
-			target,
-			description: cleanProps.description || '',
-			type: cleanProps.type || 'related',
-			color: cleanProps.color || '#95a5a6',
-			weight: cleanProps.weight || 1,
-			directed: cleanProps.directed !== undefined ? cleanProps.directed : true,
-			...cleanProps
-		};
-
-		// Feature 10: Store free end coordinates for half-edges
-		if (!source && properties.sourceX !== undefined) {
-			edge.sourceX = properties.sourceX;
-			edge.sourceY = properties.sourceY;
-		}
-		if (!target && properties.targetX !== undefined) {
-			edge.targetX = properties.targetX;
-			edge.targetY = properties.targetY;
-		}
-
+            id: edgeId,
+            name: cleanProps.name || edgeId,
+            source: cleanProps.source || null,
+            target: cleanProps.target || null,
+            description: cleanProps.description || '',
+            relationship: cleanProps.relationship || '',
+            color: cleanProps.color || '#95a5a6',
+            weight: cleanProps.weight || 1,
+            directed: cleanProps.directed !== undefined ? cleanProps.directed : true,
+            ...cleanProps
+        };
+        
         this.edges.push(edge);
         this.updateModifiedDate();
         return edge;
@@ -204,7 +195,7 @@ class Graph {
 
     /**
      * Remove an edge
-     * @param {string} edgeId - Edge ID
+     * @param {string} edgeId - ID of edge to remove
      * @returns {boolean} Success
      */
     removeEdge(edgeId) {
@@ -217,9 +208,9 @@ class Graph {
     }
 
     /**
-     * Get edge by ID
-     * @param {string} edgeId - Edge ID
-     * @returns {Object|null} Edge object
+     * Get an edge by ID
+     * @param {string} edgeId - ID of edge to retrieve
+     * @returns {Object|null} Edge object or null
      */
     getEdge(edgeId) {
         return this.edges.find(e => e.id === edgeId) || null;
@@ -227,217 +218,189 @@ class Graph {
 
     /**
      * Update edge properties
-     * @param {string} edgeId - Edge ID
+     * @param {string} edgeId - ID of edge to update
      * @param {Object} properties - Properties to update
      * @returns {boolean} Success
      */
     updateEdge(edgeId, properties) {
-		const edge = this.getEdge(edgeId);
-		if (!edge) return false;
+        const edge = this.getEdge(edgeId);
+        if (!edge) return false;
 
-		// Filter out D3 simulation properties before updating
-		const cleanProperties = this.stripD3Properties(properties);
-		
-		Object.assign(edge, cleanProperties);
-		this.updateModifiedDate();
-		return true;
-	}
+        Object.assign(edge, this.stripD3Properties(properties));
+        this.updateModifiedDate();
+        return true;
+    }
 
     /**
-     * Rename an edge (Feature 2)
+     * Rename an edge (updates ID based on new name)
      * @param {string} oldId - Current edge ID
-     * @param {string} newId - New edge ID
-     * @returns {boolean} Success
+     * @param {string} newName - New edge name
+     * @returns {Promise<boolean>} Success
      */
-    renameEdge(oldId, newId) {
-        if (oldId === newId) return true;
-        if (this.getEdge(newId)) {
-            return false; // Duplicate ID
-        }
-        
+    async renameEdge(oldId, newName) {
         const edge = this.getEdge(oldId);
         if (!edge) return false;
+
+        // Generate new ID from new name
+        const newId = await Utils.generateSHA256(newName);
         
+        // Check if new ID already exists
+        if (newId !== oldId && this.getEdge(newId)) {
+            throw new Error('An edge with this name already exists');
+        }
+
+        // Update edge
         edge.id = newId;
+        edge.name = newName;
+
         this.updateModifiedDate();
         return true;
     }
 
     /**
-     * Break an edge at one end (Feature 10)
+     * Change edge endpoint
      * @param {string} edgeId - Edge ID
-     * @param {string} end - Which end to break ('source' or 'target')
-     * @param {number} x - X coordinate for free end
-     * @param {number} y - Y coordinate for free end
+     * @param {string} endpoint - 'source' or 'target'
+     * @param {string|null} nodeId - New node ID (null for free end)
      * @returns {boolean} Success
      */
-    breakEdge(edgeId, end, x, y) {
+    changeEdgeEndpoint(edgeId, endpoint, nodeId) {
         const edge = this.getEdge(edgeId);
         if (!edge) return false;
-        
-        if (end === 'source') {
-            edge.source = null;
-            edge.sourceX = x;
-            edge.sourceY = y;
-        } else if (end === 'target') {
-            edge.target = null;
-            edge.targetX = x;
-            edge.targetY = y;
-        }
-        
+
+        if (endpoint !== 'source' && endpoint !== 'target') return false;
+
+        // If nodeId is provided, validate it exists
+        if (nodeId && !this.getNode(nodeId)) return false;
+
+        edge[endpoint] = nodeId;
         this.updateModifiedDate();
         return true;
     }
 
     /**
-     * Connect a half-edge to a node (Feature 10)
-     * @param {string} edgeId - Edge ID
-     * @param {string} end - Which end to connect ('source' or 'target')
-     * @param {string} nodeId - Node to connect to
-     * @returns {boolean} Success
+     * Break edge at a point, creating a new node
+     * @param {string} edgeId - Edge to break
+     * @param {string} endpoint - 'source' or 'target' (which end to disconnect)
+     * @param {number} x - X position for new free end
+     * @param {number} y - Y position for free end
+     * @returns {Promise<boolean>} Success
      */
-    connectHalfEdge(edgeId, end, nodeId) {
+    async breakEdge(edgeId, endpoint, x, y) {
         const edge = this.getEdge(edgeId);
         if (!edge) return false;
+
+        // Simply set the endpoint to null (free end)
+        edge[endpoint] = null;
         
-        const node = this.getNode(nodeId);
-        if (!node) return false;
-        
-        if (end === 'source') {
-            edge.source = nodeId;
-            delete edge.sourceX;
-            delete edge.sourceY;
-        } else if (end === 'target') {
-            edge.target = nodeId;
-            delete edge.targetX;
-            delete edge.targetY;
+        // Store free end position on edge
+        if (endpoint === 'source') {
+            edge.freeSourceX = x;
+            edge.freeSourceY = y;
+        } else {
+            edge.freeTargetX = x;
+            edge.freeTargetY = y;
         }
-        
+
         this.updateModifiedDate();
         return true;
     }
-	/**
-	 * Change edge source or target to a different node
-	 * @param {string} edgeId - Edge ID
-	 * @param {string} end - Which end to change ('source' or 'target')
-	 * @param {string} newNodeId - New node ID to connect to
-	 * @returns {boolean} Success
-	 */
-	changeEdgeEndpoint(edgeId, end, newNodeId) {
-		const edge = this.getEdge(edgeId);
-		if (!edge) return false;
-		
-		const newNode = this.getNode(newNodeId);
-		if (!newNode) return false;
-		
-		if (end === 'source') {
-			edge.source = newNodeId;
-			delete edge.sourceX;
-			delete edge.sourceY;
-		} else if (end === 'target') {
-			edge.target = newNodeId;
-			delete edge.targetX;
-			delete edge.targetY;
-		}
-		
-		this.updateModifiedDate();
-		return true;
-	}
 
     /**
-     * Get all edges connected to a node
-     * @param {string} nodeId - Node ID
-     * @returns {Array} Connected edges
+     * Break edge and create intermediate node with two new edges
+     * @param {string} edgeId - Edge to break
+     * @param {number} x - X position for new node
+     * @param {number} y - Y position for new node
+     * @returns {Promise<Object>} Object with new node and edges
      */
-    getNodeEdges(nodeId) {
-        return this.edges.filter(e => {
-            const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
-            const targetId = typeof e.target === 'object' ? e.target.id : e.target;
-            return sourceId === nodeId || targetId === nodeId;
+    async breakEdgeWithNode(edgeId, x, y) {
+        const edge = this.getEdge(edgeId);
+        if (!edge) return null;
+
+        const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+        const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+        // Generate unique name for intermediate node
+        const timestamp = Date.now();
+        const intermediateName = `intermediate_${timestamp}`;
+        
+        // Create intermediate node
+        const intermediateNode = await this.addNode({
+            name: intermediateName,
+            x: x,
+            y: y,
+            fx: x,
+            fy: y,
+            color: edge.color,
+            size: 8,
+            description: `Intermediate node created from edge ${edge.name || edge.id}`
         });
+
+        // Create two new edges
+        const edge1Name = `${edge.name || 'edge'}_part1`;
+        const edge2Name = `${edge.name || 'edge'}_part2`;
+        
+        const edge1 = await this.addEdge({
+            name: edge1Name,
+            source: sourceId,
+            target: intermediateNode.id,
+            relationship: edge.relationship,
+            color: edge.color,
+            weight: edge.weight,
+            directed: edge.directed,
+            description: edge.description
+        });
+
+        const edge2 = await this.addEdge({
+            name: edge2Name,
+            source: intermediateNode.id,
+            target: targetId,
+            relationship: edge.relationship,
+            color: edge.color,
+            weight: edge.weight,
+            directed: edge.directed,
+            description: edge.description
+        });
+
+        // Remove original edge
+        this.removeEdge(edgeId);
+
+        return {
+            node: intermediateNode,
+            edges: [edge1, edge2]
+        };
     }
 
     /**
-     * Get neighbors of a node
-     * @param {string} nodeId - Node ID
-     * @returns {Array} Neighbor node IDs
+     * Merge duplicate nodes
+     * @param {string} keepId - ID of node to keep
+     * @param {string} deleteId - ID of node to delete
+     * @returns {boolean} Success
      */
-    getNeighbors(nodeId) {
-        const neighbors = new Set();
+    mergeNodes(keepId, deleteId) {
+        if (keepId === deleteId) return false;
+        
+        const keepNode = this.getNode(keepId);
+        const deleteNode = this.getNode(deleteId);
+        
+        if (!keepNode || !deleteNode) return false;
+
+        // Transfer edges from deleted node to kept node
         this.edges.forEach(edge => {
-            // Handle both string IDs and D3 object references
             const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
             const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
             
-            if (sourceId === nodeId && targetId) {
-                neighbors.add(targetId);
-            }
-            if (targetId === nodeId && sourceId && !edge.directed) {
-                neighbors.add(sourceId);
-            }
-        });
-        return Array.from(neighbors);
-    }
-
-    /**
-     * Merge two nodes into one (Feature 13)
-     * @param {string} nodeId1 - First node ID
-     * @param {string} nodeId2 - Second node ID
-     * @param {string} keepId - Which ID to keep (nodeId1 or nodeId2)
-     * @returns {boolean} Success
-     */
-    mergeNodes(nodeId1, nodeId2, keepId) {
-        const node1 = this.getNode(nodeId1);
-        const node2 = this.getNode(nodeId2);
-        
-        if (!node1 || !node2) return false;
-        if (keepId !== nodeId1 && keepId !== nodeId2) return false;
-        
-        const keepNode = keepId === nodeId1 ? node1 : node2;
-        const deleteNode = keepId === nodeId1 ? node2 : node1;
-        const deleteId = keepId === nodeId1 ? nodeId2 : nodeId1;
-        
-        // Define standard properties to merge (excluding structural properties)
-		const structuralProps = ['id', 'x', 'y', 'fx', 'fy', 'vx', 'vy', 'index'];
-
-		// Merge properties (preserve all information with prefixes)
-		for (const [key, value] of Object.entries(deleteNode)) {
-			if (structuralProps.includes(key)) continue; // Skip structural properties
-			
-			if (key === 'createdDate') {
-				// Keep the earliest creation date
-				const keepDate = new Date(keepNode.createdDate);
-				const deleteDate = new Date(value);
-				if (deleteDate < keepDate) {
-					keepNode.createdDate = value;
-				}
-			} else if (keepNode[key] !== undefined && keepNode[key] !== value) {
-				// Conflict: prefix the property
-				keepNode[`merged_${deleteId}_${key}`] = value;
-			} else if (keepNode[key] === undefined) {
-				// No conflict: just add it
-				keepNode[key] = value;
-			}
-}
-        
-        // Redirect all edges from deleted node to kept node
-        this.edges.forEach(edge => {
-            if (typeof edge.source === 'object' && edge.source.id === deleteId) {
-                edge.source = keepId;
-            } else if (edge.source === deleteId) {
+            if (sourceId === deleteId) {
                 edge.source = keepId;
             }
-            
-            if (typeof edge.target === 'object' && edge.target.id === deleteId) {
-                edge.target = keepId;
-            } else if (edge.target === deleteId) {
+            if (targetId === deleteId) {
                 edge.target = keepId;
             }
         });
-        
+
         // Remove duplicate edges (same source and target)
-        const uniqueEdges = [];
         const edgeSet = new Set();
+        const uniqueEdges = [];
         
         this.edges.forEach(edge => {
             const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
@@ -459,25 +422,48 @@ class Graph {
     }
 
     /**
-     * Get all unique edge types (Feature 11)
-     * @returns {Array} Unique edge types
+     * Get all unique edge relationships (replaces getAllEdgeTypes)
+     * @returns {Array} Unique edge relationships
      */
-    getAllEdgeTypes() {
-        const types = new Set();
+    getAllEdgeRelationships() {
+        const relationships = new Set();
         this.edges.forEach(edge => {
-            if (edge.type) {
-                types.add(edge.type);
+            if (edge.relationship) {
+                relationships.add(edge.relationship);
             }
         });
-        return Array.from(types).sort();
+        return Array.from(relationships).sort();
     }
-	/**
-	 * Get all node IDs for dropdowns
-	 * @returns {Array} Array of node IDs
-	 */
-	getAllNodeIds() {
-		return this.nodes.map(node => node.id);
-	}
+
+    /**
+     * Get all unique edge names
+     * @returns {Array} Unique edge names
+     */
+    getAllEdgeNames() {
+        const names = new Set();
+        this.edges.forEach(edge => {
+            if (edge.name) {
+                names.add(edge.name);
+            }
+        });
+        return Array.from(names).sort();
+    }
+
+    /**
+     * Get all node IDs for dropdowns
+     * @returns {Array} Array of node IDs
+     */
+    getAllNodeIds() {
+        return this.nodes.map(node => node.id);
+    }
+
+    /**
+     * Get all node names for dropdowns
+     * @returns {Array} Array of node names
+     */
+    getAllNodeNames() {
+        return this.nodes.map(node => node.name || node.id);
+    }
 
     /**
      * Clear the graph
@@ -520,19 +506,19 @@ class Graph {
     toJSON() {
         // Save nodes with position properties (x, y, fx, fy) but strip other D3 properties
         const cleanNodes = this.nodes.map(node => {
-			const nodeData = this.stripD3Properties(node);
-			return nodeData;
-		});
+            const nodeData = this.stripD3Properties(node);
+            return nodeData;
+        });
 
         const cleanEdges = this.edges.map(edge => {
-			const edgeData = this.stripD3Properties(edge);
-			
-			// Convert source/target object references to IDs
-			edgeData.source = typeof edge.source === 'object' ? edge.source.id : edge.source;
-			edgeData.target = typeof edge.target === 'object' ? edge.target.id : edge.target;
-			
-			return edgeData;
-		});
+            const edgeData = this.stripD3Properties(edge);
+            
+            // Convert source/target object references to IDs
+            edgeData.source = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            edgeData.target = typeof edge.target === 'object' ? edge.target.id : edge.target;
+            
+            return edgeData;
+        });
 
         return {
             graph: {
@@ -563,7 +549,7 @@ class Graph {
                 modified: Utils.getCurrentDate()
             };
             
-            // Load settings (Feature 4, 9)
+            // Load settings
             this.settings = json.graph.settings || {
                 nodeLabelSize: 12,
                 edgeLabelSize: 10,
@@ -581,130 +567,68 @@ class Graph {
 
             // Validate nodes have required structure and restore position properties
             this.nodes = this.nodes.filter(node => {
-				if (!node.id) return false;
-				
-				// Clean D3 properties if they exist
-				const cleaned = this.stripD3Properties(node);
-				Object.assign(node, cleaned);
-				
-				// Ensure required properties exist
-				node.color = node.color || '#3498db';
-				node.size = node.size || 10;
-				node.description = node.description || '';
-				
-				// Feature 5: Ensure date/priority properties exist
-				const now = new Date().toISOString();
-				node.priority = node.priority || 'Medium';
-				node.deadline = node.deadline || '';
-				node.userDate = node.userDate || '';
-				node.createdDate = node.createdDate || now;
-				node.modifiedDate = node.modifiedDate || now;
-				
-				return true;
-			});
+                if (!node.id) return false;
+                
+                // Clean D3 properties if they exist
+                const cleaned = this.stripD3Properties(node);
+                Object.assign(node, cleaned);
+                
+                // Ensure required properties exist
+                node.name = node.name || node.id;
+                node.color = node.color || '#3498db';
+                node.size = node.size || 10;
+                node.description = node.description || '';
+                node.category = node.category || '';
+                node.subCat = node.subCat || '';
+                node.link1 = node.link1 || '';
+                node.link2 = node.link2 || '';
+                node.link3 = node.link3 || '';
+                node.link4 = node.link4 || '';
+                
+                // Ensure date/priority properties exist
+                const now = new Date().toISOString();
+                node.priority = node.priority || 'Medium';
+                node.deadline = node.deadline || '';
+                node.userDate = node.userDate || '';
+                node.createdDate = node.createdDate || now;
+                node.modifiedDate = node.modifiedDate || now;
+                
+                return true;
+            });
 
             // Validate edges and clean D3 properties
             this.edges = this.edges.filter(edge => {
-				if (!edge.id) return false;
-				
-				// Feature 10: Half-edges are allowed (source or target can be null)
-				if (!edge.source && !edge.target) return false;
-				
-				// Check if connected nodes exist
-				if (edge.source && !this.getNode(edge.source)) return false;
-				if (edge.target && !this.getNode(edge.target)) return false;
-				
-				// Clean D3 properties if they exist
-				const cleaned = this.stripD3Properties(edge);
-				Object.assign(edge, cleaned);
-				
-				// Ensure required properties exist
-				edge.type = edge.type || 'related';
-				edge.color = edge.color || '#95a5a6';
-				edge.weight = edge.weight || 1;
-				edge.directed = edge.directed !== undefined ? edge.directed : true;
-				edge.description = edge.description || '';
-				return true;
-			});
+                if (!edge.id) return false;
+                
+                // Half-edges are allowed (source or target can be null)
+                if (!edge.source && !edge.target) return false;
+                
+                // Check if connected nodes exist
+                if (edge.source && !this.getNode(edge.source)) return false;
+                if (edge.target && !this.getNode(edge.target)) return false;
+                
+                // Clean D3 properties if they exist
+                const cleaned = this.stripD3Properties(edge);
+                Object.assign(edge, cleaned);
+                
+                // Ensure required properties exist
+                edge.name = edge.name || edge.id;
+                edge.relationship = edge.relationship || '';
+                edge.color = edge.color || '#95a5a6';
+                edge.weight = edge.weight || 1;
+                edge.directed = edge.directed !== undefined ? edge.directed : true;
+                edge.description = edge.description || '';
+                
+                return true;
+            });
 
-            this.updateModifiedDate();
             return true;
         } catch (error) {
             console.error('Error loading graph:', error);
             return false;
         }
     }
-
-    /**
-     * Get graph statistics
-     * @returns {Object} Statistics
-     */
-    getStats() {
-        return {
-            nodeCount: this.nodes.length,
-            edgeCount: this.edges.length,
-            avgDegree: this.nodes.length > 0 
-                ? (this.edges.length * 2) / this.nodes.length 
-                : 0
-        };
-    }
-
-    /**
-     * Search nodes by property value
-     * @param {string} query - Search query
-     * @returns {Array} Matching nodes
-     */
-    searchNodes(query) {
-		if (!query) return this.nodes;
-
-		const lowerQuery = query.toLowerCase();
-		const structuralProps = ['x', 'y', 'fx', 'fy', 'vx', 'vy', 'index'];
-		
-		return this.nodes.filter(node => {
-			// Search in node ID
-			if (node.id.toLowerCase().includes(lowerQuery)) return true;
-
-			// Search in all properties (except structural)
-			for (const [key, value] of Object.entries(node)) {
-				if (key === 'id' || structuralProps.includes(key)) continue;
-				if (String(value).toLowerCase().includes(lowerQuery)) {
-					return true;
-				}
-			}
-			return false;
-		});
-	}
-
-    /**
-     * Filter nodes by property (Feature 1)
-     * @param {string} propertyKey - Property key to filter by
-     * @param {string} propertyValue - Property value to match
-     * @param {string} matchType - Match type: 'exact', 'contains', 'starts', 'ends'
-     * @returns {Array} Matching nodes
-     */
-    filterNodes(propertyKey, propertyValue, matchType = 'exact') {
-		if (!propertyKey || !propertyValue) return this.nodes;
-		
-		const lowerValue = propertyValue.toLowerCase();
-		
-		return this.nodes.filter(node => {
-			const nodePropValue = String(node[propertyKey] || '').toLowerCase();
-			
-			switch (matchType) {
-				case 'exact':
-					return nodePropValue === lowerValue;
-				case 'contains':
-					return nodePropValue.includes(lowerValue);
-				case 'starts':
-					return nodePropValue.startsWith(lowerValue);
-				case 'ends':
-					return nodePropValue.endsWith(lowerValue);
-				default:
-					return nodePropValue === lowerValue;
-			}
-		});
-	}
 }
 
-// Export
+// Export for use in other modules
 window.Graph = Graph;
