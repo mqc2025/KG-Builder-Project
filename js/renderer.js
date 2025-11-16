@@ -251,97 +251,114 @@ class Renderer {
 
     /**
      * Render edges
-     * MODIFIED: Removed edge break controls (crosses on edges)
-     */
+    */
     renderEdges(edgeData) {
-        const self = this;
+		const self = this;
 
-        // Bind data
-        const edges = this.edgeGroup
-            .selectAll('.edge')
-            .data(edgeData, d => d.id);
+		// Bind data
+		const edges = this.edgeGroup
+			.selectAll('.edge')
+			.data(edgeData, d => d.id);
 
-        // Remove old edges
-        edges.exit().remove();
+		// Remove old edges
+		edges.exit().remove();
 
-        // Add new edges
-        const edgesEnter = edges.enter()
-            .append('g')
-            .attr('class', 'edge');
+		// Add new edges
+		const edgesEnter = edges.enter()
+			.append('g')
+			.attr('class', 'edge');
 
-        // Add path for edge
-        edgesEnter.append('path')
-            .attr('stroke', d => d.color || '#95a5a6')
-            .attr('stroke-width', 2)
-            .attr('fill', 'none')
-            .attr('marker-end', d => d.directed ? 'url(#arrowhead)' : '')
-            // Feature 10: Half-edges have dashed stroke
-            .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none');
+		// Add path for edge
+		edgesEnter.append('path')
+			.attr('stroke', d => d.color || '#95a5a6')
+			.attr('stroke-width', 2)
+			.attr('fill', 'none')
+			.attr('marker-end', d => d.directed ? 'url(#arrowhead)' : '')
+			// Feature 10: Half-edges have dashed stroke
+			.attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none');
 
-        // Add invisible wider path for easier clicking
-        edgesEnter.append('path')
-            .attr('class', 'edge-clickable')
-            .attr('stroke', 'transparent')
-            .attr('stroke-width', 10)
-            .attr('fill', 'none')
-            .style('cursor', 'pointer')
-            .style('pointer-events', 'stroke');
-            
-        // Add edge label showing type or ID
-        edgesEnter.append('text')
-            .attr('class', 'edge-label')
-            .attr('text-anchor', 'middle')
-            .attr('dy', -5)
-            .style('fill', '#7f8c8d')
-            .style('font-weight', '600')
-            .style('pointer-events', 'none')
-            .style('user-select', 'none')
-            .text(d => d.relationship || '');
-        
-        // Merge and update
-        const edgesMerge = edges.merge(edgesEnter);
+		// Add invisible wider path for easier clicking
+		edgesEnter.append('path')
+			.attr('class', 'edge-clickable')
+			.attr('stroke', 'transparent')
+			.attr('stroke-width', 10)
+			.attr('fill', 'none')
+			.style('cursor', 'pointer')
+			.style('pointer-events', 'stroke');
+			
+		// Add edge label showing type or ID
+		edgesEnter.append('text')
+			.attr('class', 'edge-label')
+			.attr('text-anchor', 'middle')
+			.attr('dy', -5)
+			.style('fill', '#7f8c8d')
+			.style('font-weight', '600')
+			.style('pointer-events', 'none')
+			.style('user-select', 'none')
+			.text(d => d.relationship || '')
+			// FIX: Initialize label position immediately to prevent jump
+			.each(function(d) {
+				const source = typeof d.source === 'object' ? d.source : { x: d.sourceX || 0, y: d.sourceY || 0 };
+				const target = typeof d.target === 'object' ? d.target : { x: d.targetX || 0, y: d.targetY || 0 };
+				
+				const midX = (source.x + target.x) / 2;
+				const midY = (source.y + target.y) / 2;
+				
+				const dx = target.x - source.x;
+				const dy = target.y - source.y;
+				const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+				const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
+				
+				d3.select(this)
+					.attr('x', midX)
+					.attr('y', midY)
+					.attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
+			});
+		
+		// Merge and update
+		const edgesMerge = edges.merge(edgesEnter);
 
-        edgesMerge.select('path:first-child')
-            .attr('stroke', d => d.color || '#95a5a6')
-            .attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none')
-            .classed('selected', d => this.selectedEdges.has(d.id))
-            .classed('highlighted', d => this.highlightedEdges.has(d.id))
-            .classed('path-highlight', d => this.highlightedEdges.has(d.id));
+		edgesMerge.select('path:first-child')
+			.attr('stroke', d => d.color || '#95a5a6')
+			.attr('stroke-dasharray', d => (!d.source || !d.target) ? '5,5' : 'none')
+			.classed('selected', d => this.selectedEdges.has(d.id))
+			.classed('highlighted', d => this.highlightedEdges.has(d.id))
+			.classed('path-highlight', d => this.highlightedEdges.has(d.id));
 
-        // Click handler on invisible path
-        edgesMerge.select('.edge-clickable')
-            .on('click', function(event, d) {
-                event.stopPropagation();
-                if (self.onEdgeClick) {
-                    self.onEdgeClick(d);
-                }
-            })
-            .on('contextmenu', function(event, d) {
-                event.preventDefault();
-                event.stopPropagation();
-                if (self.onEdgeContextMenu) {
-                    self.onEdgeContextMenu(d, event);
-                }
-            });
-        
-        // Hover effects
-        edgesMerge.select('path:last-child')
-            .on('mouseenter', function(event, d) {
-                d3.select(this.parentNode).select('path:first-child')
-                    .attr('stroke-width', 3)
-                    .style('filter', 'drop-shadow(0 0 2px rgba(52, 152, 219, 0.6))');
-            })
-            .on('mouseleave', function(event, d) {
-                if (!self.selectedEdges.has(d.id)) {
-                    d3.select(this.parentNode).select('path:first-child')
-                        .attr('stroke-width', 2)
-                        .style('filter', 'none');
-                }
-            });
+		// Click handler on invisible path
+		edgesMerge.select('.edge-clickable')
+			.on('click', function(event, d) {
+				event.stopPropagation();
+				if (self.onEdgeClick) {
+					self.onEdgeClick(d);
+				}
+			})
+			.on('contextmenu', function(event, d) {
+				event.preventDefault();
+				event.stopPropagation();
+				if (self.onEdgeContextMenu) {
+					self.onEdgeContextMenu(d, event);
+				}
+			});
+		
+		// Hover effects
+		edgesMerge.select('path:last-child')
+			.on('mouseenter', function(event, d) {
+				d3.select(this.parentNode).select('path:first-child')
+					.attr('stroke-width', 3)
+					.style('filter', 'drop-shadow(0 0 2px rgba(52, 152, 219, 0.6))');
+			})
+			.on('mouseleave', function(event, d) {
+				if (!self.selectedEdges.has(d.id)) {
+					d3.select(this.parentNode).select('path:first-child')
+						.attr('stroke-width', 2)
+						.style('filter', 'none');
+				}
+			});
 
-        // Define arrowhead marker
-        this.defineArrowhead();
-    }
+		// Define arrowhead marker
+		this.defineArrowhead();
+	}
 
     /**
      * Define arrowhead marker for directed edges
