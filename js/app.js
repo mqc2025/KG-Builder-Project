@@ -602,23 +602,33 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Apply auto layout
-     */
-    applyLayout() {
-        this.graph.nodes.forEach(node => {
-            node.fx = null;
-            node.fy = null;
-        });
+	 * Apply auto layout
+	 */
+	applyLayout() {
+		this.graph.nodes.forEach(node => {
+			node.fx = null;
+			node.fy = null;
+		});
 
-        if (!this.renderer.isFrozen) {
-            this.renderer.simulation.alpha(1).restart();
-        }
-        this.updateStatus('Layout applied');
-        
-        setTimeout(() => {
-            this.saveState();
-        }, 2000);
-    }
+		// Always unfreeze simulation for layout
+		if (this.renderer.isFrozen) {
+			this.renderer.unfreezeSimulation();
+			// Update freeze button UI
+			const freezeBtn = document.getElementById('btn-freeze');
+			if (freezeBtn) {
+				freezeBtn.classList.remove('active');
+				freezeBtn.title = 'Freeze Simulation (F)';
+			}
+		}
+		
+		this.renderer.simulation.alpha(1).restart();
+		this.renderer.startAutoFreezeTimer();
+		this.updateStatus('Layout applied - simulation active');
+		
+		setTimeout(() => {
+			this.saveState();
+		}, 100);
+	}
 
     /**
      * Show shortest path modal
