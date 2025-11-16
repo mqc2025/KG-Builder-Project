@@ -381,7 +381,7 @@ class KnowledgeGraphApp {
             name: edgeName,
             source: sourceId,
             target: targetId,
-            relationship: '',
+            relationship: 'is a subset of',
             color: '#95a5a6',
             weight: 1,
             directed: true,

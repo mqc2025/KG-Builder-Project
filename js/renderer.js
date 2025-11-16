@@ -255,7 +255,7 @@ class Renderer {
             .style('font-weight', '600')
             .style('pointer-events', 'none')
             .style('user-select', 'none')
-            .text(d => d.type || d.id);
+            .text(d => d.relationship || '');
         
         // Merge and update
         const edgesMerge = edges.merge(edgesEnter);

@@ -181,7 +181,7 @@ class Graph {
             source: cleanProps.source || null,
             target: cleanProps.target || null,
             description: cleanProps.description || '',
-            relationship: cleanProps.relationship || '',
+            relationship: cleanProps.relationship || 'is a subset of',
             color: cleanProps.color || '#95a5a6',
             weight: cleanProps.weight || 1,
             directed: cleanProps.directed !== undefined ? cleanProps.directed : true,
