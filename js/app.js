@@ -519,24 +519,16 @@ class KnowledgeGraphApp {
      * Show shortest path modal
      */
     showPathModal() {
-        const selectedNodes = Array.from(this.renderer.selectedNodes);
-        
-        if (selectedNodes.length === 2) {
-            this.pathStartNode = selectedNodes[0];
-            this.pathEndNode = selectedNodes[1];
-            this.calculateShortestPath();
-            return;
-        }
-        
         const modal = document.getElementById('path-modal');
         modal?.classList.remove('hidden');
 
+        // Clear previous selections
         this.pathStartNode = null;
         this.pathEndNode = null;
         this.renderer.clearHighlight();
 
-        document.getElementById('path-start').textContent = 'None';
-        document.getElementById('path-end').textContent = 'None';
+        // Populate dropdowns with all node names
+        this.populatePathDropdowns();
 
         const calculateBtn = document.getElementById('btn-calculate-path');
         if (calculateBtn) {
@@ -558,14 +550,33 @@ class KnowledgeGraphApp {
             this.pathEndNode
         );
 
+        const modal = document.getElementById('path-modal');
+
         if (path) {
             this.renderer.highlightNodes(path.nodes);
             this.renderer.highlightEdges(path.edges);
-            alert(`Shortest path found!\n` +
-                  `Path: ${path.nodes.join(' → ')}\n` +
+            
+            // Get node names for display
+            const startNode = this.graph.getNode(this.pathStartNode);
+            const endNode = this.graph.getNode(this.pathEndNode);
+            const startName = startNode ? (startNode.name || this.pathStartNode) : this.pathStartNode;
+            const endName = endNode ? (endNode.name || this.pathEndNode) : this.pathEndNode;
+            
+            // Build path display with node names
+            const pathNames = path.nodes.map(nodeId => {
+                const node = this.graph.getNode(nodeId);
+                return node ? (node.name || nodeId) : nodeId;
+            });
+            
+            alert(`Shortest path found!\n\n` +
+                  `From: ${startName}\n` +
+                  `To: ${endName}\n\n` +
+                  `Path: ${pathNames.join(' → ')}\n` +
                   `Distance: ${path.distance.toFixed(2)}`);
+            
+            modal?.classList.add('hidden');
         } else {
-            alert('No path found between these nodes');
+            alert(`No path found between:\n${startNode?.name || this.pathStartNode}\nand\n${endNode?.name || this.pathEndNode}`);
         }
     }
 
@@ -577,44 +588,102 @@ class KnowledgeGraphApp {
         const calculateBtn = document.getElementById('btn-calculate-path');
         const clearBtn = document.getElementById('btn-clear-path');
         const closeBtn = modal?.querySelector('.modal-close');
+        const startSelect = document.getElementById('path-start-select');
+        const endSelect = document.getElementById('path-end-select');
 
-        const originalNodeClick = this.renderer.onNodeClick;
-        this.renderer.onNodeClick = (node) => {
-            if (!this.pathStartNode) {
-                this.pathStartNode = node.id;
-                document.getElementById('path-start').textContent = node.id;
-            } else if (!this.pathEndNode) {
-                this.pathEndNode = node.id;
-                document.getElementById('path-end').textContent = node.id;
-                if (calculateBtn) calculateBtn.disabled = false;
-            }
-        };
+        // Remove existing event listeners by cloning
+        const newCalculateBtn = calculateBtn?.cloneNode(true);
+        const newClearBtn = clearBtn?.cloneNode(true);
+        const newCloseBtn = closeBtn?.cloneNode(true);
+        const newStartSelect = startSelect?.cloneNode(true);
+        const newEndSelect = endSelect?.cloneNode(true);
 
-        const handleCalculate = () => {
+        calculateBtn?.parentNode?.replaceChild(newCalculateBtn, calculateBtn);
+        clearBtn?.parentNode?.replaceChild(newClearBtn, clearBtn);
+        closeBtn?.parentNode?.replaceChild(newCloseBtn, closeBtn);
+        startSelect?.parentNode?.replaceChild(newStartSelect, startSelect);
+        endSelect?.parentNode?.replaceChild(newEndSelect, endSelect);
+
+        // Start node selection
+        newStartSelect?.addEventListener('change', (e) => {
+            this.pathStartNode = e.target.value;
+            this.checkPathSelectionComplete();
+        });
+
+        // End node selection
+        newEndSelect?.addEventListener('change', (e) => {
+            this.pathEndNode = e.target.value;
+            this.checkPathSelectionComplete();
+        });
+
+        // Calculate path
+        newCalculateBtn?.addEventListener('click', () => {
             this.calculateShortestPath();
-        };
+        });
 
-        const handleClear = () => {
+        // Clear path
+        newClearBtn?.addEventListener('click', () => {
             this.pathStartNode = null;
             this.pathEndNode = null;
-            document.getElementById('path-start').textContent = 'None';
-            document.getElementById('path-end').textContent = 'None';
+            if (newStartSelect) newStartSelect.value = '';
+            if (newEndSelect) newEndSelect.value = '';
             this.renderer.clearHighlight();
-            if (calculateBtn) calculateBtn.disabled = true;
-        };
+            if (newCalculateBtn) newCalculateBtn.disabled = true;
+        });
 
+        // Close modal
         const handleClose = () => {
             modal?.classList.add('hidden');
-            this.renderer.onNodeClick = originalNodeClick;
             this.renderer.clearHighlight();
         };
 
-        calculateBtn?.addEventListener('click', handleCalculate, { once: true });
-        clearBtn?.addEventListener('click', handleClear);
-        closeBtn?.addEventListener('click', handleClose, { once: true });
+        newCloseBtn?.addEventListener('click', handleClose);
         modal?.addEventListener('click', (e) => {
             if (e.target === modal) handleClose();
         });
+    }
+	/**
+     * Populate path dropdowns with node names
+     */
+    populatePathDropdowns() {
+        const startSelect = document.getElementById('path-start-select');
+        const endSelect = document.getElementById('path-end-select');
+
+        if (!startSelect || !endSelect) return;
+
+        // Clear existing options except the first one
+        startSelect.innerHTML = '<option value="">-- Select Start Node --</option>';
+        endSelect.innerHTML = '<option value="">-- Select End Node --</option>';
+
+        // Get all nodes and populate dropdowns
+        const allNodeIds = this.graph.getAllNodeIds();
+        
+        allNodeIds.forEach(nodeId => {
+            const node = this.graph.getNode(nodeId);
+            const displayName = node ? (node.name || nodeId) : nodeId;
+            
+            // Add to start dropdown
+            const startOption = document.createElement('option');
+            startOption.value = nodeId;
+            startOption.textContent = displayName;
+            startSelect.appendChild(startOption);
+            
+            // Add to end dropdown
+            const endOption = document.createElement('option');
+            endOption.value = nodeId;
+            endOption.textContent = displayName;
+            endSelect.appendChild(endOption);
+        });
+    }
+
+    /**
+     * Check if both start and end nodes are selected
+     */
+    checkPathSelectionComplete() {
+        const calculateBtn = document.getElementById('btn-calculate-path');
+        if (calculateBtn) {
+            calculateBtn.disabled = !(this.pathStartNode && this.pathEndNode && this.pathStartNode !== this.pathEndNode);
+        }
     }
 
     

@@ -152,13 +152,22 @@
                 <button class="modal-close">✕</button>
             </div>
             <div class="modal-body">
-                <p>Select two nodes to find the shortest path between them.</p>
-                <div class="path-info">
-                    <div>Start Node: <span id="path-start">None</span></div>
-                    <div>End Node: <span id="path-end">None</span></div>
+                <div class="property-item">
+                    <label class="property-label">Start Node</label>
+                    <select class="property-input" id="path-start-select">
+                        <option value="">-- Select Start Node --</option>
+                    </select>
                 </div>
+
+                <div class="property-item">
+                    <label class="property-label">End Node</label>
+                    <select class="property-input" id="path-end-select">
+                        <option value="">-- Select End Node --</option>
+                    </select>
+                </div>
+
                 <button id="btn-calculate-path" class="modal-btn" disabled>Calculate Path</button>
-                <button id="btn-clear-path" class="modal-btn">Clear Selection</button>
+                <button id="btn-clear-path" class="modal-btn">Clear Path</button>
             </div>
         </div>
     </div>
