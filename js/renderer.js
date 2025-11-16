@@ -228,7 +228,8 @@ class Renderer {
         this.simulation.nodes(nodes);
         this.simulation.force('link').links(edgeData);
         
-        // Feature 3: Only restart if not frozen
+        this.simulation.tick();
+		// Feature 3: Only restart if not frozen
 			if (!this.isFrozen) {
 				this.simulation.alpha(0.3).restart();
 				this.startAutoFreezeTimer();
