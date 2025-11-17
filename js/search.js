@@ -48,12 +48,13 @@ class SearchManager {
         // Search nodes
         this.currentResults = this.graph.searchNodes(query);
 
-        // Highlight results
-			const nodeIds = this.currentResults.map(node => node.id);
-			this.renderer.highlightNodes(nodeIds);
+        // Highlight AND select results
+		const nodeIds = this.currentResults.map(node => node.id);
+		this.renderer.highlightNodes(nodeIds);
+		this.renderer.selectNodes(nodeIds);  // ADD THIS LINE
 
-			// Update UI
-			this.updateSearchStatus();
+		// Update UI
+		this.updateSearchStatus();
 	}
 
     /**
@@ -66,6 +67,7 @@ class SearchManager {
 
         this.currentResults = [];
         this.renderer.clearHighlight();
+		this.renderer.clearSelection();
         this.updateSearchStatus();
     }
 
