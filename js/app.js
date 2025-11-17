@@ -51,7 +51,8 @@ class KnowledgeGraphApp {
         // Toolbar buttons
         document.getElementById('btn-new')?.addEventListener('click', () => this.newGraph());
         document.getElementById('btn-open')?.addEventListener('click', () => this.openGraph());
-        document.getElementById('btn-save')?.addEventListener('click', () => this.saveGraph());
+		document.getElementById('btn-save')?.addEventListener('click', () => this.saveGraph());
+		document.getElementById('btn-save-as')?.addEventListener('click', () => this.saveGraphAs());
         document.getElementById('btn-export')?.addEventListener('click', () => this.exportGraph());
         
         // Undo/Redo
@@ -458,11 +459,18 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Save graph
-     */
-    saveGraph() {
-        this.fileManager.saveAs();
-    }
+	 * Save graph
+	 */
+	saveGraph() {
+		this.fileManager.save();
+	}
+
+	/**
+	 * Save graph as
+	 */
+	saveGraphAs() {
+		this.fileManager.saveAs();
+	}
 
     /**
      * Export graph

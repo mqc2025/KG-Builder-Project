@@ -12,7 +12,7 @@ class TabManager {
         this.setupEventListeners();
         
         // Create first tab
-        this.createTab('Graph 1');
+        this.createTab('Graph 1', true);
     }
 
     /**
@@ -42,19 +42,47 @@ class TabManager {
     /**
      * Create a new tab
      */
-    createTab(name = null) {
+    createTab(name = null, isFirstTab = false) {
         const tabId = `tab_${++this.tabCounter}`;
         const tabName = name || `Graph ${this.tabCounter}`;
 
         const tab = {
             id: tabId,
             name: tabName,
-            graphData: null // Will store serialized graph
+            graphData: null, // Will store serialized graph
+            filename: null // Track filename for this tab
         };
 
         this.tabs.push(tab);
         this.renderTabs();
-        this.switchTab(tabId);
+        
+        // For new tabs (not the first one), initialize with empty graph
+        if (!isFirstTab) {
+            // Save current tab before switching
+            this.saveCurrentTab();
+            this.switchTab(tabId);
+            
+            // Initialize new empty graph for the new tab
+            if (window.app) {
+                window.app.graph.clear();
+                window.app.graph.metadata = {
+                    name: tabName,
+                    title: '',
+                    description: '',
+                    created: Utils.getCurrentDate(),
+                    modified: Utils.getCurrentDate()
+                };
+                window.app.fileManager.clearCurrentFilename();
+                window.app.renderer.clearSelection();
+                window.app.renderer.render();
+                window.app.propertiesPanel.hide();
+                window.app.updateStats();
+                window.app.history.clear();
+                window.app.saveState();
+            }
+        } else {
+            this.switchTab(tabId);
+        }
 
         return tabId;
     }
@@ -96,22 +124,45 @@ class TabManager {
         const tab = this.tabs.find(t => t.id === tabId);
         if (!tab) return;
 
-        // Save current tab's graph
+        // Don't switch if already active
+        if (this.activeTabId === tabId) {
+            return;
+        }
+
+        // Save current tab's graph and filename
         if (this.activeTabId && window.app) {
             const currentTab = this.tabs.find(t => t.id === this.activeTabId);
             if (currentTab) {
                 currentTab.graphData = window.app.graph.toJSON();
+                currentTab.filename = window.app.fileManager.getCurrentFilename();
             }
         }
 
         this.activeTabId = tabId;
 
-        // Load new tab's graph
+        // Load new tab's graph and filename
         if (window.app) {
             if (tab.graphData) {
+                // Tab has existing data, load it
                 window.app.loadGraph(tab.graphData);
+                window.app.fileManager.setCurrentFilename(tab.filename);
             } else {
-                window.app.newGraph();
+                // Tab is empty, but don't call newGraph() - just clear
+                window.app.graph.clear();
+                window.app.graph.metadata = {
+                    name: tab.name,
+                    title: '',
+                    description: '',
+                    created: Utils.getCurrentDate(),
+                    modified: Utils.getCurrentDate()
+                };
+                window.app.fileManager.clearCurrentFilename();
+                window.app.renderer.clearSelection();
+                window.app.renderer.render();
+                window.app.propertiesPanel.hide();
+                window.app.updateStats();
+                window.app.history.clear();
+                window.app.saveState();
             }
         }
 
@@ -158,6 +209,7 @@ class TabManager {
             const currentTab = this.tabs.find(t => t.id === this.activeTabId);
             if (currentTab) {
                 currentTab.graphData = window.app.graph.toJSON();
+                currentTab.filename = window.app.fileManager.getCurrentFilename();
             }
         }
     }
@@ -170,7 +222,8 @@ class TabManager {
         return this.tabs.map(tab => ({
             id: tab.id,
             name: tab.name,
-            graphData: tab.graphData
+            graphData: tab.graphData,
+            filename: tab.filename
         }));
     }
 
@@ -183,7 +236,8 @@ class TabManager {
         this.tabs = tabsData.map((data, index) => ({
             id: data.id || `tab_${index + 1}`,
             name: data.name || `Graph ${index + 1}`,
-            graphData: data.graphData
+            graphData: data.graphData,
+            filename: data.filename || null
         }));
 
         this.tabCounter = this.tabs.length;

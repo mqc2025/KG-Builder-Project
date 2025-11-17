@@ -5,6 +5,9 @@ class FileManager {
         this.graph = graph;
         this.renderer = renderer;
         
+        // Track current filename for direct save
+        this.currentFilename = null;
+        
         this.fileInput = document.getElementById('file-input');
         this.exportModal = document.getElementById('export-modal');
         
@@ -110,6 +113,9 @@ class FileManager {
                     const newTabId = window.app.tabManager.createTab(filename);
                     window.app.tabManager.switchTab(newTabId);
                     
+                    // Set the current filename for this tab
+                    this.currentFilename = filename;
+                    
                     // Load the graph in the new tab
                     this.importGraph(json);
                 }
@@ -120,92 +126,6 @@ class FileManager {
         };
 
         reader.readAsText(file);
-    }
-
-    /**
-     * Setup auto-save functionality
-     */
-    setupAutoSave() {
-        setInterval(() => {
-            this.saveToLocalStorage();
-        }, 30000);
-
-        this.tryRecoverFromLocalStorage();
-    }
-
-    /**
-     * Open file dialog
-     */
-    openFile() {
-        this.fileInput?.click();
-    }
-
-    /**
-     * Handle file selection
-     */
-    handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (!file.name.endsWith('.json')) {
-            alert('Please select a JSON file');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const json = JSON.parse(e.target.result);
-                this.importGraph(json);
-            } catch (error) {
-                alert('Error reading file: ' + error.message);
-                console.error('Import error:', error);
-            }
-        };
-
-        reader.readAsText(file);
-
-        event.target.value = '';
-    }
-
-    /**
-     * Import graph from JSON
-     */
-    importGraph(json) {
-        Utils.showLoading();
-
-        setTimeout(() => {
-            try {
-                const success = this.graph.fromJSON(json);
-
-                if (!success) {
-                    throw new Error('Invalid graph format');
-                }
-
-                if (json.graph?.metadata?.name && window.app?.tabManager) {
-                    window.app.tabManager.renameActiveTab(json.graph.metadata.name);
-                }
-
-                this.renderer.render();
-
-                setTimeout(() => {
-                    this.renderer.fitToView();
-                }, 150);
-
-                if (window.app) {
-                    window.app.updateStats();
-                    window.app.saveState();
-                    window.app.propertiesPanel.hide();
-                }
-
-                Utils.hideLoading();
-                alert('Graph imported successfully!');
-            } catch (error) {
-                Utils.hideLoading();
-                alert('Error importing graph: ' + error.message);
-                console.error('Import error:', error);
-            }
-        }, 100);
     }
 
     /**
@@ -236,38 +156,41 @@ class FileManager {
             try {
                 const svgElement = document.getElementById('graph-canvas');
                 const svgString = new XMLSerializer().serializeToString(svgElement);
-                
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                
+
+                const bbox = svgElement.getBBox();
+                canvas.width = bbox.width + 40;
+                canvas.height = bbox.height + 40;
+
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
                 const img = new Image();
-                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
+                const blob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
 
                 img.onload = () => {
-                    canvas.width = svgElement.clientWidth;
-                    canvas.height = svgElement.clientHeight;
-                    
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    ctx.drawImage(img, 0, 0);
+                    ctx.drawImage(img, 20, 20);
                     URL.revokeObjectURL(url);
 
                     canvas.toBlob((blob) => {
-                        const link = document.createElement('a');
-                        link.download = `${this.graph.metadata.name.replace(/\s+/g, '_')}.png`;
-                        link.href = URL.createObjectURL(blob);
-                        link.click();
-                        URL.revokeObjectURL(link.href);
+                        const url = URL.createObjectURL(blob);
+                        const filename = `${this.graph.metadata.name.replace(/\s+/g, '_')}.png`;
+
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        a.click();
+
+                        URL.revokeObjectURL(url);
                         Utils.hideLoading();
                     });
                 };
 
                 img.onerror = () => {
-                    URL.revokeObjectURL(url);
                     Utils.hideLoading();
-                    alert('Error exporting PNG. Using alternative method...');
+                    console.error('PNG export failed. Using alternative method...');
                     this.exportPNGFallback();
                 };
 
@@ -366,17 +289,162 @@ class FileManager {
     }
 
     /**
+     * Setup auto-save functionality
+     */
+    setupAutoSave() {
+        setInterval(() => {
+            this.saveToLocalStorage();
+        }, 30000);
+
+        this.tryRecoverFromLocalStorage();
+    }
+
+    /**
+     * Open file dialog
+     */
+    openFile() {
+        this.fileInput?.click();
+    }
+
+    /**
+     * Handle file selection
+     */
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.json')) {
+            alert('Please select a JSON file');
+            return;
+        }
+
+        // Store the filename for future saves
+        this.currentFilename = file.name.replace('.json', '');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+                this.importGraph(json);
+            } catch (error) {
+                alert('Error reading file: ' + error.message);
+                console.error('Import error:', error);
+            }
+        };
+
+        reader.readAsText(file);
+
+        event.target.value = '';
+    }
+
+    /**
+     * Import graph from JSON
+     */
+    importGraph(json) {
+        Utils.showLoading();
+
+        setTimeout(() => {
+            try {
+                const success = this.graph.fromJSON(json);
+
+                if (!success) {
+                    throw new Error('Invalid graph format');
+                }
+
+                if (json.graph?.metadata?.name && window.app?.tabManager) {
+                    window.app.tabManager.renameActiveTab(json.graph.metadata.name);
+                }
+
+                this.renderer.render();
+
+                setTimeout(() => {
+                    this.renderer.fitToView();
+                }, 150);
+
+                if (window.app) {
+                    window.app.updateStats();
+                    window.app.saveState();
+                    window.app.propertiesPanel.hide();
+                }
+
+                Utils.hideLoading();
+                alert('Graph imported successfully!');
+            } catch (error) {
+                Utils.hideLoading();
+                alert('Error importing graph: ' + error.message);
+                console.error('Import error:', error);
+            }
+        }, 100);
+    }
+
+    /**
+     * Save graph directly (if filename exists) or prompt for name
+     */
+    save() {
+        if (this.currentFilename) {
+            // Direct save with existing filename
+            const json = this.graph.toJSON();
+            const jsonString = JSON.stringify(json, null, 2);
+            const filename = `${this.currentFilename}.json`;
+            
+            Utils.downloadFile(filename, jsonString, 'application/json');
+            
+            if (window.app) {
+                window.app.updateStatus(`Saved as ${filename}`);
+            }
+        } else {
+            // No filename yet, act like Save As
+            this.saveAs();
+        }
+    }
+
+    /**
      * Save graph with custom name
      */
     saveAs() {
-        const name = prompt('Enter graph name:', this.graph.metadata.name);
+        const currentName = this.currentFilename || this.graph.metadata.name;
+        const name = prompt('Enter graph name:', currentName);
+        
         if (name) {
+            this.currentFilename = name;
             this.graph.metadata.name = name;
+            
             if (window.app?.tabManager) {
                 window.app.tabManager.renameActiveTab(name);
             }
-            this.exportJSON();
+            
+            // Now save with the new filename
+            const json = this.graph.toJSON();
+            const jsonString = JSON.stringify(json, null, 2);
+            const filename = `${name.replace(/\s+/g, '_')}.json`;
+            
+            Utils.downloadFile(filename, jsonString, 'application/json');
+            
+            if (window.app) {
+                window.app.updateStatus(`Saved as ${filename}`);
+            }
         }
+    }
+
+    /**
+     * Get current filename
+     */
+    getCurrentFilename() {
+        return this.currentFilename;
+    }
+
+    /**
+     * Set current filename
+     */
+    setCurrentFilename(filename) {
+        this.currentFilename = filename;
+    }
+
+    /**
+     * Clear current filename
+     */
+    clearCurrentFilename() {
+        this.currentFilename = null;
     }
 }
 
