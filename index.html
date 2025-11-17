@@ -20,28 +20,6 @@
             <h1 class="app-title">Knowledge Graph Editor</h1>
         </div>
         <div class="toolbar">
-            <button id="btn-new" class="toolbar-btn" title="New Graph (Ctrl+N)">
-                <span>📄</span> New
-            </button>
-            <button id="btn-open" class="toolbar-btn" title="Open Graph (Ctrl+O)">
-				<span>📂</span> Open
-			</button>
-			<button id="btn-save" class="toolbar-btn" title="Save Graph (Ctrl+S)">
-				<span>💾</span> Save
-			</button>
-			<button id="btn-save-as" class="toolbar-btn" title="Save Graph As">
-				<span>💾</span> Save As
-			</button>
-            <button id="btn-export" class="toolbar-btn" title="Export">
-                <span>📤</span> Export
-            </button>
-            <button id="btn-create-excel-converter" class="toolbar-btn" title="Create Excel Converter">
-                <span>📊</span> Create Excel Converter
-            </button>
-            <button id="btn-convert-excel" class="toolbar-btn" title="Convert Excel">
-                <span>🔄</span> Convert Excel
-            </button>
-            <div class="toolbar-separator"></div>
             <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
                 <span>↶</span>
             </button>
@@ -65,29 +43,76 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Left Sidebar: Tools -->
-		<aside class="left-sidebar">
-			<div class="tool-palette">
-				<h3>Tools</h3>
-				<button id="tool-pan" class="tool-btn" title="Pan (Space)">
-					<span>✋</span>
-					<span class="tool-label">Pan</span>
-				</button>
-				<div class="tool-separator"></div>
-				<button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
-					<span>❄️</span>
-					<span class="tool-label">Freeze</span>
-				</button>
-				<button id="btn-layout" class="tool-btn" title="Resimulate">
-					<span>⊞</span>
-					<span class="tool-label">Resimulate</span>
-				</button>
-				<button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
-					<span>⚡</span>
-					<span class="tool-label">Path</span>
-				</button>
-			</div>
-		</aside>
+        <!-- Left Sidebar: File & Tools Tabs -->
+        <aside class="left-sidebar">
+            <!-- Tab Headers -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="file">File</button>
+                <button class="sidebar-tab" data-tab="tools">Tools</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="sidebar-tab-content">
+                <!-- File Tab Content -->
+                <div id="file-tab" class="tab-panel active">
+                    <div class="tool-palette">
+                        <button id="btn-new" class="tool-btn" title="New Graph (Ctrl+N)">
+                            <span>📄</span>
+                            <span class="tool-label">New</span>
+                        </button>
+                        <button id="btn-open" class="tool-btn" title="Open Graph (Ctrl+O)">
+                            <span>📂</span>
+                            <span class="tool-label">Open</span>
+                        </button>
+                        <button id="btn-save" class="tool-btn" title="Save Graph (Ctrl+S)">
+                            <span>💾</span>
+                            <span class="tool-label">Save</span>
+                        </button>
+                        <button id="btn-save-as" class="tool-btn" title="Save Graph As">
+                            <span>💾</span>
+                            <span class="tool-label">Save As</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-export" class="tool-btn" title="Export">
+                            <span>📤</span>
+                            <span class="tool-label">Export</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-create-excel-converter" class="tool-btn" title="Create Excel Converter">
+                            <span>📊</span>
+                            <span class="tool-label">Create Excel Converter</span>
+                        </button>
+                        <button id="btn-convert-excel" class="tool-btn" title="Convert Excel">
+                            <span>🔄</span>
+                            <span class="tool-label">Convert Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tools Tab Content -->
+                <div id="tools-tab" class="tab-panel">
+                    <div class="tool-palette">
+                        <button id="tool-pan" class="tool-btn" title="Pan (Space)">
+                            <span>✋</span>
+                            <span class="tool-label">Pan</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
+                            <span>❄️</span>
+                            <span class="tool-label">Freeze</span>
+                        </button>
+                        <button id="btn-layout" class="tool-btn" title="Resimulate">
+                            <span>⊞</span>
+                            <span class="tool-label">Resimulate</span>
+                        </button>
+                        <button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
+                            <span>⚡</span>
+                            <span class="tool-label">Path</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
         <!-- Canvas Area -->
         <main class="canvas-container" id="canvas-drop-zone">
@@ -246,6 +271,7 @@
     <script src="js/tabManager.js"></script>
     <script src="js/fileManager.js"></script>
     <script src="js/excelConverter.js"></script>
+    <script src="js/sidebarTabs.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

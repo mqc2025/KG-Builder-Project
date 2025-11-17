@@ -143,6 +143,112 @@ body {
     overflow-y: auto;
     box-shadow: 2px 0 4px rgba(0,0,0,0.05);
 }
+/* Left Sidebar */
+.left-sidebar {
+    width: var(--sidebar-width);
+    background-color: white;
+    border-right: 1px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar Tabs */
+.sidebar-tabs {
+    display: flex;
+    background-color: var(--light-bg);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.sidebar-tab {
+    flex: 1;
+    padding: 12px 15px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.sidebar-tab:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--text-primary);
+}
+
+.sidebar-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background-color: white;
+}
+
+/* Tab Content */
+.sidebar-tab-content {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.tab-panel {
+    display: none;
+    height: 100%;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.tool-palette {
+    padding: 15px;
+}
+
+.tool-palette h3 {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.tool-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.tool-btn span:first-child {
+    font-size: 20px;
+}
+
+.tool-btn:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+}
+
+.tool-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.tool-separator {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 15px 0;
+}
 
 .tool-palette {
     padding: 15px;

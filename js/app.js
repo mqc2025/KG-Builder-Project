@@ -49,6 +49,22 @@ class KnowledgeGraphApp {
      * Setup event listeners
      */
     setupEventListeners() {
+		// Sidebar tab switching - ADD THIS SECTION
+        const sidebarTabs = document.querySelectorAll('.sidebar-tab');
+        sidebarTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and panels
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding panel
+                const tabName = tab.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tab`)?.classList.add('active');
+            });
+        });
         // Toolbar buttons
         document.getElementById('btn-new')?.addEventListener('click', () => this.newGraph());
         document.getElementById('btn-open')?.addEventListener('click', () => this.openGraph());
@@ -500,6 +516,27 @@ class KnowledgeGraphApp {
         this.updateStats();
         this.history.clear();
         this.saveState();
+    }
+	
+	/**
+     * Add node at specific position (called from context menu)
+     */
+    async addNode(x, y) {
+        const name = prompt('Enter node name:');
+        if (!name) return;
+
+        const node = await this.graph.addNode({
+            name: name,
+            x: x,
+            y: y,
+            fx: x,
+            fy: y
+        });
+
+        this.renderer.render();
+        this.updateStats();
+        this.saveState();
+        this.updateStatus(`Added node: ${name}`);
     }
 }
 
