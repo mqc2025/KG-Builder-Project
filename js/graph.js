@@ -464,6 +464,85 @@ class Graph {
     getAllNodeNames() {
         return this.nodes.map(node => node.name || node.id);
     }
+	/**
+	 * Search nodes by query (searches in name, description, category)
+	 * @param {string} query - Search query
+	 * @returns {Array} Matching nodes
+	 */
+	searchNodes(query) {
+		if (!query || query.trim() === '') {
+			return [];
+		}
+
+		const lowerQuery = query.toLowerCase().trim();
+
+		return this.nodes.filter(node => {
+			// Search in name
+			if (node.name && node.name.toLowerCase().includes(lowerQuery)) {
+				return true;
+			}
+
+			// Search in description
+			if (node.description && node.description.toLowerCase().includes(lowerQuery)) {
+				return true;
+			}
+
+			// Search in category
+			if (node.category && node.category.toLowerCase().includes(lowerQuery)) {
+				return true;
+			}
+
+			// Search in subCat
+			if (node.subCat && node.subCat.toLowerCase().includes(lowerQuery)) {
+				return true;
+			}
+
+			// Search in id
+			if (node.id && node.id.toLowerCase().includes(lowerQuery)) {
+				return true;
+			}
+
+			return false;
+		});
+	}
+
+	/**
+	 * Filter nodes by property value
+	 * @param {string} propertyKey - Property name to filter by
+	 * @param {string} propertyValue - Value to match
+	 * @param {string} matchType - Match type: 'exact', 'contains', 'starts', 'ends'
+	 * @returns {Array} Matching nodes
+	 */
+	filterNodes(propertyKey, propertyValue, matchType = 'exact') {
+		if (!propertyKey || !propertyValue) {
+			return [];
+		}
+
+		const lowerValue = propertyValue.toLowerCase();
+
+		return this.nodes.filter(node => {
+			const nodeValue = node[propertyKey];
+			
+			if (nodeValue === undefined || nodeValue === null) {
+				return false;
+			}
+
+			const lowerNodeValue = String(nodeValue).toLowerCase();
+
+			switch (matchType) {
+				case 'exact':
+					return lowerNodeValue === lowerValue;
+				case 'contains':
+					return lowerNodeValue.includes(lowerValue);
+				case 'starts':
+					return lowerNodeValue.startsWith(lowerValue);
+				case 'ends':
+					return lowerNodeValue.endsWith(lowerValue);
+				default:
+					return lowerNodeValue === lowerValue;
+			}
+		});
+	}
 
     /**
      * Clear the graph
