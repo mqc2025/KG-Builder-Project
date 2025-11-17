@@ -35,6 +35,12 @@
             <button id="btn-export" class="toolbar-btn" title="Export">
                 <span>📤</span> Export
             </button>
+            <button id="btn-create-excel-converter" class="toolbar-btn" title="Create Excel Converter">
+                <span>📊</span> Create Excel Converter
+            </button>
+            <button id="btn-convert-excel" class="toolbar-btn" title="Convert Excel">
+                <span>🔄</span> Convert Excel
+            </button>
             <div class="toolbar-separator"></div>
             <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
                 <span>↶</span>
@@ -125,6 +131,15 @@
 
     <!-- Hidden File Input -->
     <input type="file" id="file-input" accept=".json" style="display: none;">
+    
+    <!-- Hidden Excel File Input for Create Converter -->
+    <input type="file" id="excel-converter-input" accept=".xlsx,.xls" style="display: none;">
+    
+    <!-- Hidden Excel File Input for Convert Excel -->
+    <input type="file" id="excel-data-input" accept=".xlsx,.xls" style="display: none;">
+    
+    <!-- Hidden Mapping JSON Input for Convert Excel -->
+    <input type="file" id="mapping-json-input" accept=".json" style="display: none;">
 
     <!-- Export Modal -->
     <div id="export-modal" class="modal hidden">
@@ -211,6 +226,9 @@
         <!-- Dynamically populated -->
     </div>
 
+    <!-- SheetJS Library for Excel Processing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
     <!-- D3.js Library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
@@ -227,6 +245,7 @@
     <script src="js/contextMenu.js"></script>
     <script src="js/tabManager.js"></script>
     <script src="js/fileManager.js"></script>
+    <script src="js/excelConverter.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
