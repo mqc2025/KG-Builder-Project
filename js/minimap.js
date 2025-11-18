@@ -27,11 +27,7 @@ class Minimap {
     setupInteraction() {
         const self = this;
 
-        // Click to navigate
-        this.svg.on('click', function(event) {
-            const [x, y] = d3.pointer(event);
-            self.navigateToPoint(x, y);
-        });
+        // REMOVED: Click to navigate - now only drag is supported
 
         // Drag viewport
         const drag = d3.drag()

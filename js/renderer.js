@@ -85,6 +85,8 @@ class Renderer {
 		this.simulation.stop();
 		this.clearAutoFreezeTimer();
 		this.updateSimulationStatus();
+		// Update minimap when frozen
+		this.updateMinimap();
 	}
 
 	/**
@@ -248,6 +250,9 @@ class Renderer {
         
         // Feature 9: Update font sizes
         this.updateFontSizes();
+        
+        // Update minimap after initial render
+        this.updateMinimap();
     }
 
     /**
@@ -481,6 +486,9 @@ class Renderer {
 			if (!self.isFrozen) {
 				self.simulation.alpha(0.3).restart();
 				self.startAutoFreezeTimer();
+			} else {
+				// Update minimap when dragging while frozen
+				self.updateMinimap();
 			}
 			
 			if (self.onNodeDragEnd) {
@@ -574,6 +582,9 @@ class Renderer {
                 .attr('y', midY)
                 .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
         });
+        
+        // Update minimap viewport (not full redraw, just viewport position)
+        this.updateMinimapViewport();
     }
 
     /**
@@ -750,6 +761,9 @@ class Renderer {
 			this.simulation.alpha(0.3).restart();
 			this.startAutoFreezeTimer();
 		}
+		
+		// Update minimap on resize
+		this.updateMinimap();
 	}
 
     /**
@@ -810,6 +824,23 @@ class Renderer {
 		});
 	}
 	
+	/**
+	 * Update minimap with full graph data
+	 */
+	updateMinimap() {
+		if (window.app && window.app.minimap) {
+			window.app.minimap.update(this.graph.nodes, this.graph.edges);
+		}
+	}
+	
+	/**
+	 * Update only minimap viewport (lighter operation)
+	 */
+	updateMinimapViewport() {
+		if (window.app && window.app.minimap) {
+			window.app.minimap.updateViewport();
+		}
+	}
 	
 }
 
