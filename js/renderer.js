@@ -520,6 +520,25 @@ class Renderer {
             this.simulation.alpha(0.5).restart();
         }
     }
+	/**
+     * Pin all nodes at their current positions
+     */
+    pinAllNodes() {
+        this.graph.nodes.forEach(node => {
+            node.fx = node.x;
+            node.fy = node.y;
+        });
+    }
+
+    /**
+     * Unpin all nodes
+     */
+    unpinAllNodes() {
+        this.graph.nodes.forEach(node => {
+            node.fx = null;
+            node.fy = null;
+        });
+    }
 
     /**
      * Update node and edge positions on simulation tick
@@ -744,9 +763,11 @@ class Renderer {
      * Restart simulation
      */
     restartSimulation() {
-        if (!this.isFrozen) {
-            this.simulation.alpha(0.3).restart();
-        }
+        // Always unfreeze and restart with strong alpha
+        this.isFrozen = false;
+        this.simulation.alpha(0.5).restart();
+        this.startAutoFreezeTimer();
+        this.updateSimulationStatus();
     }
 
     /**

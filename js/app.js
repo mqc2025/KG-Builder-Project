@@ -167,7 +167,7 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Handle node click
+     * Handle node click - FIXED
      */
     handleNodeClick(node) {
         // Check if in shortest path mode
@@ -176,16 +176,26 @@ class KnowledgeGraphApp {
             return;
         }
         
-        this.propertiesPanel.show(node, 'node');
-        this.updateStatus();
+        // Select the node
+        this.renderer.selectNodes([node.id]);
+        
+        // Show properties panel
+        this.propertiesPanel.showNodeProperties(node.id);
+        
+        this.updateStatus(`Selected node: ${node.name || node.id}`);
     }
 
     /**
-     * Handle edge click
+     * Handle edge click - FIXED
      */
     handleEdgeClick(edge) {
-        this.propertiesPanel.show(edge, 'edge');
-        this.updateStatus();
+        // Select the edge
+        this.renderer.selectEdges([edge.id]);
+        
+        // Show properties panel
+        this.propertiesPanel.showEdgeProperties(edge.id);
+        
+        this.updateStatus(`Selected edge: ${edge.name || edge.id}`);
     }
 
     /**
@@ -198,10 +208,22 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Toggle freeze simulation
+     * Toggle freeze simulation - FIXED to pin/unpin all nodes
      */
     toggleFreeze() {
-        this.renderer.toggleFreeze();
+        if (this.renderer.isFrozen) {
+            // Unfreeze: unpin all nodes and restart simulation
+            this.renderer.unpinAllNodes();
+            this.renderer.unfreezeSimulation();
+            this.updateStatus('Unfrozen: All nodes unpinned, simulation active');
+        } else {
+            // Freeze: pin all nodes at current positions and stop simulation
+            this.renderer.pinAllNodes();
+            this.renderer.freezeSimulation();
+            this.updateStatus('Frozen: All nodes pinned, simulation stopped');
+        }
+        
+        // Update button UI
         const btn = document.getElementById('btn-freeze');
         if (btn) {
             const icon = btn.querySelector('span:first-child');
@@ -209,26 +231,44 @@ class KnowledgeGraphApp {
             if (this.renderer.isFrozen) {
                 icon.textContent = '▶️';
                 label.textContent = 'Unfreeze';
+                btn.classList.add('active');
             } else {
                 icon.textContent = '❄️';
                 label.textContent = 'Freeze';
+                btn.classList.remove('active');
             }
         }
+        
         this.updateSimulationStatus();
     }
 
     /**
-     * Resimulate graph
+     * Resimulate graph - FIXED to properly reset simulation
      */
     resimulate() {
         // Unpin all nodes
-        this.graph.nodes.forEach(node => {
-            delete node.fx;
-            delete node.fy;
-        });
+        this.renderer.unpinAllNodes();
         
+        // Unfreeze if frozen
+        if (this.renderer.isFrozen) {
+            this.renderer.unfreezeSimulation();
+            
+            // Update freeze button UI
+            const btn = document.getElementById('btn-freeze');
+            if (btn) {
+                const icon = btn.querySelector('span:first-child');
+                const label = btn.querySelector('.tool-label');
+                icon.textContent = '❄️';
+                label.textContent = 'Freeze';
+                btn.classList.remove('active');
+            }
+        }
+        
+        // Restart simulation with higher alpha for more movement
         this.renderer.restartSimulation();
-        this.updateStatus('Simulation restarted');
+        
+        this.updateStatus('Simulation restarted - all nodes unpinned');
+        this.updateSimulationStatus();
     }
 
     /**
@@ -404,11 +444,12 @@ class KnowledgeGraphApp {
         
         let selectionText = 'None';
         if (selectedNode) {
-            selectionText = `Node: ${selectedNode}`;
+            const node = this.graph.getNode(selectedNode);
+            selectionText = node ? `Node: ${node.name || selectedNode}` : `Node: ${selectedNode}`;
         } else if (selectedEdge) {
             const edge = this.graph.getEdge(selectedEdge);
             if (edge) {
-                selectionText = `Edge: ${edge.type || selectedEdge}`;
+                selectionText = `Edge: ${edge.name || edge.relationship || selectedEdge}`;
             } else {
                 selectionText = `Edge: ${selectedEdge}`;
             }
