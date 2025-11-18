@@ -27,9 +27,9 @@ class Minimap {
     setupInteraction() {
         const self = this;
 
-        // REMOVED: Click to navigate - now only drag is supported
+        // REMOVED: Click to navigate - this was causing the scroll wheel font size issue
 
-        // Drag viewport
+        // Drag viewport only
         const drag = d3.drag()
             .on('drag', function(event) {
                 const [x, y] = [event.x, event.y];
@@ -122,7 +122,7 @@ class Minimap {
 
     /**
      * Render minimap edges
-     * FIX: Guard against NaN coordinates when source/target are still string IDs
+     * FIXED: Use self reference instead of this to access transformX/Y methods
      */
     renderEdges(edges) {
         const self = this;
@@ -138,49 +138,42 @@ class Minimap {
             .attr('class', 'minimap-edge')
             .merge(edgeElements)
             .attr('x1', d => {
-                // Handle object references (after D3 conversion)
                 if (typeof d.source === 'object' && d.source !== null) {
-                    return this.transformX(d.source.x);
+                    return self.transformX(d.source.x);
                 }
-                // Handle half-edges with free source end
                 if (d.sourceX !== undefined) {
-                    return this.transformX(d.sourceX);
+                    return self.transformX(d.sourceX);
                 }
-                // Skip rendering if source is still a string (pre-conversion)
                 return 0;
             })
             .attr('y1', d => {
                 if (typeof d.source === 'object' && d.source !== null) {
-                    return this.transformY(d.source.y);
+                    return self.transformY(d.source.y);
                 }
                 if (d.sourceY !== undefined) {
-                    return this.transformY(d.sourceY);
+                    return self.transformY(d.sourceY);
                 }
                 return 0;
             })
             .attr('x2', d => {
-                // Handle object references (after D3 conversion)
                 if (typeof d.target === 'object' && d.target !== null) {
-                    return this.transformX(d.target.x);
+                    return self.transformX(d.target.x);
                 }
-                // Handle half-edges with free target end
                 if (d.targetX !== undefined) {
-                    return this.transformX(d.targetX);
+                    return self.transformX(d.targetX);
                 }
-                // Skip rendering if target is still a string (pre-conversion)
                 return 0;
             })
             .attr('y2', d => {
                 if (typeof d.target === 'object' && d.target !== null) {
-                    return this.transformY(d.target.y);
+                    return self.transformY(d.target.y);
                 }
                 if (d.targetY !== undefined) {
-                    return this.transformY(d.targetY);
+                    return self.transformY(d.targetY);
                 }
                 return 0;
             })
             .style('visibility', d => {
-                // Hide edge if source or target is still a string
                 const sourceValid = (typeof d.source === 'object' && d.source !== null) || d.sourceX !== undefined;
                 const targetValid = (typeof d.target === 'object' && d.target !== null) || d.targetX !== undefined;
                 return (sourceValid && targetValid) ? 'visible' : 'hidden';
@@ -191,6 +184,8 @@ class Minimap {
      * Render minimap nodes
      */
     renderNodes(nodes) {
+        const self = this;
+
         const nodeElements = this.nodeGroup
             .selectAll('circle')
             .data(nodes, d => d.id);
@@ -202,8 +197,8 @@ class Minimap {
             .attr('class', 'minimap-node')
             .attr('r', 2)
             .merge(nodeElements)
-            .attr('cx', d => this.transformX(d.x))
-            .attr('cy', d => this.transformY(d.y));
+            .attr('cx', d => self.transformX(d.x))
+            .attr('cy', d => self.transformY(d.y));
     }
 
     /**

@@ -638,3 +638,699 @@
     background-color: #95a5a6;
     color: white;
 }
+
+/* Properties Panel Styles */
+
+.properties-panel {
+    position: fixed;
+    right: 0;
+    top: 60px;
+    bottom: 40px;
+    width: 350px;
+    background-color: white;
+    border-left: 1px solid var(--border-color);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.3s ease;
+}
+
+.properties-panel.hidden {
+    transform: translateX(100%);
+}
+
+/* Header */
+.properties-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.properties-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+#btn-close-properties {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s;
+}
+
+#btn-close-properties:hover {
+    color: var(--danger-color);
+}
+
+/* Content */
+.properties-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Property Groups */
+.property-group {
+    margin-bottom: 25px;
+}
+
+.property-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Property Items */
+.property-item {
+    margin-bottom: 15px;
+}
+
+.property-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.property-hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 4px 0 0 0;
+    font-style: italic;
+}
+
+.property-input,
+.property-textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.property-input:focus,
+.property-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.property-textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* Color Palette */
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    padding: 0;
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.color-swatch.active {
+    border-color: var(--text-primary);
+    border-width: 3px;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+/* Custom Properties */
+.custom-property {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: var(--light-bg);
+    border-radius: 4px;
+}
+
+.custom-property-inputs {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+}
+
+.custom-property-key,
+.custom-property-value {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.btn-remove-property {
+    padding: 4px 8px;
+    background-color: transparent;
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-remove-property:hover {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+
+/* Empty State */
+.properties-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.properties-empty p {
+    margin-bottom: 20px;
+}
+
+/* Metadata Section */
+.metadata-section {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.metadata-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.metadata-item strong {
+    color: var(--text-primary);
+}
+
+.metadata-item span {
+    color: var(--text-secondary);
+}
+
+/* Connection Items */
+.connection-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+    background-color: var(--light-bg);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+    transition: all 0.2s;
+}
+
+.connection-item:hover {
+    background-color: #e8eaed;
+    border-left-color: var(--secondary-color);
+}
+
+/* Connection item header (info + actions) */
+.connection-item > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.connection-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.connection-direction {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.connection-node {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.connection-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.connection-actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* Connection action buttons - Updated for three buttons */
+.btn-toggle-inline-edit,
+.btn-view-edge-details,
+.btn-delete-connection {
+    padding: 4px 8px;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    min-width: 28px;
+    text-align: center;
+}
+
+.btn-toggle-inline-edit:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-view-edge-details:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.btn-delete-connection:hover {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+/* Inline editing section */
+.connection-inline-edit {
+    padding: 10px 10px 15px 10px;
+    border-top: 1px dashed var(--border-color);
+    background-color: #f8f9fa;
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 300px;
+    }
+}
+
+.inline-edit-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inline-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-edit-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.inline-edit-select,
+.inline-edit-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: inherit;
+    background-color: white;
+    transition: border-color 0.2s;
+}
+
+.inline-edit-select:focus,
+.inline-edit-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.inline-edit-select {
+    cursor: pointer;
+}
+
+/* NEW: Inline edit action buttons (Save/Cancel) */
+.inline-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-inline-save,
+.btn-inline-cancel {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.btn-inline-save {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-inline-save:hover {
+    background-color: #27ae60;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(46, 204, 113, 0.3);
+}
+
+.btn-inline-save:active {
+    transform: translateY(0);
+}
+
+.btn-inline-cancel {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-inline-cancel:hover {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-inline-cancel:active {
+    transform: translateY(0);
+}
+
+/* Property Actions */
+.property-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-add-property {
+    flex: 1;
+    padding: 10px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-add-property:hover {
+    background-color: #27ae60;
+}
+
+.btn-delete-selected {
+    flex: 1;
+    padding: 10px;
+    background-color: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-delete-selected:hover {
+    background-color: #c0392b;
+}
+
+/* Connection Selector Dialog */
+.connection-selector {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 2px solid var(--primary-color);
+    border-radius: 6px;
+    margin-top: 10px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal Overlay - For Connect to Node Dialog */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000; /* Higher than status bar and properties panel */
+    animation: fadeInOverlay 0.2s ease-out;
+}
+
+@keyframes fadeInOverlay {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-overlay .modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 24px;
+    min-width: 400px;
+    max-width: 500px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-overlay .modal-content h3 {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+}
+
+/* Direction Radio Group for Connection Modal */
+.direction-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: white;
+}
+
+.radio-option:hover {
+    background-color: var(--light-bg);
+    border-color: var(--primary-color);
+}
+
+.radio-option input[type="radio"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+.radio-option input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.radio-option span {
+    font-size: 14px;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+/* Form group styling for modal */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+/* Modal actions styling */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .btn-primary,
+.modal-actions .btn-secondary {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.modal-actions .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.modal-actions .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.modal-actions .btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-actions .btn-secondary:hover {
+    background-color: #95a5a6;
+    color: white;
+}
+
+/* NEW: Link Input Group Styles */
+.link-input-group {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.link-input-group .link-input {
+    flex: 1;
+}
+
+.btn-link-action {
+    padding: 8px 10px;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-link-action:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.btn-link-action:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-link-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-link-action[data-action="set"] {
+    /* Paperclip button */
+}
+
+.btn-link-action[data-action="open"] {
+    /* Open link button */
+}
+
+.btn-link-action[data-action="open"]:hover:not(:disabled) {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
