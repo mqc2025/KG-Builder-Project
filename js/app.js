@@ -18,7 +18,7 @@ class KnowledgeGraphApp {
         this.tabManager = new TabManager();
         this.filterManager = new FilterManager(this.graph, this.renderer);
         this.contextMenuManager = new ContextMenuManager(this);
-        this.excelConverter = new ExcelConverter(this.graph, this.renderer); // NEW: Excel Converter
+        this.excelConverter = new ExcelConverter(this.graph, this.renderer);
         
         // Current tool
         this.currentTool = 'select';
@@ -32,6 +32,9 @@ class KnowledgeGraphApp {
         this.lastNodeClick = null;
         this.lastNodeClickTime = 0;
         
+        // Connect by click state
+        this.connectByClickSourceNode = null;
+        this.connectByClickActive = false;
            
         // Setup
         this.setupEventListeners();
@@ -49,7 +52,7 @@ class KnowledgeGraphApp {
      * Setup event listeners
      */
     setupEventListeners() {
-		// Sidebar tab switching - ADD THIS SECTION
+        // Sidebar tab switching
         const sidebarTabs = document.querySelectorAll('.sidebar-tab');
         sidebarTabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -65,11 +68,12 @@ class KnowledgeGraphApp {
                 document.getElementById(`${tabName}-tab`)?.classList.add('active');
             });
         });
+        
         // Toolbar buttons
         document.getElementById('btn-new')?.addEventListener('click', () => this.newGraph());
         document.getElementById('btn-open')?.addEventListener('click', () => this.openGraph());
-		document.getElementById('btn-save')?.addEventListener('click', () => this.saveGraph());
-		document.getElementById('btn-save-as')?.addEventListener('click', () => this.saveGraphAs());
+        document.getElementById('btn-save')?.addEventListener('click', () => this.saveGraph());
+        document.getElementById('btn-save-as')?.addEventListener('click', () => this.saveGraphAs());
         document.getElementById('btn-export')?.addEventListener('click', () => this.exportGraph());
         document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
         document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
@@ -156,20 +160,32 @@ class KnowledgeGraphApp {
                 this.deleteSelection();
             }
             
-            // Escape: Clear selection
+            // Escape: Clear selection OR cancel connect-by-click mode
             if (e.key === 'Escape') {
                 e.preventDefault();
-                this.renderer.clearSelection();
-                this.propertiesPanel.hide();
-                this.updateStatus('Selection cleared');
+                
+                // Cancel connect by click if active
+                if (this.connectByClickActive) {
+                    this.cancelConnectByClick();
+                } else {
+                    this.renderer.clearSelection();
+                    this.propertiesPanel.hide();
+                    this.updateStatus('Selection cleared');
+                }
             }
         });
     }
 
     /**
-     * Handle node click - FIXED
+     * Handle node click
      */
     handleNodeClick(node) {
+        // Check if in connect-by-click mode
+        if (this.connectByClickActive) {
+            this.completeConnectByClick(node);
+            return;
+        }
+        
         // Check if in shortest path mode
         if (this.currentTool === 'shortest-path') {
             this.selectPathNode(node);
@@ -186,7 +202,7 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Handle edge click - FIXED
+     * Handle edge click
      */
     handleEdgeClick(edge) {
         // Select the edge
@@ -202,13 +218,92 @@ class KnowledgeGraphApp {
      * Handle canvas click
      */
     handleCanvasClick() {
+        // Cancel connect by click if active
+        if (this.connectByClickActive) {
+            this.cancelConnectByClick();
+            return;
+        }
+        
         this.renderer.clearSelection();
         this.propertiesPanel.hide();
         this.updateStatus('Selection cleared');
     }
 
     /**
-     * Toggle freeze simulation - FIXED to pin/unpin all nodes
+     * Start connect by click mode
+     */
+    startConnectByClick(sourceNode) {
+        this.connectByClickSourceNode = sourceNode;
+        this.connectByClickActive = true;
+        
+        // Update cursor
+        const canvas = document.getElementById('graph-canvas');
+        canvas.classList.add('connecting');
+        
+        // Highlight source node
+        this.renderer.selectNodes([sourceNode.id]);
+        
+        this.updateStatus(`Connect by Click: Click target node (ESC to cancel)`);
+    }
+
+    /**
+     * Complete connect by click
+     */
+    async completeConnectByClick(targetNode) {
+        // Check if same node
+        if (targetNode.id === this.connectByClickSourceNode.id) {
+            this.updateStatus('Cannot connect node to itself');
+            return;
+        }
+        
+        const sourceId = this.connectByClickSourceNode.id;
+        const targetId = targetNode.id;
+        
+        // Auto-generate edge name
+        const timestamp = Date.now();
+        const edgeName = `edge_${timestamp}`;
+        
+        // Create edge
+        await this.graph.addEdge({
+            name: edgeName,
+            source: sourceId,
+            target: targetId,
+            relationship: 'is a subset of',
+            directed: true
+        });
+        
+        this.renderer.render();
+        this.updateStats();
+        this.saveState();
+        
+        const sourceNodeName = this.connectByClickSourceNode.name || sourceId;
+        const targetNodeName = targetNode.name || targetId;
+        
+        // Cancel mode immediately after creating one edge
+        this.cancelConnectByClick();
+        
+        this.updateStatus(`Connected: ${sourceNodeName} → ${targetNodeName}`);
+    }
+
+    /**
+     * Cancel connect by click mode
+     */
+    cancelConnectByClick() {
+        this.connectByClickSourceNode = null;
+        this.connectByClickActive = false;
+        
+        // Remove cursor class
+        const canvas = document.getElementById('graph-canvas');
+        canvas.classList.remove('connecting');
+        
+        // Clear selection
+        this.renderer.clearSelection();
+        
+        this.updateStatus('Connect by click cancelled');
+    }
+
+    /**
+     * Toggle freeze simulation
      */
     toggleFreeze() {
         if (this.renderer.isFrozen) {
@@ -243,7 +338,7 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Resimulate graph - FIXED to properly reset simulation
+     * Resimulate graph
      */
     resimulate() {
         // Unpin all nodes
@@ -523,18 +618,18 @@ class KnowledgeGraphApp {
     }
 
     /**
-	 * Save graph
-	 */
-	saveGraph() {
-		this.fileManager.save();
-	}
+     * Save graph
+     */
+    saveGraph() {
+        this.fileManager.save();
+    }
 
-	/**
-	 * Save graph as
-	 */
-	saveGraphAs() {
-		this.fileManager.saveAs();
-	}
+    /**
+     * Save graph as
+     */
+    saveGraphAs() {
+        this.fileManager.saveAs();
+    }
 
     /**
      * Export graph
@@ -558,8 +653,8 @@ class KnowledgeGraphApp {
         this.history.clear();
         this.saveState();
     }
-	
-	/**
+    
+    /**
      * Add node at specific position (called from context menu)
      */
     async addNode(x, y) {

@@ -777,3 +777,12 @@ body {
     border-width: 3px;
     transform: scale(1.15);
 }
+
+/* Connect by Click Mode Cursor */
+.graph-canvas.connecting {
+    cursor: crosshair !important;
+}
+
+.graph-canvas.connecting .node {
+    cursor: crosshair !important;
+}

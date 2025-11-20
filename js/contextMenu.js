@@ -55,6 +55,11 @@ class ContextMenuManager {
                 label: 'Connect To...',
                 action: () => this.startConnectFrom(node)
             },
+            {
+                icon: '🔗',
+                label: 'Connect by Click',
+                action: () => this.startConnectByClick(node)
+            },
             { separator: true },
             {
                 icon: '🗑️',
@@ -214,10 +219,17 @@ class ContextMenuManager {
     }
 
     /**
-     * Start connecting from a node
+     * Start connecting from a node (modal)
      */
     startConnectFrom(node) {
         this.app.propertiesPanel.showConnectToNodeModal(node.id);
+    }
+
+    /**
+     * Start connect by click mode
+     */
+    startConnectByClick(node) {
+        this.app.startConnectByClick(node);
     }
 
     /**
@@ -277,20 +289,20 @@ class ContextMenuManager {
         this.app.updateStatus(`Deleted edge: ${edge.id}`);
     }
 
-	 /**
-	 * Add node at position
-	 */
-	addNodeAtPosition(event) {
-		const svgElement = document.getElementById('graph-canvas');
-		const rect = svgElement.getBoundingClientRect();
-		
-		// Convert click position to SVG coordinates
-		const transform = this.app.renderer.currentTransform;
-		const x = (event.clientX - rect.left - transform.x) / transform.k;
-		const y = (event.clientY - rect.top - transform.y) / transform.k;
+    /**
+     * Add node at position
+     */
+    addNodeAtPosition(event) {
+        const svgElement = document.getElementById('graph-canvas');
+        const rect = svgElement.getBoundingClientRect();
+        
+        // Convert click position to SVG coordinates
+        const transform = this.app.renderer.currentTransform;
+        const x = (event.clientX - rect.left - transform.x) / transform.k;
+        const y = (event.clientY - rect.top - transform.y) / transform.k;
 
-		this.app.addNode(x, y);
-	}
+        this.app.addNode(x, y);
+    }
 }
 
 // Export
