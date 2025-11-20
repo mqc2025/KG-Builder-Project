@@ -464,6 +464,27 @@ class PropertiesPanel {
                 });
             }
         });
+		
+		// Special handler for relationship input - update on Enter key
+		const relationshipInput = document.getElementById('prop-relationship');
+		if (relationshipInput) {
+			relationshipInput.addEventListener('keypress', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					const newValue = e.target.value.trim();
+					this.updateProperty('relationship', newValue);
+					// Force immediate re-render to show new label
+					this.renderer.render();
+					// Update the edge display name in properties panel if needed
+					if (this.currentType === 'edge') {
+						const edge = this.graph.getEdge(this.currentSelection);
+						if (edge && window.app) {
+							window.app.updateStatus(`Updated relationship: ${newValue || '(none)'}`);
+						}
+					}
+				}
+			});
+		}
 
         // Directed checkbox
         const directedCheckbox = document.getElementById('prop-directed');

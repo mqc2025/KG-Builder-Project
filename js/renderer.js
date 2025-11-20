@@ -330,6 +330,9 @@ class Renderer {
 			.classed('selected', d => this.selectedEdges.has(d.id))
 			.classed('highlighted', d => this.highlightedEdges.has(d.id))
 			.classed('path-highlight', d => this.highlightedEdges.has(d.id));
+		// UPDATE: Also update edge label text when edges are updated
+		edgesMerge.select('.edge-label')
+			.text(d => d.relationship || '');	
 
 		// Click handler on invisible path
 		edgesMerge.select('.edge-clickable')
