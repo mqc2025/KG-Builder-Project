@@ -49,13 +49,81 @@ class SearchManager {
         this.currentResults = this.graph.searchNodes(query);
 
         // Highlight AND select results
-		const nodeIds = this.currentResults.map(node => node.id);
-		this.renderer.highlightNodes(nodeIds);
-		this.renderer.selectNodes(nodeIds);  // ADD THIS LINE
+        const nodeIds = this.currentResults.map(node => node.id);
+        this.renderer.highlightNodes(nodeIds);
+        this.renderer.selectNodes(nodeIds);
 
-		// Update UI
-		this.updateSearchStatus();
-	}
+        // ADD THIS: Attach one-time click handlers to highlighted nodes
+        this.attachDimmingClickHandlers(nodeIds);
+
+        // Update UI
+        this.updateSearchStatus();
+    }
+	/**
+     * Attach click handlers for distance dimming effect
+     * @param {Array} nodeIds - Array of highlighted node IDs
+     */
+    attachDimmingClickHandlers(nodeIds) {
+        // Remove any existing handlers first
+        this.removeDimmingClickHandlers();
+        
+        // Create a one-time click handler for each highlighted node
+        this.dimmingClickHandler = (event, d) => {
+            // Only trigger if dimming is not already active
+            if (!this.renderer.isDimmingActive) {
+                event.stopPropagation();
+                
+                // Apply distance-based dimming
+                this.renderer.applyDistanceDimming(d.id, 2);
+                
+                // Set up one-time clear handler on next click anywhere
+                this.setupDimmingClearHandler();
+                
+                if (window.app) {
+                    window.app.updateStatus(`Showing connections within distance 4 from: ${d.name || d.id} (click anywhere to clear)`);
+                }
+            }
+        };
+        
+        // Attach handler to highlighted nodes
+        this.renderer.nodeGroup.selectAll('.node')
+            .filter(d => nodeIds.includes(d.id))
+            .on('click.dimming', this.dimmingClickHandler);
+    }
+    
+    /**
+     * Setup one-time click handler to clear dimming on next click
+     */
+    setupDimmingClearHandler() {
+        const clearDimming = () => {
+            this.renderer.clearDistanceDimming();
+            
+            // Remove this handler after first use
+            document.removeEventListener('click', clearDimming);
+            this.renderer.svg.on('click.dimming-clear', null);
+            
+            if (window.app) {
+                window.app.updateStatus('Distance filter cleared');
+            }
+        };
+        
+        // Use a slight delay to prevent immediate clearing
+        setTimeout(() => {
+            // Listen for any click on the document
+            document.addEventListener('click', clearDimming, { once: true });
+            
+            // Also listen on SVG canvas
+            this.renderer.svg.on('click.dimming-clear', clearDimming);
+        }, 100);
+    }
+    
+    /**
+     * Remove dimming click handlers
+     */
+    removeDimmingClickHandlers() {
+        this.renderer.nodeGroup.selectAll('.node')
+            .on('click.dimming', null);
+    }
 
     /**
      * Clear search
@@ -67,7 +135,14 @@ class SearchManager {
 
         this.currentResults = [];
         this.renderer.clearHighlight();
-		this.renderer.clearSelection();
+        this.renderer.clearSelection();
+        
+        // ADD THIS: Clear dimming handlers and state
+        this.removeDimmingClickHandlers();
+        if (this.renderer.isDimmingActive) {
+            this.renderer.clearDistanceDimming();
+        }
+        
         this.updateSearchStatus();
     }
 

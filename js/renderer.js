@@ -73,7 +73,12 @@ class Renderer {
         this.highlightedNodes = new Set();
         this.highlightedEdges = new Set();
         
-        // Handle window resize
+        // Distance-based dimming state
+        this.dimmedNodes = new Set();
+        this.dimmedEdges = new Set();
+        this.isDimmingActive = false;
+		
+		// Handle window resize
         window.addEventListener('resize', () => this.handleResize());
     }
 
@@ -858,6 +863,74 @@ class Renderer {
 			window.app.minimap.updateViewport();
 		}
 	}
+	
+	/**
+     * Apply distance-based dimming from a source node
+     * @param {string} sourceNodeId - Source node ID
+     * @param {number} maxDistance - Maximum distance to keep visible (default: 4)
+     */
+    applyDistanceDimming(sourceNodeId, maxDistance = 4) {
+        // Calculate distances from source node
+        const distances = Algorithms.calculateDistancesFromNode(this.graph, sourceNodeId, true, maxDistance);
+        
+        // Clear previous dimming state
+        this.dimmedNodes.clear();
+        this.dimmedEdges.clear();
+        
+        // Mark nodes beyond maxDistance as dimmed
+        this.graph.nodes.forEach(node => {
+            const distance = distances[node.id];
+            if (distance === undefined || distance > maxDistance) {
+                this.dimmedNodes.add(node.id);
+            }
+        });
+        
+        // Mark edges where BOTH endpoints are beyond maxDistance as dimmed
+        this.graph.edges.forEach(edge => {
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+            
+            const sourceDistance = distances[sourceId] || Infinity;
+            const targetDistance = distances[targetId] || Infinity;
+            
+            // Dim edge if both endpoints are beyond maxDistance OR if one endpoint doesn't exist
+            if ((sourceDistance > maxDistance && targetDistance > maxDistance) || 
+                (!sourceId || !targetId)) {
+                this.dimmedEdges.add(edge.id);
+            }
+        });
+        
+        this.isDimmingActive = true;
+        this.updateDimming();
+    }
+    
+    /**
+     * Clear distance-based dimming
+     */
+    clearDistanceDimming() {
+        this.dimmedNodes.clear();
+        this.dimmedEdges.clear();
+        this.isDimmingActive = false;
+        this.updateDimming();
+    }
+    
+    /**
+     * Update dimming styling
+     */
+    updateDimming() {
+        this.nodeGroup.selectAll('.node')
+            .classed('dimmed', d => this.dimmedNodes.has(d.id));
+        
+        this.edgeGroup.selectAll('.edge')
+            .classed('dimmed', d => this.dimmedEdges.has(d.id));
+    }
+
+    /**
+     * Get current transform
+     */
+    getTransform() {
+        return this.currentTransform;
+    }
 	
 }
 

@@ -802,3 +802,48 @@ body {
     font-size: 12px;
     word-break: break-word;
 }
+
+/* Distance-based Dimming Styles */
+.node.dimmed {
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.node.dimmed circle {
+    stroke-width: 1px;
+}
+
+.node.dimmed text {
+    opacity: 0.1;
+}
+
+.edge.dimmed {
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.edge.dimmed path {
+    stroke-width: 1px !important;
+}
+
+.edge.dimmed .edge-label {
+    opacity: 0.1;
+}
+
+/* Ensure highlighted/selected nodes are NOT dimmed */
+.node.highlighted.dimmed,
+.node.selected.dimmed {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.node.highlighted.dimmed circle,
+.node.selected.dimmed circle {
+    stroke-width: 4px;
+}
+
+.edge.highlighted.dimmed,
+.edge.selected.dimmed {
+    opacity: 1;
+    pointer-events: all;
+}

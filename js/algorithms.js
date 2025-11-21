@@ -392,6 +392,69 @@ const Algorithms = {
 
         return suggestions.sort((a, b) => b.similarity - a.similarity);
     },
+	
+	/**
+     * Calculate distance from a source node to all other nodes using BFS
+     * @param {Graph} graph - Graph instance
+     * @param {string} sourceId - Source node ID
+     * @param {boolean} ignoreDirection - If true, treat all edges as undirected
+     * @param {number} maxDistance - Maximum distance to calculate (default: Infinity)
+     * @returns {Object} Map of nodeId -> distance
+     */
+    calculateDistancesFromNode(graph, sourceId, ignoreDirection = false, maxDistance = Infinity) {
+        if (!graph.getNode(sourceId)) {
+            return {};
+        }
+
+        const distances = { [sourceId]: 0 };
+        const queue = [sourceId];
+        const visited = new Set([sourceId]);
+
+        // Build adjacency map for faster lookup
+        const adjacency = {};
+        graph.nodes.forEach(node => {
+            adjacency[node.id] = [];
+        });
+
+        graph.edges.forEach(edge => {
+            const sourceNodeId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetNodeId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+            if (!sourceNodeId || !targetNodeId) return; // Skip half-edges
+
+            // Add forward direction
+            if (!adjacency[sourceNodeId]) adjacency[sourceNodeId] = [];
+            adjacency[sourceNodeId].push(targetNodeId);
+
+            // Add reverse direction if ignoring direction or edge is undirected
+            if (ignoreDirection || !edge.directed) {
+                if (!adjacency[targetNodeId]) adjacency[targetNodeId] = [];
+                adjacency[targetNodeId].push(sourceNodeId);
+            }
+        });
+
+        // BFS
+        while (queue.length > 0) {
+            const currentId = queue.shift();
+            const currentDistance = distances[currentId];
+
+            // Stop if we've reached max distance
+            if (currentDistance >= maxDistance) {
+                continue;
+            }
+
+            const neighbors = adjacency[currentId] || [];
+            for (const neighborId of neighbors) {
+                if (!visited.has(neighborId)) {
+                    visited.add(neighborId);
+                    distances[neighborId] = currentDistance + 1;
+                    queue.push(neighborId);
+                }
+            }
+        }
+
+        return distances;
+    },
 
     /**
      * Calculate similarity between two nodes
