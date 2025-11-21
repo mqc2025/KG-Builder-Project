@@ -15,7 +15,6 @@ class KnowledgeGraphApp {
         this.minimap = new Minimap(document.getElementById('minimap'), this.renderer);
         this.searchManager = new SearchManager(this.graph, this.renderer);
         this.fileManager = new FileManager(this.graph, this.renderer);
-        this.tabManager = new TabManager();
         this.filterManager = new FilterManager(this.graph, this.renderer);
         this.contextMenuManager = new ContextMenuManager(this);
         this.excelConverter = new ExcelConverter(this.graph, this.renderer);

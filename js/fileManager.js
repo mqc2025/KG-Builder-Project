@@ -13,7 +13,7 @@ class FileManager {
         
         this.setupEventListeners();
         this.setupAutoSave();
-        this.setupDragAndDrop(); // Feature 6
+        this.setupDragAndDrop();
     }
 
     /**
@@ -52,7 +52,7 @@ class FileManager {
     }
 
     /**
-     * Feature 6: Setup drag and drop for JSON files
+     * Setup drag and drop for JSON files
      */
     setupDragAndDrop() {
         const dropZone = document.getElementById('canvas-drop-zone');
@@ -98,7 +98,7 @@ class FileManager {
     }
 
     /**
-     * Feature 6: Handle dropped file
+     * Handle dropped file
      */
     handleDroppedFile(file) {
         const reader = new FileReader();
@@ -107,18 +107,11 @@ class FileManager {
             try {
                 const json = JSON.parse(e.target.result);
                 
-                // Create new tab with the dropped file
-                if (window.app && window.app.tabManager) {
-                    const filename = file.name.replace('.json', '');
-                    const newTabId = window.app.tabManager.createTab(filename);
-                    window.app.tabManager.switchTab(newTabId);
-                    
-                    // Set the current filename for this tab
-                    this.currentFilename = filename;
-                    
-                    // Load the graph in the new tab
-                    this.importGraph(json);
-                }
+                // Set the current filename
+                this.currentFilename = file.name.replace('.json', '');
+                
+                // Load the graph directly
+                this.importGraph(json);
             } catch (error) {
                 alert('Error reading dropped file: ' + error.message);
                 console.error('Drop error:', error);
@@ -351,10 +344,6 @@ class FileManager {
                     throw new Error('Invalid graph format');
                 }
 
-                if (json.graph?.metadata?.name && window.app?.tabManager) {
-                    window.app.tabManager.renameActiveTab(json.graph.metadata.name);
-                }
-
                 this.renderer.render();
 
                 setTimeout(() => {
@@ -408,10 +397,6 @@ class FileManager {
         if (name) {
             this.currentFilename = name;
             this.graph.metadata.name = name;
-            
-            if (window.app?.tabManager) {
-                window.app.tabManager.renameActiveTab(name);
-            }
             
             // Now save with the new filename
             const json = this.graph.toJSON();
