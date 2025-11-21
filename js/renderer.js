@@ -520,6 +520,18 @@ class Renderer {
     }
 
     /**
+     * Pin a single node at its current position
+     * FIX: Added missing method
+     */
+    pinNode(nodeId) {
+        const node = this.graph.nodes.find(n => n.id === nodeId);
+        if (node) {
+            node.fx = node.x;
+            node.fy = node.y;
+        }
+    }
+
+    /**
      * Unpin a node (allow it to move freely again)
      */
     unpinNode(nodeId) {
@@ -534,18 +546,6 @@ class Renderer {
     }
 
     /**
-     * Unpin all nodes
-     */
-    unpinAllNodes() {
-        this.graph.nodes.forEach(node => {
-            node.fx = null;
-            node.fy = null;
-        });
-        if (!this.isFrozen) {
-            this.simulation.alpha(0.5).restart();
-        }
-    }
-	/**
      * Pin all nodes at their current positions
      */
     pinAllNodes() {

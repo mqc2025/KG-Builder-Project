@@ -74,10 +74,15 @@ class ContextMenuManager {
 
     /**
      * Show edge context menu
+     * FIX: Added edge selection before showing menu
      */
     showEdgeMenu(edge, event) {
         this.currentTarget = edge;
         this.currentTargetType = 'edge';
+
+        // FIX: Select and highlight the edge before showing menu
+        this.app.renderer.selectEdges([edge.id]);
+        this.app.updateStatus(`Selected edge: ${edge.name || edge.id}`);
 
         const menuItems = [
             {
@@ -211,10 +216,10 @@ class ContextMenuManager {
     togglePin(node) {
         if (node.fx !== null && node.fy !== null) {
             this.app.renderer.unpinNode(node.id);
-            this.app.updateStatus(`Unpinned: ${node.id}`);
+            this.app.updateStatus(`Unpinned: ${node.name || node.id}`);
         } else {
             this.app.renderer.pinNode(node.id);
-            this.app.updateStatus(`Pinned: ${node.id}`);
+            this.app.updateStatus(`Pinned: ${node.name || node.id}`);
         }
     }
 
@@ -278,7 +283,7 @@ class ContextMenuManager {
      * Delete edge
      */
     deleteEdge(edge) {
-        if (!Utils.confirm(`Delete edge "${edge.id}"?`)) return;
+        if (!Utils.confirm(`Delete edge "${edge.name || edge.id}"?`)) return;
 
         this.app.graph.removeEdge(edge.id);
         this.app.renderer.clearSelection();
@@ -286,7 +291,7 @@ class ContextMenuManager {
         this.app.renderer.render();
         this.app.updateStats();
         this.app.saveState();
-        this.app.updateStatus(`Deleted edge: ${edge.id}`);
+        this.app.updateStatus(`Deleted edge: ${edge.name || edge.id}`);
     }
 
     /**
