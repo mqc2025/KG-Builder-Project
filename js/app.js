@@ -439,6 +439,7 @@ class KnowledgeGraphApp {
         const clearBtn = document.getElementById('btn-clear-path');
         const startSelect = document.getElementById('path-start-select');
         const endSelect = document.getElementById('path-end-select');
+        const showAllCheckbox = document.getElementById('path-show-all');
         
         // Close modal
         closeBtn?.addEventListener('click', () => {
@@ -460,15 +461,20 @@ class KnowledgeGraphApp {
         calculateBtn?.addEventListener('click', () => {
             const startId = startSelect?.value;
             const endId = endSelect?.value;
+            const showAll = showAllCheckbox?.checked || false;
             
             if (startId && endId) {
-                this.calculateShortestPath(startId, endId);
+                this.calculateShortestPath(startId, endId, showAll);
             }
         });
         
         // Clear path
         clearBtn?.addEventListener('click', () => {
-            this.renderer.clearPathHighlight();
+            this.renderer.clearHighlight();
+            const resultsDiv = document.getElementById('path-results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '';
+            }
             this.updateStatus('Path cleared');
         });
     }
@@ -505,16 +511,143 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Calculate shortest path
+     * Calculate shortest path or all paths
      */
-    calculateShortestPath(startId, endId) {
-        const result = Algorithms.findShortestPath(this.graph, startId, endId);
-        
-        if (result.path) {
-            this.renderer.highlightPath(result.path);
-            this.updateStatus(`Shortest path found: ${result.path.length} nodes, distance: ${result.distance.toFixed(2)}`);
+    calculateShortestPath(startId, endId, showAll = false) {
+        if (showAll) {
+            // Find all paths
+            const paths = Algorithms.findAllPaths(this.graph, startId, endId, true);
+            
+            if (paths.length === 0) {
+                alert('No path found between selected nodes');
+                return;
+            }
+            
+            // Display all paths
+            this.displayAllPaths(paths, startId, endId);
+            
+            // Highlight the shortest path
+            const shortestPath = paths[0];
+            this.renderer.highlightNodes(shortestPath.nodes);
+            this.renderer.highlightEdges(shortestPath.edges);
+            
+            this.updateStatus(`Found ${paths.length} path(s) between nodes`);
         } else {
-            alert('No path found between selected nodes');
+            // Find only shortest path
+            const result = Algorithms.findShortestPath(this.graph, startId, endId, true);
+            
+            if (!result) {
+                alert('No path found between selected nodes');
+                return;
+            }
+            
+            // Highlight the path
+            this.renderer.highlightNodes(result.nodes);
+            this.renderer.highlightEdges(result.edges);
+            
+            // Display single path result
+            this.displaySinglePath(result, startId, endId);
+            
+            this.updateStatus(`Shortest path: ${result.nodes.length} nodes, distance: ${result.distance.toFixed(2)}`);
+        }
+    }
+    
+    /**
+     * Display single path result
+     */
+    displaySinglePath(result, startId, endId) {
+        const resultsDiv = document.getElementById('path-results');
+        if (!resultsDiv) return;
+        
+        const startNode = this.graph.getNode(startId);
+        const endNode = this.graph.getNode(endId);
+        
+        const startName = startNode ? startNode.name : startId;
+        const endName = endNode ? endNode.name : endId;
+        
+        const pathNames = result.nodes.map(nodeId => {
+            const node = this.graph.getNode(nodeId);
+            return node ? node.name : nodeId;
+        });
+        
+        resultsDiv.innerHTML = `
+            <div class="path-result-item">
+                <div class="path-result-header">
+                    <strong>Shortest Path Found</strong>
+                </div>
+                <div class="path-result-details">
+                    <div><strong>From:</strong> ${startName}</div>
+                    <div><strong>To:</strong> ${endName}</div>
+                    <div><strong>Hops:</strong> ${result.nodes.length - 1}</div>
+                    <div><strong>Distance:</strong> ${result.distance.toFixed(2)}</div>
+                    <div class="path-route"><strong>Route:</strong> ${pathNames.join(' → ')}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    /**
+     * Display all paths results
+     */
+    displayAllPaths(paths, startId, endId) {
+        const resultsDiv = document.getElementById('path-results');
+        if (!resultsDiv) return;
+        
+        const startNode = this.graph.getNode(startId);
+        const endNode = this.graph.getNode(endId);
+        
+        const startName = startNode ? startNode.name : startId;
+        const endName = endNode ? endNode.name : endId;
+        
+        let html = `<div class="path-results-summary">
+            <strong>Found ${paths.length} path(s) from "${startName}" to "${endName}"</strong>
+        </div>`;
+        
+        paths.forEach((path, index) => {
+            const pathNames = path.nodes.map(nodeId => {
+                const node = this.graph.getNode(nodeId);
+                return node ? node.name : nodeId;
+            });
+            
+            html += `
+                <div class="path-result-item" data-path-index="${index}">
+                    <div class="path-result-header">
+                        <strong>Path ${index + 1}</strong>
+                        ${index === 0 ? '<span class="path-shortest-badge">Shortest</span>' : ''}
+                    </div>
+                    <div class="path-result-details">
+                        <div><strong>Hops:</strong> ${path.length}</div>
+                        <div><strong>Distance:</strong> ${path.distance.toFixed(2)}</div>
+                        <div class="path-route">${pathNames.join(' → ')}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+        
+        // Add click handlers to highlight individual paths
+        resultsDiv.querySelectorAll('.path-result-item').forEach((item, index) => {
+            item.addEventListener('click', () => {
+                const path = paths[index];
+                this.renderer.highlightNodes(path.nodes);
+                this.renderer.highlightEdges(path.edges);
+                
+                // Remove active class from all items
+                resultsDiv.querySelectorAll('.path-result-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                this.updateStatus(`Showing path ${index + 1}: ${path.length} hops, distance ${path.distance.toFixed(2)}`);
+            });
+        });
+        
+        // Mark first path as active
+        const firstItem = resultsDiv.querySelector('.path-result-item');
+        if (firstItem) {
+            firstItem.classList.add('active');
         }
     }
 

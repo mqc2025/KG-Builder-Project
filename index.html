@@ -218,8 +218,17 @@
                     </select>
                 </div>
 
+                <div class="property-item">
+                    <label class="property-label" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="path-show-all" style="width: auto; margin: 0;">
+                        <span>Show all paths (sorted by length)</span>
+                    </label>
+                </div>
+
                 <button id="btn-calculate-path" class="modal-btn" disabled>Calculate Path</button>
-                <button id="btn-clear-path" class="modal-btn">Clear Path</button>
+                <button id="btn-clear-path" class="modal-btn" style="background-color: var(--border-color);">Clear Path</button>
+                
+                <div id="path-results" class="path-results-container"></div>
             </div>
         </div>
     </div>

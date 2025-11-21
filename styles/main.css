@@ -730,3 +730,75 @@ body {
     font-size: 11px;
     color: var(--text-secondary);
 }
+/* Path Results Styles */
+.path-results-container {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.path-results-summary {
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.path-result-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    background-color: var(--light-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.path-result-item:hover {
+    background-color: #e0e4e8;
+    border-color: var(--primary-color);
+}
+
+.path-result-item.active {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-color: var(--primary-color);
+    border-width: 3px;
+}
+
+.path-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.path-shortest-badge {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.path-result-details {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.path-result-details > div {
+    margin-bottom: 6px;
+}
+
+.path-route {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: white;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-word;
+}

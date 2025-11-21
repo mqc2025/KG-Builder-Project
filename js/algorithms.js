@@ -6,9 +6,10 @@ const Algorithms = {
      * @param {Graph} graph - Graph instance
      * @param {string} startId - Start node ID
      * @param {string} endId - End node ID
+     * @param {boolean} ignoreDirection - If true, treat all edges as undirected
      * @returns {Object|null} Path info with nodes and edges, or null
      */
-    findShortestPath(graph, startId, endId) {
+    findShortestPath(graph, startId, endId, ignoreDirection = false) {
         if (!graph.getNode(startId) || !graph.getNode(endId)) {
             return null;
         }
@@ -58,9 +59,15 @@ const Algorithms = {
             // Update distances to neighbors
             graph.edges.forEach(edge => {
                 let neighborId = null;
+                
+                // Handle edge direction
                 if (edge.source === currentId) {
                     neighborId = edge.target;
-                } else if (edge.target === currentId && !edge.directed) {
+                } else if (ignoreDirection && edge.target === currentId) {
+                    // If ignoring direction, allow traversal in reverse
+                    neighborId = edge.source;
+                } else if (!edge.directed && edge.target === currentId) {
+                    // Undirected edges can be traversed both ways
                     neighborId = edge.source;
                 }
 
@@ -106,6 +113,103 @@ const Algorithms = {
     },
 
     /**
+     * Find ALL simple paths between two nodes (no repeated nodes)
+     * @param {Graph} graph - Graph instance
+     * @param {string} startId - Start node ID
+     * @param {string} endId - End node ID
+     * @param {boolean} ignoreDirection - If true, treat all edges as undirected
+     * @returns {Array} Array of path objects sorted by length
+     */
+    findAllPaths(graph, startId, endId, ignoreDirection = false) {
+        if (!graph.getNode(startId) || !graph.getNode(endId)) {
+            return [];
+        }
+
+        if (startId === endId) {
+            return [{
+                nodes: [startId],
+                edges: [],
+                distance: 0,
+                length: 0
+            }];
+        }
+
+        const allPaths = [];
+        const visited = new Set();
+
+        // Build adjacency map for faster lookup
+        const adjacency = {};
+        graph.nodes.forEach(node => {
+            adjacency[node.id] = [];
+        });
+
+        graph.edges.forEach(edge => {
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+            if (!sourceId || !targetId) return; // Skip half-edges
+
+            // Add forward direction
+            if (!adjacency[sourceId]) adjacency[sourceId] = [];
+            adjacency[sourceId].push({
+                nodeId: targetId,
+                edgeId: edge.id,
+                weight: edge.weight || 1
+            });
+
+            // Add reverse direction if ignoring direction or edge is undirected
+            if (ignoreDirection || !edge.directed) {
+                if (!adjacency[targetId]) adjacency[targetId] = [];
+                adjacency[targetId].push({
+                    nodeId: sourceId,
+                    edgeId: edge.id,
+                    weight: edge.weight || 1
+                });
+            }
+        });
+
+        // DFS to find all paths
+        function dfs(currentId, path, edges, distance) {
+            if (currentId === endId) {
+                allPaths.push({
+                    nodes: [...path],
+                    edges: [...edges],
+                    distance: distance,
+                    length: path.length - 1
+                });
+                return;
+            }
+
+            visited.add(currentId);
+
+            const neighbors = adjacency[currentId] || [];
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor.nodeId)) {
+                    path.push(neighbor.nodeId);
+                    edges.push(neighbor.edgeId);
+                    dfs(neighbor.nodeId, path, edges, distance + neighbor.weight);
+                    path.pop();
+                    edges.pop();
+                }
+            }
+
+            visited.delete(currentId);
+        }
+
+        dfs(startId, [startId], [], 0);
+
+        // Sort by length (number of hops), then by distance
+        allPaths.sort((a, b) => {
+            if (a.length !== b.length) {
+                return a.length - b.length;
+            }
+            return a.distance - b.distance;
+        });
+
+        return allPaths;
+    },
+
+    /**
      * Cluster nodes by property value
      * @param {Graph} graph - Graph instance
      * @param {string} propertyKey - Property to cluster by
@@ -115,7 +219,7 @@ const Algorithms = {
         const clusters = {};
 
         graph.nodes.forEach(node => {
-            const value = node.properties[propertyKey];
+            const value = node.properties ? node.properties[propertyKey] : node[propertyKey];
             const key = value !== undefined ? String(value) : 'undefined';
 
             if (!clusters[key]) {
@@ -152,7 +256,7 @@ const Algorithms = {
             const nodeIds = graph.nodes.map(n => n.id).sort(() => Math.random() - 0.5);
 
             for (const nodeId of nodeIds) {
-                const neighbors = graph.getNeighbors(nodeId);
+                const neighbors = this.getNeighbors(graph, nodeId);
                 
                 if (neighbors.length === 0) continue;
 
@@ -194,6 +298,30 @@ const Algorithms = {
     },
 
     /**
+     * Get neighbors of a node
+     * @param {Graph} graph - Graph instance
+     * @param {string} nodeId - Node ID
+     * @returns {Array} Array of neighbor node IDs
+     */
+    getNeighbors(graph, nodeId) {
+        const neighbors = new Set();
+        
+        graph.edges.forEach(edge => {
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+            
+            if (sourceId === nodeId && targetId) {
+                neighbors.add(targetId);
+            }
+            if (targetId === nodeId && sourceId && !edge.directed) {
+                neighbors.add(sourceId);
+            }
+        });
+        
+        return Array.from(neighbors);
+    },
+
+    /**
      * Calculate centrality measures
      * @param {Graph} graph - Graph instance
      * @param {string} nodeId - Node ID
@@ -203,53 +331,26 @@ const Algorithms = {
         const node = graph.getNode(nodeId);
         if (!node) return null;
 
-        const edges = graph.getNodeEdges(nodeId);
-        const neighbors = graph.getNeighbors(nodeId);
+        const edges = graph.edges.filter(e => {
+            const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+            const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+            return sourceId === nodeId || targetId === nodeId;
+        });
+
+        const neighbors = this.getNeighbors(graph, nodeId);
 
         return {
             degree: edges.length,
             neighbors: neighbors.length,
-            inDegree: edges.filter(e => e.target === nodeId).length,
-            outDegree: edges.filter(e => e.source === nodeId).length
+            inDegree: edges.filter(e => {
+                const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+                return targetId === nodeId;
+            }).length,
+            outDegree: edges.filter(e => {
+                const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+                return sourceId === nodeId;
+            }).length
         };
-    },
-
-    /**
-     * Find all simple paths between two nodes (DFS)
-     * @param {Graph} graph - Graph instance
-     * @param {string} startId - Start node ID
-     * @param {string} endId - End node ID
-     * @param {number} maxPaths - Maximum paths to find
-     * @returns {Array} Array of paths
-     */
-    findAllPaths(graph, startId, endId, maxPaths = 10) {
-        const paths = [];
-        const visited = new Set();
-
-        function dfs(currentId, path) {
-            if (paths.length >= maxPaths) return;
-            
-            if (currentId === endId) {
-                paths.push([...path]);
-                return;
-            }
-
-            visited.add(currentId);
-
-            const neighbors = graph.getNeighbors(currentId);
-            for (const neighborId of neighbors) {
-                if (!visited.has(neighborId)) {
-                    path.push(neighborId);
-                    dfs(neighborId, path);
-                    path.pop();
-                }
-            }
-
-            visited.delete(currentId);
-        }
-
-        dfs(startId, [startId]);
-        return paths;
     },
 
     /**
@@ -267,10 +368,12 @@ const Algorithms = {
                 const node2 = graph.nodes[j];
 
                 // Skip if edge already exists
-                const existingEdge = graph.edges.find(e =>
-                    (e.source === node1.id && e.target === node2.id) ||
-                    (e.source === node2.id && e.target === node1.id)
-                );
+                const existingEdge = graph.edges.find(e => {
+                    const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+                    const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+                    return (sourceId === node1.id && targetId === node2.id) ||
+                           (sourceId === node2.id && targetId === node1.id);
+                });
                 if (existingEdge) continue;
 
                 // Calculate similarity
@@ -297,8 +400,8 @@ const Algorithms = {
      * @returns {number} Similarity score (0-1)
      */
     calculateSimilarity(node1, node2) {
-        const props1 = node1.properties;
-        const props2 = node2.properties;
+        const props1 = node1.properties || node1;
+        const props2 = node2.properties || node2;
 
         const allKeys = new Set([
             ...Object.keys(props1),
@@ -310,7 +413,7 @@ const Algorithms = {
 
         for (const key of allKeys) {
             // Skip special properties
-            if (['color', 'size', 'x', 'y', 'vx', 'vy'].includes(key)) continue;
+            if (['color', 'size', 'x', 'y', 'vx', 'vy', 'fx', 'fy', 'id', 'name'].includes(key)) continue;
 
             total++;
 
