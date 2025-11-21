@@ -180,6 +180,20 @@ class Renderer {
             this.simulation.force('boundary', null);
         }
     }
+	/**
+	 * Update force strength
+	 * @param {number} strength - Charge force strength (negative value, e.g., -200)
+	 */
+	updateForceStrength(strength) {
+		// Update charge force with new strength
+		this.simulation.force('charge', d3.forceManyBody().strength(-strength));
+		
+		// Restart simulation if not frozen
+		if (!this.isFrozen) {
+			this.simulation.alpha(0.1).restart();
+			this.startAutoFreezeTimer();
+		}
+	}
 
     /**
      * Feature 9: Update font sizes relative to zoom

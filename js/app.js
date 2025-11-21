@@ -34,6 +34,9 @@ class KnowledgeGraphApp {
         // Connect by click state
         this.connectByClickSourceNode = null;
         this.connectByClickActive = false;
+		
+		// Force strength
+		this.currentForceStrength = 200;
            
         // Setup
         this.setupEventListeners();
@@ -82,6 +85,11 @@ class KnowledgeGraphApp {
         document.getElementById('btn-freeze')?.addEventListener('click', () => this.toggleFreeze());
         document.getElementById('btn-layout')?.addEventListener('click', () => this.resimulate());
         document.getElementById('btn-shortest-path')?.addEventListener('click', () => this.startShortestPath());
+		// Force strength slider
+		document.getElementById('force-slider')?.addEventListener('input', (e) => {
+			this.updateForceStrength(parseInt(e.target.value));
+		});
+		
         
         // Search
         document.getElementById('search-input')?.addEventListener('input', (e) => {
@@ -337,34 +345,69 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Resimulate graph
-     */
-    resimulate() {
-        // Unpin all nodes
-        this.renderer.unpinAllNodes();
-        
-        // Unfreeze if frozen
-        if (this.renderer.isFrozen) {
-            this.renderer.unfreezeSimulation();
-            
-            // Update freeze button UI
-            const btn = document.getElementById('btn-freeze');
-            if (btn) {
-                const icon = btn.querySelector('span:first-child');
-                const label = btn.querySelector('.tool-label');
-                icon.textContent = '❄️';
-                label.textContent = 'Freeze';
-                btn.classList.remove('active');
-            }
-        }
-        
-        // Restart simulation with higher alpha for more movement
-        this.renderer.restartSimulation();
-        
-        this.updateStatus('Simulation restarted - all nodes unpinned');
-        this.updateSimulationStatus();
-    }
-
+	 * Resimulate graph
+	 */
+	resimulate() {
+		// Shuffle nodes with random displacement to help untangle
+		this.graph.nodes.forEach(node => {
+			// Add random offset pixels
+			const offsetX = (Math.random() - 0.5) * 200;
+			const offsetY = (Math.random() - 0.5) * 200;
+			
+			node.x += offsetX;
+			node.y += offsetY;
+			
+			// If node was pinned, update fixed position too
+			if (node.fx !== null && node.fx !== undefined) {
+				node.fx += offsetX;
+			}
+			if (node.fy !== null && node.fy !== undefined) {
+				node.fy += offsetY;
+			}
+		});
+		
+		// Unpin all nodes
+		this.renderer.unpinAllNodes();
+		
+		// Unfreeze if frozen
+		if (this.renderer.isFrozen) {
+			this.renderer.unfreezeSimulation();
+			
+			// Update freeze button UI
+			const btn = document.getElementById('btn-freeze');
+			if (btn) {
+				const icon = btn.querySelector('span:first-child');
+				const label = btn.querySelector('.tool-label');
+				icon.textContent = '❄️';
+				label.textContent = 'Freeze';
+				btn.classList.remove('active');
+			}
+		}
+		
+		// Restart simulation with higher alpha for more movement
+		this.renderer.restartSimulation();
+		
+		this.updateStatus('Simulation restarted with shuffle - all nodes unpinned');
+		this.updateSimulationStatus();
+	}
+	
+	/**
+	 * Update simulation force strength
+	 */
+	updateForceStrength(strength) {
+		this.currentForceStrength = strength;
+		
+		// Update display
+		const valueDisplay = document.getElementById('force-value');
+		if (valueDisplay) {
+			valueDisplay.textContent = strength;
+		}
+		
+		// Update renderer
+		this.renderer.updateForceStrength(strength);
+		
+		this.updateStatus(`Force strength: ${strength}`);
+	}
     /**
      * Start shortest path selection
      */

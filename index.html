@@ -84,27 +84,42 @@
                 </div>
 
                 <!-- Tools Tab Content -->
-                <div id="tools-tab" class="tab-panel">
-                    <div class="tool-palette">
-                        <button id="tool-pan" class="tool-btn" title="Pan (Space)">
-                            <span>✋</span>
-                            <span class="tool-label">Pan</span>
-                        </button>
-                        <div class="tool-separator"></div>
-                        <button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
-                            <span>❄️</span>
-                            <span class="tool-label">Freeze</span>
-                        </button>
-                        <button id="btn-layout" class="tool-btn" title="Resimulate">
-                            <span>⊞</span>
-                            <span class="tool-label">Resimulate</span>
-                        </button>
-                        <button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
-                            <span>⚡</span>
-                            <span class="tool-label">Path</span>
-                        </button>
-                    </div>
-                </div>
+				<div id="tools-tab" class="tab-panel">
+					<div class="tool-palette">
+						<button id="tool-pan" class="tool-btn" title="Pan (Space)">
+							<span>✋</span>
+							<span class="tool-label">Pan</span>
+						</button>
+						<div class="tool-separator"></div>
+						<button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
+							<span>❄️</span>
+							<span class="tool-label">Freeze</span>
+						</button>
+						<button id="btn-layout" class="tool-btn" title="Resimulate">
+							<span>⊞</span>
+							<span class="tool-label">Resimulate</span>
+						</button>
+						<button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
+							<span>⚡</span>
+							<span class="tool-label">Path</span>
+						</button>
+						<div class="tool-separator"></div>
+						
+						<!-- Force Strength Slider -->
+						<div class="force-control">
+							<label class="force-label">
+								<span>⚙️ Force Strength</span>
+								<span id="force-value" class="force-value">200</span>
+							</label>
+							<input type="range" id="force-slider" class="force-slider" 
+								   min="50" max="500" value="200" step="10">
+							<div class="force-hints">
+								<span>Weak</span>
+								<span>Strong</span>
+							</div>
+						</div>
+					</div>
+				</div>
             </div>
         </aside>
 
