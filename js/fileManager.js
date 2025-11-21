@@ -107,11 +107,16 @@ class FileManager {
             try {
                 const json = JSON.parse(e.target.result);
                 
-                // Set the current filename
+                // Set the current filename (without .json extension)
                 this.currentFilename = file.name.replace('.json', '');
                 
                 // Load the graph directly
                 this.importGraph(json);
+                
+                // Update status with filename
+                if (window.app) {
+                    window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
+                }
             } catch (error) {
                 alert('Error reading dropped file: ' + error.message);
                 console.error('Drop error:', error);
@@ -234,6 +239,7 @@ class FileManager {
         try {
             const data = {
                 graph: this.graph.toJSON(),
+                filename: this.currentFilename, // Save the current filename
                 timestamp: new Date().toISOString()
             };
 
@@ -261,13 +267,30 @@ class FileManager {
                 return;
             }
 
-            const recover = confirm(
-                `Found auto-saved graph from ${timestamp.toLocaleString()}. ` +
-                'Would you like to recover it?'
-            );
+            // Build recovery message with filename info
+            let message = `Found auto-saved graph from ${timestamp.toLocaleString()}.`;
+            if (data.filename) {
+                message += `\n\nFile: ${data.filename}.json`;
+            }
+            message += '\n\nWould you like to recover it?';
+
+            const recover = confirm(message);
 
             if (recover && data.graph) {
+                // Restore the filename if it was saved
+                if (data.filename) {
+                    this.currentFilename = data.filename;
+                }
+                
                 this.importGraph(data.graph);
+                
+                // Update status with recovery info
+                if (window.app) {
+                    const statusMsg = data.filename ? 
+                        `Recovered: ${data.filename}.json (auto-saved)` : 
+                        'Recovered auto-saved graph';
+                    window.app.updateStatus(statusMsg);
+                }
             }
         } catch (error) {
             console.error('Recovery error:', error);
@@ -311,7 +334,7 @@ class FileManager {
             return;
         }
 
-        // Store the filename for future saves
+        // Store the filename for future saves (without .json extension)
         this.currentFilename = file.name.replace('.json', '');
 
         const reader = new FileReader();
@@ -319,6 +342,11 @@ class FileManager {
             try {
                 const json = JSON.parse(e.target.result);
                 this.importGraph(json);
+                
+                // Update status with filename
+                if (window.app) {
+                    window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
+                }
             } catch (error) {
                 alert('Error reading file: ' + error.message);
                 console.error('Import error:', error);
@@ -357,7 +385,6 @@ class FileManager {
                 }
 
                 Utils.hideLoading();
-                alert('Graph imported successfully!');
             } catch (error) {
                 Utils.hideLoading();
                 alert('Error importing graph: ' + error.message);
@@ -367,7 +394,9 @@ class FileManager {
     }
 
     /**
-     * Save graph directly (if filename exists) or prompt for name
+     * Save graph directly (Ctrl+S behavior)
+     * - If filename exists: save with that name
+     * - If no filename: prompt for name (same as Save As)
      */
     save() {
         if (this.currentFilename) {
@@ -379,34 +408,37 @@ class FileManager {
             Utils.downloadFile(filename, jsonString, 'application/json');
             
             if (window.app) {
-                window.app.updateStatus(`Saved as ${filename}`);
+                window.app.updateStatus(`Saved: ${filename}`);
             }
         } else {
-            // No filename yet, act like Save As
+            // No filename yet, prompt for one
             this.saveAs();
         }
     }
 
     /**
-     * Save graph with custom name
+     * Save graph with custom name (always prompts)
      */
     saveAs() {
-        const currentName = this.currentFilename || this.graph.metadata.name;
-        const name = prompt('Enter graph name:', currentName);
+        // Suggest current filename or graph metadata name
+        const suggestedName = this.currentFilename || this.graph.metadata.name.replace(/\s+/g, '_');
         
-        if (name) {
-            this.currentFilename = name;
-            this.graph.metadata.name = name;
+        const name = prompt('Enter filename (without .json):', suggestedName);
+        
+        if (name && name.trim()) {
+            const cleanName = name.trim();
+            this.currentFilename = cleanName;
+            this.graph.metadata.name = cleanName;
             
             // Now save with the new filename
             const json = this.graph.toJSON();
             const jsonString = JSON.stringify(json, null, 2);
-            const filename = `${name.replace(/\s+/g, '_')}.json`;
+            const filename = `${cleanName}.json`;
             
             Utils.downloadFile(filename, jsonString, 'application/json');
             
             if (window.app) {
-                window.app.updateStatus(`Saved as ${filename}`);
+                window.app.updateStatus(`Saved as: ${filename}`);
             }
         }
     }
@@ -426,7 +458,7 @@ class FileManager {
     }
 
     /**
-     * Clear current filename
+     * Clear current filename (called when creating new graph)
      */
     clearCurrentFilename() {
         this.currentFilename = null;

@@ -643,6 +643,9 @@ class KnowledgeGraphApp {
             modified: Utils.getCurrentDate()
         };
 
+        // Clear the current filename so Save will prompt
+        this.fileManager.clearCurrentFilename();
+
         this.renderer.clearSelection();
         this.renderer.render();
         this.propertiesPanel.hide();
