@@ -707,6 +707,26 @@ class Graph {
             return false;
         }
     }
+	
+	/**
+     * Get graph statistics
+     * @returns {Object} Statistics object with nodeCount and edgeCount
+     */
+    getStats() {
+        return {
+            nodeCount: this.nodes.length,
+            edgeCount: this.edges.length
+        };
+    }
+
+    /**
+     * Serialize graph to JSON
+     * @returns {Object} JSON representation
+     */
+    toJSON() {
+        // ... existing code
+    }
+	
 }
 
 // Export for use in other modules
