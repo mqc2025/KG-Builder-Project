@@ -113,6 +113,9 @@ class FileManager {
                 // Load the graph directly
                 this.importGraph(json);
                 
+                // ✅ NEW: Auto-save after loading file
+                this.saveToLocalStorage();
+                
                 // Update status with filename
                 if (window.app) {
                     window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
@@ -306,11 +309,12 @@ class FileManager {
 
     /**
      * Setup auto-save functionality
+     * ✅ MODIFIED: Changed interval to 10 seconds (10000ms)
      */
     setupAutoSave() {
         setInterval(() => {
             this.saveToLocalStorage();
-        }, 30000);
+        }, 10000); // Changed from 30000 to 10000
 
         this.tryRecoverFromLocalStorage();
     }
@@ -324,6 +328,7 @@ class FileManager {
 
     /**
      * Handle file selection
+     * ✅ MODIFIED: Added auto-save after import
      */
     handleFileSelect(event) {
         const file = event.target.files[0];
@@ -342,6 +347,9 @@ class FileManager {
             try {
                 const json = JSON.parse(e.target.result);
                 this.importGraph(json);
+                
+                // ✅ NEW: Auto-save after loading file
+                this.saveToLocalStorage();
                 
                 // Update status with filename
                 if (window.app) {
