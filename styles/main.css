@@ -18,6 +18,7 @@
     --sidebar-width: 200px;
     --toolbar-height: 60px;
     --statusbar-height: 30px;
+    --ad-banner-height: 90px;
 }
 
 body {
@@ -846,4 +847,43 @@ body {
 .edge.selected.dimmed {
     opacity: 1;
     pointer-events: all;
+}
+/* Google AdSense Banner */
+.ad-banner-container {
+    height: var(--ad-banner-height);
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid var(--border-color);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.ad-banner {
+    max-width: 728px;
+    width: 100%;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive: hide ad on small screens */
+@media (max-width: 768px) {
+    .ad-banner-container {
+        display: none;
+    }
+}
+
+/* Ensure ad doesn't overflow on medium screens */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .ad-banner {
+        max-width: 468px;
+    }
+    
+    .ad-banner ins.adsbygoogle {
+        width: 468px !important;
+        height: 60px !important;
+    }
 }
