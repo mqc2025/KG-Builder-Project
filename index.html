@@ -14,10 +14,22 @@
     <link rel="stylesheet" href="styles/filter.css">
 </head>
 <body>
+	<!-- Privacy Banner (add this right after <body>) -->
+		<div id="privacy-banner" class="privacy-banner hidden">
+			<div class="privacy-banner-content">
+				<div class="privacy-banner-text">
+					<span class="privacy-icon">🔒</span>
+					<strong>Your Privacy Matters:</strong> NodeBook runs entirely in your browser. No data is recorded, stored on servers, or transmitted anywhere. All your work stays on your device.
+				</div>
+				<button id="privacy-banner-dismiss" class="privacy-banner-dismiss">Got it</button>
+			</div>
+		</div>
+
+
     <!-- Header / Toolbar -->
     <header class="header">
         <div class="header-left">
-            <h1 class="app-title">Knowledge Graph Editor</h1>
+            <h1 class="app-title">NodeBook</h1>
         </div>
         <div class="toolbar">
             <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
@@ -179,6 +191,10 @@
         <span id="status-selection">Selected: None</span>
         <span class="separator">|</span>
         <span id="status-simulation">Simulation: Active</span>
+        <span class="separator">|</span>
+        <span id="status-privacy" class="status-privacy" title="Click for privacy information">
+            🔒 Private & Local
+        </span>
     </footer>
 
     <!-- Hidden File Input -->
@@ -286,6 +302,43 @@
     <div id="context-menu" class="context-menu hidden">
         <!-- Dynamically populated -->
     </div>
+	
+	<!-- Privacy Info Modal (add before </body>) -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔒 Privacy & Data Security</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-info-section">
+                    <h4>100% Local Processing</h4>
+                    <p>NodeBook runs entirely in your web browser. All computations, data processing, and file operations happen on your device.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>No Server Communication</h4>
+                    <p>Your graphs, nodes, and data are never transmitted to any server. We don't collect, store, or have access to your information.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>Local Storage Only</h4>
+                    <p>The only data storage used is your browser's localStorage for auto-save functionality. This data never leaves your device and can be cleared at any time through your browser settings.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>Your Data, Your Control</h4>
+                    <p>You have complete control over your data. Export your graphs as JSON files, and they remain entirely under your ownership.</p>
+                </div>
+                
+                <div class="privacy-info-section privacy-info-footer">
+                    <p><strong>NodeBook is a client-side application with zero telemetry.</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SheetJS Library for Excel Processing -->
 
     <!-- SheetJS Library for Excel Processing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>

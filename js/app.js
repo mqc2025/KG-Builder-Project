@@ -41,6 +41,8 @@ class KnowledgeGraphApp {
         // Setup
         this.setupEventListeners();
         this.setupKeyboardShortcuts();
+		this.setupPrivacyNotice();
+
         this.updateStats();
         
         // Initial state
@@ -48,6 +50,50 @@ class KnowledgeGraphApp {
         
         // Make app globally accessible
         window.app = this;
+    }
+	
+	/**
+     * Setup privacy banner and modal
+     */
+    setupPrivacyNotice() {
+        const banner = document.getElementById('privacy-banner');
+        const dismissBtn = document.getElementById('privacy-banner-dismiss');
+        const privacyStatus = document.getElementById('status-privacy');
+        const privacyModal = document.getElementById('privacy-modal');
+        
+        // Check if user has dismissed the banner before
+        const bannerDismissed = localStorage.getItem('nodebook-privacy-banner-dismissed');
+        
+        if (!bannerDismissed) {
+            // Show banner on first visit
+            banner?.classList.remove('hidden');
+            document.body.classList.add('privacy-banner-visible');
+        }
+        
+        // Dismiss banner
+        dismissBtn?.addEventListener('click', () => {
+            banner?.classList.add('hidden');
+            document.body.classList.remove('privacy-banner-visible');
+            localStorage.setItem('nodebook-privacy-banner-dismissed', 'true');
+        });
+        
+        // Show privacy modal when clicking status bar privacy link
+        privacyStatus?.addEventListener('click', () => {
+            privacyModal?.classList.remove('hidden');
+        });
+        
+        // Close privacy modal
+        const closeModalBtn = privacyModal?.querySelector('.modal-close');
+        closeModalBtn?.addEventListener('click', () => {
+            privacyModal?.classList.add('hidden');
+        });
+        
+        // Close modal when clicking outside
+        privacyModal?.addEventListener('click', (e) => {
+            if (e.target === privacyModal) {
+                privacyModal.classList.add('hidden');
+            }
+        });
     }
 
     /**

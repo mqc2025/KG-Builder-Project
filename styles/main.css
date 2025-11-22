@@ -887,3 +887,137 @@ body {
         height: 60px !important;
     }
 }
+
+/* Privacy Banner Styles */
+.privacy-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.privacy-banner.hidden {
+    display: none;
+}
+
+.privacy-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.privacy-banner-text {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.privacy-icon {
+    font-size: 24px;
+}
+
+.privacy-banner-dismiss {
+    padding: 8px 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.privacy-banner-dismiss:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+.privacy-banner-dismiss:active {
+    transform: translateY(0);
+}
+
+/* Status Bar Privacy Link */
+.status-privacy {
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.status-privacy:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #2ecc71;
+}
+
+/* Privacy Info Modal Styles */
+#privacy-modal .modal-content {
+    max-width: 600px;
+}
+
+.privacy-info-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--light-bg);
+    border-radius: 6px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.privacy-info-section h4 {
+    margin: 0 0 10px 0;
+    color: var(--primary-color);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.privacy-info-section p {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.privacy-info-footer {
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left-color: var(--secondary-color);
+    text-align: center;
+}
+
+.privacy-info-footer p {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Adjust main content when banner is visible */
+body.privacy-banner-visible .header {
+    margin-top: 60px;
+}
+
+body.privacy-banner-visible .main-content {
+    height: calc(100vh - var(--toolbar-height) - var(--statusbar-height) - 60px);
+}
