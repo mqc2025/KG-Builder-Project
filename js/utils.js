@@ -38,7 +38,67 @@ const Utils = {
      * @returns {Object} Cloned object
      */
     deepClone(obj) {
-        return JSON.parse(JSON.stringify(obj));
+        // Handle null, undefined, or non-objects
+        if (obj === null || obj === undefined) {
+            return obj;
+        }
+        
+        // Handle non-object types (primitives)
+        if (typeof obj !== 'object') {
+            return obj;
+        }
+        
+        // Handle arrays
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.deepClone(item));
+        }
+        
+        try {
+            // Clean the object before stringifying
+            const cleaned = this.cleanForJSON(obj);
+            return JSON.parse(JSON.stringify(cleaned));
+        } catch (error) {
+            console.error('Deep clone error:', error);
+            // Fallback: return a shallow copy
+            return { ...obj };
+        }
+    },
+    
+    /**
+     * Clean an object for JSON serialization
+     * Removes undefined values and functions
+     * @param {Object} obj - Object to clean
+     * @returns {Object} Cleaned object
+     */
+    cleanForJSON(obj) {
+        if (obj === null || obj === undefined) {
+            return null;
+        }
+        
+        if (typeof obj !== 'object') {
+            return obj;
+        }
+        
+        if (Array.isArray(obj)) {
+            return obj.map(item => this.cleanForJSON(item)).filter(item => item !== undefined);
+        }
+        
+        const cleaned = {};
+        for (const [key, value] of Object.entries(obj)) {
+            // Skip undefined values and functions
+            if (value === undefined || typeof value === 'function') {
+                continue;
+            }
+            
+            // Recursively clean nested objects
+            if (typeof value === 'object') {
+                cleaned[key] = this.cleanForJSON(value);
+            } else {
+                cleaned[key] = value;
+            }
+        }
+        
+        return cleaned;
     },
 
     /**
