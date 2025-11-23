@@ -51,12 +51,12 @@ class ContextMenuManager {
                 action: () => this.togglePin(node)
             },
             {
-                icon: '→',
+                icon: '🔗',
                 label: 'Connect To...',
                 action: () => this.startConnectFrom(node)
             },
             {
-                icon: '🔗',
+                icon: '→',
                 label: 'Connect by Click',
                 action: () => this.startConnectByClick(node)
             },
