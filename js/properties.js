@@ -93,6 +93,78 @@ class PropertiesPanel {
                     </div>
                     <input type="color" class="property-input" id="prop-color" value="${node.color || '#3498db'}">
                 </div>
+				
+				<div class="property-item">
+					<label class="property-label">Icon (Emoji)</label>
+					<div class="icon-palette">
+						<button class="icon-swatch ${!node.icon || node.icon === '' ? 'active' : ''}" 
+								data-icon="" 
+								title="No icon (circle)">
+							⭕
+						</button>
+						<button class="icon-swatch ${node.icon === '📊' ? 'active' : ''}" 
+								data-icon="📊" 
+								title="Chart">
+							📊
+						</button>
+						<button class="icon-swatch ${node.icon === '📁' ? 'active' : ''}" 
+								data-icon="📁" 
+								title="Folder">
+							📁
+						</button>
+						<button class="icon-swatch ${node.icon === '💡' ? 'active' : ''}" 
+								data-icon="💡" 
+								title="Idea">
+							💡
+						</button>
+						<button class="icon-swatch ${node.icon === '🔧' ? 'active' : ''}" 
+								data-icon="🔧" 
+								title="Tool">
+							🔧
+						</button>
+						<button class="icon-swatch ${node.icon === '⚙️' ? 'active' : ''}" 
+								data-icon="⚙️" 
+								title="Settings">
+							⚙️
+						</button>
+						<button class="icon-swatch ${node.icon === '📝' ? 'active' : ''}" 
+								data-icon="📝" 
+								title="Document">
+							📝
+						</button>
+						<button class="icon-swatch ${node.icon === '🎯' ? 'active' : ''}" 
+								data-icon="🎯" 
+								title="Target">
+							🎯
+						</button>
+						<button class="icon-swatch ${node.icon === '🔍' ? 'active' : ''}" 
+								data-icon="🔍" 
+								title="Search">
+							🔍
+						</button>
+						<button class="icon-swatch ${node.icon === '🚀' ? 'active' : ''}" 
+								data-icon="🚀" 
+								title="Rocket">
+							🚀
+						</button>
+						<button class="icon-swatch ${node.icon === '🏢' ? 'active' : ''}" 
+								data-icon="🏢" 
+								title="Building">
+							🏢
+						</button>
+						<button class="icon-swatch ${node.icon === '👤' ? 'active' : ''}" 
+								data-icon="👤" 
+								title="Person">
+							👤
+						</button>
+					</div>
+					<input type="text" class="property-input" id="prop-icon" 
+						   value="${Utils.sanitizeHtml(node.icon || '')}" 
+						   placeholder="Or enter any emoji" 
+						   maxlength="2"
+						   style="margin-top: 8px;">
+					<p class="property-hint">Click palette or type emoji (e.g., 🌟 ✨ 🎨)</p>
+				</div>
 
                 <div class="property-item">
                     <label class="property-label">Size</label>
@@ -414,9 +486,37 @@ class PropertiesPanel {
                 document.getElementById('prop-color').value = color;
             });
         });
+		
+		// Icon palette
+		const iconSwatches = document.querySelectorAll('.icon-swatch');
+		iconSwatches.forEach(swatch => {
+			swatch.addEventListener('click', (e) => {
+				const icon = e.target.dataset.icon;
+				this.updateProperty('icon', icon);
+				document.getElementById('prop-icon').value = icon;
+				
+				// Update active state
+				iconSwatches.forEach(s => s.classList.remove('active'));
+				e.target.classList.add('active');
+			});
+		});
+
+		// Icon input field
+		const iconInput = document.getElementById('prop-icon');
+		if (iconInput) {
+			iconInput.addEventListener('input', (e) => {
+				const icon = e.target.value.trim();
+				this.updateProperty('icon', icon);
+				
+				// Update palette selection
+				iconSwatches.forEach(swatch => {
+					swatch.classList.toggle('active', swatch.dataset.icon === icon);
+				});
+			});
+		}
 
         // Standard properties for nodes
-        const nodePropertyInputs = ['prop-color', 'prop-size', 'prop-description', 
+        const nodePropertyInputs = ['prop-color', 'prop-size', 'prop-icon', 'prop-description', 
                                     'prop-category', 'prop-subcat', 'prop-priority', 
                                     'prop-deadline', 'prop-link1', 'prop-link2', 
                                     'prop-link3', 'prop-link4'];
@@ -737,6 +837,14 @@ class PropertiesPanel {
             if (!node) return;
             node[key] = value;
             node.modifiedDate = new Date().toISOString();
+			// NEW: Remember color/icon for next node
+			if (window.app) {
+				if (key === 'color') {
+					window.app.lastNodeColor = value;
+				} else if (key === 'icon') {
+					window.app.lastNodeIcon = value;
+				}
+			}
         } else if (this.currentType === 'edge') {
             const edge = this.graph.getEdge(this.currentSelection);
             if (!edge) return;

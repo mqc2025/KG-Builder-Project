@@ -51,6 +51,7 @@ class Graph {
             name: cleanProps.name || nodeId,
             color: cleanProps.color || '#3498db',
             size: cleanProps.size || 10,
+			icon: cleanProps.icon || '',
             description: cleanProps.description || '',
             category: cleanProps.category || '',
             subCat: cleanProps.subCat || '',
@@ -736,6 +737,7 @@ class Graph {
                 node.link2 = node.link2 || '';
                 node.link3 = node.link3 || '';
                 node.link4 = node.link4 || '';
+				node.icon = node.icon || '';
                 
                 // Ensure date/priority properties exist
                 const now = new Date().toISOString();

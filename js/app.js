@@ -21,6 +21,9 @@ class KnowledgeGraphApp {
         
         // Current tool
         this.currentTool = 'select';
+		
+		this.lastNodeColor = '#3498db';
+		this.lastNodeIcon = '';
         
         // Temporary state for adding edges
         this.edgeSourceNode = null;
@@ -925,8 +928,14 @@ class KnowledgeGraphApp {
             x: x,
             y: y,
             fx: x,
-            fy: y
+            fy: y,
+			color: this.lastNodeColor, // NEW: Use last color
+			icon: this.lastNodeIcon     // NEW: Use last icon
         });
+		
+		// Update last used settings
+		this.lastNodeColor = node.color;
+		this.lastNodeIcon = node.icon;
 
         this.renderer.render();
         this.updateStats();

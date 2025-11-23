@@ -1334,3 +1334,39 @@
     background-color: var(--secondary-color);
     border-color: var(--secondary-color);
 }
+
+/* Icon Palette */
+.icon-palette {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.icon-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    padding: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-swatch:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border-color: var(--primary-color);
+}
+
+.icon-swatch.active {
+    border-color: var(--secondary-color);
+    border-width: 3px;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
+    background-color: rgba(46, 204, 113, 0.1);
+}
