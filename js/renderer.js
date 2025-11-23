@@ -473,53 +473,72 @@ class Renderer {
             .text(d => d.name || d.id);
 
         // Merge and update
-        const nodesMerge = nodes.merge(nodesEnter);
+		const nodesMerge = nodes.merge(nodesEnter);
 
-        // Update visual elements
-        nodesMerge.each(function(d) {
-            const nodeGroup = d3.select(this);
-            
-            // Update icon if it exists
-            const iconElement = nodeGroup.select('.node-icon');
-            if (d.icon && d.icon.trim() !== '') {
-                if (iconElement.empty()) {
-                    // Icon was just added, need to reconstruct
-                    nodeGroup.select('circle:not(.node-hitbox)').remove();
-                    nodeGroup.append('text')
-                        .attr('class', 'node-icon')
-                        .attr('text-anchor', 'middle')
-                        .attr('dy', '0.35em')
-                        .style('font-size', `${(d.size || 10) * 2}px`) // 
-                        .style('cursor', 'pointer')
-                        .style('user-select', 'none')
-                        .text(d.icon);
-                } else {
-                    iconElement
-                        .style('font-size', `${(d.size || 10) * 2}px`) //
-                        .text(d.icon);
-                }
-            } else {
-                // No icon, ensure circle exists
-                if (iconElement.size() > 0) {
-                    // Had icon before, switch to circle
-                    iconElement.remove();
-                    nodeGroup.select('.node-hitbox').remove();
-                    nodeGroup.insert('circle', ':first-child')
-                        .attr('r', d.size || 10)
-                        .attr('fill', d.color || '#3498db');
-                } else {
-                    // Update existing circle
-                    nodeGroup.select('circle:not(.node-hitbox)')
-                        .attr('r', d.size || 10)
-                        .attr('fill', d.color || '#3498db');
-                }
-            }
-            
-            // Update label position - CHANGED: adjusted for larger icons
-            nodeGroup.select('.node-label')
-                .attr('dy', d.icon && d.icon.trim() !== '' ? (d.size || 10) * 3 : -15)
-                .text(d.name || d.id);
-        });
+		// Update visual elements
+		nodesMerge.each(function(d) {
+			const nodeGroup = d3.select(this);
+			
+			// Update icon if it exists
+			const iconElement = nodeGroup.select('.node-icon');
+			const hitboxElement = nodeGroup.select('.node-hitbox');
+			
+			if (d.icon && d.icon.trim() !== '') {
+				if (iconElement.empty()) {
+					// Icon was just added, need to reconstruct
+					nodeGroup.select('circle:not(.node-hitbox)').remove();
+					
+					// Add icon text
+					nodeGroup.append('text')
+						.attr('class', 'node-icon')
+						.attr('text-anchor', 'middle')
+						.attr('dy', '0.35em')
+						.style('font-size', `${(d.size || 10) * 2}px`)
+						.style('cursor', 'pointer')
+						.style('user-select', 'none')
+						.text(d.icon);
+					
+					// FIX: Add hitbox circle for click handling
+					nodeGroup.append('circle')
+						.attr('class', 'node-hitbox')
+						.attr('r', (d.size || 10) * 1.5)
+						.attr('fill', 'transparent')
+						.attr('stroke', 'transparent')
+						.attr('stroke-width', 0)
+						.style('pointer-events', 'all');
+				} else {
+					// Update existing icon
+					iconElement
+						.style('font-size', `${(d.size || 10) * 2}px`)
+						.text(d.icon);
+					
+					// Update hitbox size
+					if (!hitboxElement.empty()) {
+						hitboxElement.attr('r', (d.size || 10) * 1.5);
+					}
+				}
+			} else {
+				// No icon, ensure circle exists
+				if (iconElement.size() > 0) {
+					// Had icon before, switch to circle
+					iconElement.remove();
+					nodeGroup.select('.node-hitbox').remove();
+					nodeGroup.insert('circle', ':first-child')
+						.attr('r', d.size || 10)
+						.attr('fill', d.color || '#3498db');
+				} else {
+					// Update existing circle
+					nodeGroup.select('circle:not(.node-hitbox)')
+						.attr('r', d.size || 10)
+						.attr('fill', d.color || '#3498db');
+				}
+			}
+			
+			// Update label position
+			nodeGroup.select('.node-label')
+				.attr('dy', d.icon && d.icon.trim() !== '' ? (d.size || 10) * 3 : -15)
+				.text(d.name || d.id);
+		});
 
         // Apply selection/highlight classes
         nodesMerge.select('circle:not(.node-hitbox)')
