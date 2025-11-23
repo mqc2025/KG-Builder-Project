@@ -78,11 +78,7 @@ class PropertiesPanel {
                     <p class="property-hint">Press Enter to save (will regenerate ID)</p>
                 </div>
 
-                <div class="property-item">
-                    <label class="property-label">ID (SHA256 of Name)</label>
-                    <input type="text" class="property-input" id="prop-node-id" value="${Utils.sanitizeHtml(node.id)}" readonly>
-                    <p class="property-hint">Auto-generated from name</p>
-                </div>
+                
 
                 <div class="property-item">
                     <label class="property-label">Color (Feature 8: Palette)</label>
@@ -223,11 +219,7 @@ class PropertiesPanel {
                     <p class="property-hint">Press Enter to save (will regenerate ID)</p>
                 </div>
 
-                <div class="property-item">
-                    <label class="property-label">ID (SHA256 of Name)</label>
-                    <input type="text" class="property-input" id="prop-edge-id" value="${Utils.sanitizeHtml(edge.id)}" readonly>
-                    <p class="property-hint">Auto-generated from name</p>
-                </div>
+                
 
                 <div class="property-item">
                     <label class="property-label">Source</label>
