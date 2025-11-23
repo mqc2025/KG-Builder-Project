@@ -464,85 +464,86 @@ class Graph {
     getAllNodeNames() {
         return this.nodes.map(node => node.name || node.id);
     }
-	/**
-	 * Search nodes by query (searches in name, description, category)
-	 * @param {string} query - Search query
-	 * @returns {Array} Matching nodes
-	 */
-	searchNodes(query) {
-		if (!query || query.trim() === '') {
-			return [];
-		}
 
-		const lowerQuery = query.toLowerCase().trim();
+    /**
+     * Search nodes by query (searches in name, description, category)
+     * @param {string} query - Search query
+     * @returns {Array} Matching nodes
+     */
+    searchNodes(query) {
+        if (!query || query.trim() === '') {
+            return [];
+        }
 
-		return this.nodes.filter(node => {
-			// Search in name
-			if (node.name && node.name.toLowerCase().includes(lowerQuery)) {
-				return true;
-			}
+        const lowerQuery = query.toLowerCase().trim();
 
-			// Search in description
-			if (node.description && node.description.toLowerCase().includes(lowerQuery)) {
-				return true;
-			}
+        return this.nodes.filter(node => {
+            // Search in name
+            if (node.name && node.name.toLowerCase().includes(lowerQuery)) {
+                return true;
+            }
 
-			// Search in category
-			if (node.category && node.category.toLowerCase().includes(lowerQuery)) {
-				return true;
-			}
+            // Search in description
+            if (node.description && node.description.toLowerCase().includes(lowerQuery)) {
+                return true;
+            }
 
-			// Search in subCat
-			if (node.subCat && node.subCat.toLowerCase().includes(lowerQuery)) {
-				return true;
-			}
+            // Search in category
+            if (node.category && node.category.toLowerCase().includes(lowerQuery)) {
+                return true;
+            }
 
-			// Search in id
-			if (node.id && node.id.toLowerCase().includes(lowerQuery)) {
-				return true;
-			}
+            // Search in subCat
+            if (node.subCat && node.subCat.toLowerCase().includes(lowerQuery)) {
+                return true;
+            }
 
-			return false;
-		});
-	}
+            // Search in id
+            if (node.id && node.id.toLowerCase().includes(lowerQuery)) {
+                return true;
+            }
 
-	/**
-	 * Filter nodes by property value
-	 * @param {string} propertyKey - Property name to filter by
-	 * @param {string} propertyValue - Value to match
-	 * @param {string} matchType - Match type: 'exact', 'contains', 'starts', 'ends'
-	 * @returns {Array} Matching nodes
-	 */
-	filterNodes(propertyKey, propertyValue, matchType = 'exact') {
-		if (!propertyKey || !propertyValue) {
-			return [];
-		}
+            return false;
+        });
+    }
 
-		const lowerValue = propertyValue.toLowerCase();
+    /**
+     * Filter nodes by property value
+     * @param {string} propertyKey - Property name to filter by
+     * @param {string} propertyValue - Value to match
+     * @param {string} matchType - Match type: 'exact', 'contains', 'starts', 'ends'
+     * @returns {Array} Matching nodes
+     */
+    filterNodes(propertyKey, propertyValue, matchType = 'exact') {
+        if (!propertyKey || !propertyValue) {
+            return [];
+        }
 
-		return this.nodes.filter(node => {
-			const nodeValue = node[propertyKey];
-			
-			if (nodeValue === undefined || nodeValue === null) {
-				return false;
-			}
+        const lowerValue = propertyValue.toLowerCase();
 
-			const lowerNodeValue = String(nodeValue).toLowerCase();
+        return this.nodes.filter(node => {
+            const nodeValue = node[propertyKey];
+            
+            if (nodeValue === undefined || nodeValue === null) {
+                return false;
+            }
 
-			switch (matchType) {
-				case 'exact':
-					return lowerNodeValue === lowerValue;
-				case 'contains':
-					return lowerNodeValue.includes(lowerValue);
-				case 'starts':
-					return lowerNodeValue.startsWith(lowerValue);
-				case 'ends':
-					return lowerNodeValue.endsWith(lowerValue);
-				default:
-					return lowerNodeValue === lowerValue;
-			}
-		});
-	}
+            const lowerNodeValue = String(nodeValue).toLowerCase();
+
+            switch (matchType) {
+                case 'exact':
+                    return lowerNodeValue === lowerValue;
+                case 'contains':
+                    return lowerNodeValue.includes(lowerValue);
+                case 'starts':
+                    return lowerNodeValue.startsWith(lowerValue);
+                case 'ends':
+                    return lowerNodeValue.endsWith(lowerValue);
+                default:
+                    return lowerNodeValue === lowerValue;
+            }
+        });
+    }
 
     /**
      * Clear the graph
@@ -579,34 +580,106 @@ class Graph {
     }
 
     /**
+     * Get graph statistics
+     * @returns {Object} Statistics object with nodeCount and edgeCount
+     */
+    getStats() {
+        return {
+            nodeCount: this.nodes.length,
+            edgeCount: this.edges.length
+        };
+    }
+
+    /**
      * Serialize graph to JSON
      * @returns {Object} JSON representation
      */
     toJSON() {
-        // Save nodes with position properties (x, y, fx, fy) but strip other D3 properties
-        const cleanNodes = this.nodes.map(node => {
-            const nodeData = this.stripD3Properties(node);
-            return nodeData;
-        });
-
-        const cleanEdges = this.edges.map(edge => {
-            const edgeData = this.stripD3Properties(edge);
+        try {
+            console.log('toJSON called, nodes:', this.nodes?.length, 'edges:', this.edges?.length);
             
-            // Convert source/target object references to IDs
-            edgeData.source = typeof edge.source === 'object' ? edge.source.id : edge.source;
-            edgeData.target = typeof edge.target === 'object' ? edge.target.id : edge.target;
-            
-            return edgeData;
-        });
-
-        return {
-            graph: {
-                metadata: this.metadata,
-                settings: this.settings,
-                nodes: cleanNodes,
-                edges: cleanEdges
+            // Validate that we have arrays
+            if (!Array.isArray(this.nodes)) {
+                console.error('toJSON error: nodes is not an array', this.nodes);
+                this.nodes = [];
             }
-        };
+            if (!Array.isArray(this.edges)) {
+                console.error('toJSON error: edges is not an array', this.edges);
+                this.edges = [];
+            }
+            
+            // Save nodes with position properties (x, y, fx, fy) but strip other D3 properties
+            const cleanNodes = this.nodes.map(node => {
+                const nodeData = this.stripD3Properties(node);
+                return nodeData;
+            });
+
+            const cleanEdges = this.edges.map(edge => {
+                const edgeData = this.stripD3Properties(edge);
+                
+                // Convert source/target object references to IDs
+                edgeData.source = typeof edge.source === 'object' && edge.source !== null ? edge.source.id : edge.source;
+                edgeData.target = typeof edge.target === 'object' && edge.target !== null ? edge.target.id : edge.target;
+                
+                return edgeData;
+            });
+
+            const result = {
+                graph: {
+                    metadata: this.metadata || {
+                        name: 'Untitled Graph',
+                        title: '',
+                        description: '',
+                        created: Utils.getCurrentDate(),
+                        modified: Utils.getCurrentDate()
+                    },
+                    settings: this.settings || {
+                        nodeLabelSize: 12,
+                        edgeLabelSize: 10,
+                        worldBoundary: {
+                            enabled: false,
+                            minX: -2000,
+                            maxX: 2000,
+                            minY: -2000,
+                            maxY: 2000
+                        }
+                    },
+                    nodes: cleanNodes,
+                    edges: cleanEdges
+                }
+            };
+            
+            console.log('toJSON result created successfully, nodes:', cleanNodes.length, 'edges:', cleanEdges.length);
+            return result;
+            
+        } catch (error) {
+            console.error('toJSON error:', error);
+            // Return a valid minimal structure instead of undefined
+            return {
+                graph: {
+                    metadata: {
+                        name: 'Error Graph',
+                        title: '',
+                        description: 'Error occurred during serialization',
+                        created: Utils.getCurrentDate(),
+                        modified: Utils.getCurrentDate()
+                    },
+                    settings: {
+                        nodeLabelSize: 12,
+                        edgeLabelSize: 10,
+                        worldBoundary: {
+                            enabled: false,
+                            minX: -2000,
+                            maxX: 2000,
+                            minY: -2000,
+                            maxY: 2000
+                        }
+                    },
+                    nodes: [],
+                    edges: []
+                }
+            };
+        }
     }
 
     /**
@@ -707,26 +780,6 @@ class Graph {
             return false;
         }
     }
-	
-	/**
-     * Get graph statistics
-     * @returns {Object} Statistics object with nodeCount and edgeCount
-     */
-    getStats() {
-        return {
-            nodeCount: this.nodes.length,
-            edgeCount: this.edges.length
-        };
-    }
-
-    /**
-     * Serialize graph to JSON
-     * @returns {Object} JSON representation
-     */
-    toJSON() {
-        // ... existing code
-    }
-	
 }
 
 // Export for use in other modules
