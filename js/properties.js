@@ -99,8 +99,8 @@ class PropertiesPanel {
 					<div class="icon-palette">
 						<button class="icon-swatch ${!node.icon || node.icon === '' ? 'active' : ''}" 
 								data-icon="" 
-								title="No icon (circle)">
-							⭕
+								title="No icon (filled circle)"
+								style="background-color: ${node.color || '#3498db'}; border-radius: 50%;">
 						</button>
 						<button class="icon-swatch ${node.icon === '📊' ? 'active' : ''}" 
 								data-icon="📊" 
@@ -152,18 +152,17 @@ class PropertiesPanel {
 								title="Building">
 							🏢
 						</button>
-						<button class="icon-swatch ${node.icon === '👤' ? 'active' : ''}" 
-								data-icon="👤" 
-								title="Person">
-							👤
+						<button class="icon-swatch icon-more-btn" 
+								title="More icons...">
+							⋯
 						</button>
 					</div>
 					<input type="text" class="property-input" id="prop-icon" 
 						   value="${Utils.sanitizeHtml(node.icon || '')}" 
 						   placeholder="Or enter any emoji" 
-						   maxlength="2"
+						   maxlength="4"
 						   style="margin-top: 8px;">
-					<p class="property-hint">Click palette or type emoji (e.g., 🌟 ✨ 🎨)</p>
+					<p class="property-hint">Click palette, "More icons..." button, or type emoji</p>
 				</div>
 
                 <div class="property-item">
@@ -512,6 +511,13 @@ class PropertiesPanel {
 				iconSwatches.forEach(swatch => {
 					swatch.classList.toggle('active', swatch.dataset.icon === icon);
 				});
+			});
+		}
+		// More icons button
+		const moreIconsBtn = document.querySelector('.icon-more-btn');
+		if (moreIconsBtn) {
+			moreIconsBtn.addEventListener('click', () => {
+				this.showIconPickerModal();
 			});
 		}
 
@@ -1302,6 +1308,130 @@ class PropertiesPanel {
 			}
 		});
 	}
+	
+	/**
+	 * Show comprehensive icon picker modal
+	 */
+	showIconPickerModal() {
+		const modal = document.createElement('div');
+		modal.className = 'modal-overlay';
+		modal.innerHTML = `
+			<div class="modal-content icon-picker-modal">
+				<div class="modal-header">
+					<h3>Choose an Icon</h3>
+					<button class="modal-close">✕</button>
+				</div>
+				<div class="modal-body">
+					<div class="icon-picker-search">
+						<input type="text" id="icon-search" class="property-input" placeholder="Search icons..." autocomplete="off">
+					</div>
+					
+					<div class="icon-picker-categories">
+						<button class="icon-category-btn active" data-category="common">Common</button>
+						<button class="icon-category-btn" data-category="objects">Objects</button>
+						<button class="icon-category-btn" data-category="symbols">Symbols</button>
+						<button class="icon-category-btn" data-category="nature">Nature</button>
+						<button class="icon-category-btn" data-category="travel">Travel</button>
+						<button class="icon-category-btn" data-category="activities">Activities</button>
+					</div>
+					
+					<div class="icon-picker-grid" id="icon-picker-grid">
+						<!-- Will be populated dynamically -->
+					</div>
+				</div>
+			</div>
+		`;
+		
+		document.body.appendChild(modal);
+		
+		// Icon categories
+		const iconCategories = {
+			common: ['📊', '📁', '💡', '🔧', '⚙️', '📝', '🎯', '🔍', '🚀', '🏢', '👤', '📱', '💻', '🖥️', '⌨️', '🖱️', '🖨️', '📷', '📹', '📞', '☎️', '📠', '📺', '📻', '🎙️', '🎚️', '🎛️', '⏱️', '⏲️', '⏰', '🕰️', '⌛', '⏳', '📡', '🔋', '🔌', '💾', '💿', '📀', '🎮', '🕹️', '🎰'],
+			objects: ['📦', '📫', '📪', '📬', '📭', '📮', '🗳️', '✏️', '✒️', '🖊️', '🖋️', '🖍️', '📐', '📏', '📌', '📍', '✂️', '🗃️', '🗄️', '🗑️', '🔒', '🔓', '🔐', '🔑', '🗝️', '🔨', '⛏️', '⚒️', '🛠️', '🗡️', '⚔️', '🔫', '🏹', '🛡️', '🔧', '🔩', '⚙️', '🗜️', '⚖️', '🔗', '⛓️', '🧰', '🧲', '⚗️'],
+			symbols: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '⭐', '🌟', '✨', '⚡', '🔥', '💫', '💥', '💢', '💦', '💨', '🕳️', '💬', '👁️', '🗨️', '🗯️', '💭', '💤', '✔️', '✅', '✖️', '❌', '❎', '➕', '➖', '➗', '♾️'],
+			nature: ['🌱', '🌿', '🍀', '🎋', '🎍', '🌾', '🌵', '🌴', '🌳', '🌲', '🌰', '🎃', '🍄', '🌹', '🌺', '🌻', '🌼', '🌷', '🌸', '💐', '🏵️', '🥀', '☘️', '🌊', '💧', '💦', '🌈', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌩️', '🌨️', '❄️', '☃️', '⛄', '🌬️', '💨', '🌪️', '🌫️', '☔'],
+			travel: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🛴', '🚲', '🛵', '🏍️', '🛺', '🚨', '🚔', '🚍', '🚘', '🚖', '🚡', '🚠', '🚟', '🚃', '🚋', '🚞', '🚝', '🚄', '🚅', '🚈', '🚂', '🚆', '🚇', '🚊', '🚉', '✈️', '🛫', '🛬', '🛩️', '💺', '🚁'],
+			activities: ['⚽', '🏀', '🏈', '⚾', '🥎', '🎾', '🏐', '🏉', '🥏', '🎱', '🏓', '🏸', '🏒', '🏑', '🥍', '🏏', '⛳', '🏹', '🎣', '🥊', '🥋', '🎽', '⛸️', '🥌', '🛷', '🎿', '⛷️', '🏂', '🏋️', '🤼', '🤸', '🤺', '⛹️', '🤾', '🏌️', '🏇', '🧘', '🏊', '🤽', '🚣', '🧗', '🚴', '🚵', '🎪']
+		};
+		
+		const grid = document.getElementById('icon-picker-grid');
+		const searchInput = document.getElementById('icon-search');
+		const categoryBtns = modal.querySelectorAll('.icon-category-btn');
+		
+		// Function to render icons
+		const renderIcons = (icons) => {
+			grid.innerHTML = icons.map(icon => `
+				<button class="icon-picker-item" data-icon="${icon}" title="${icon}">
+					${icon}
+				</button>
+			`).join('');
+			
+			// Attach click handlers
+			grid.querySelectorAll('.icon-picker-item').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const selectedIcon = btn.dataset.icon;
+					this.updateProperty('icon', selectedIcon);
+					document.getElementById('prop-icon').value = selectedIcon;
+					
+					// Update palette selection
+					document.querySelectorAll('.icon-swatch').forEach(swatch => {
+						swatch.classList.toggle('active', swatch.dataset.icon === selectedIcon);
+					});
+					
+					document.body.removeChild(modal);
+				});
+			});
+		};
+		
+		// Initial render - common category
+		renderIcons(iconCategories.common);
+		
+		// Category switching
+		categoryBtns.forEach(btn => {
+			btn.addEventListener('click', () => {
+				categoryBtns.forEach(b => b.classList.remove('active'));
+				btn.classList.add('active');
+				
+				const category = btn.dataset.category;
+				renderIcons(iconCategories[category]);
+				searchInput.value = '';
+			});
+		});
+		
+		// Search functionality
+		searchInput.addEventListener('input', (e) => {
+			const query = e.target.value.toLowerCase().trim();
+			
+			if (!query) {
+				// Show current category
+				const activeCategory = modal.querySelector('.icon-category-btn.active').dataset.category;
+				renderIcons(iconCategories[activeCategory]);
+				return;
+			}
+			
+			// Search across all categories
+			const allIcons = Object.values(iconCategories).flat();
+			const filtered = allIcons.filter(icon => {
+				// You could add emoji names here for better search
+				return icon.includes(query);
+			});
+			
+			renderIcons(filtered.length > 0 ? filtered : ['❌ No results']);
+		});
+		
+		// Close modal
+		const closeBtn = modal.querySelector('.modal-close');
+		closeBtn.addEventListener('click', () => {
+			document.body.removeChild(modal);
+		});
+		
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) {
+				document.body.removeChild(modal);
+			}
+		});
+	}
+	
 }
 
 // Export for use in other modules
