@@ -440,7 +440,7 @@ class Renderer {
                     .attr('class', 'node-icon')
                     .attr('text-anchor', 'middle')
                     .attr('dy', '0.35em')
-                    .style('font-size', d => `${(d.size || 10) * 4}px`) // CHANGED: 2 to 4
+                    .style('font-size', d => `${(d.size || 10) * 2}px`) // CHANGED
                     .style('cursor', 'pointer')
                     .style('user-select', 'none')
                     .text(d.icon);
@@ -489,13 +489,13 @@ class Renderer {
                         .attr('class', 'node-icon')
                         .attr('text-anchor', 'middle')
                         .attr('dy', '0.35em')
-                        .style('font-size', `${(d.size || 10) * 4}px`) // CHANGED: 2 to 4
+                        .style('font-size', `${(d.size || 10) * 2}px`) // 
                         .style('cursor', 'pointer')
                         .style('user-select', 'none')
                         .text(d.icon);
                 } else {
                     iconElement
-                        .style('font-size', `${(d.size || 10) * 4}px`) // CHANGED: 2 to 4
+                        .style('font-size', `${(d.size || 10) * 2}px`) //
                         .text(d.icon);
                 }
             } else {
