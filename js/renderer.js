@@ -626,18 +626,23 @@ class Renderer {
     }
 
     /**
-     * Unpin a node (allow it to move freely again)
-     */
-    unpinNode(nodeId) {
-        const node = this.graph.nodes.find(n => n.id === nodeId);
-        if (node) {
-            node.fx = null;
-            node.fy = null;
-            if (!this.isFrozen) {
-                this.simulation.alpha(0.3).restart();
-            }
-        }
-    }
+	 * Unpin a node (allow it to move freely again)
+	 */
+	unpinNode(nodeId) {
+		const node = this.graph.nodes.find(n => n.id === nodeId);
+		if (node) {
+			node.fx = null;
+			node.fy = null;
+			
+			// Add a small "giggle" effect - random velocity
+			node.vx = (Math.random() - 0.5) * 20;
+			node.vy = (Math.random() - 0.5) * 20;
+			
+			if (!this.isFrozen) {
+				this.simulation.alpha(0.3).restart();
+			}
+		}
+	}
 
     /**
      * Pin all nodes at their current positions
