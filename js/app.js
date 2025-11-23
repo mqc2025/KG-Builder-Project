@@ -207,11 +207,21 @@ class KnowledgeGraphApp {
                 this.toggleFreeze();
             }
             
-            // Delete: Delete selection
-            if (e.key === 'Delete') {
-                e.preventDefault();
-                this.deleteSelection();
-            }
+            // Delete: Delete selection (but not when typing in inputs)
+			if (e.key === 'Delete') {
+				// Check if user is currently typing in an input or textarea
+				const activeElement = document.activeElement;
+				const isTyping = activeElement && 
+								 (activeElement.tagName === 'INPUT' || 
+								  activeElement.tagName === 'TEXTAREA' ||
+								  activeElement.isContentEditable);
+				
+				// Only delete selection if NOT typing
+				if (!isTyping) {
+					e.preventDefault();
+					this.deleteSelection();
+				}
+			}
             
             // Escape: Clear selection OR cancel connect-by-click mode
             if (e.key === 'Escape') {
@@ -233,39 +243,41 @@ class KnowledgeGraphApp {
      * Handle node click
      */
     handleNodeClick(node) {
-        // Check if in connect-by-click mode
-        if (this.connectByClickActive) {
-            this.completeConnectByClick(node);
-            return;
-        }
-        
-        // Check if in shortest path mode
-        if (this.currentTool === 'shortest-path') {
-            this.selectPathNode(node);
-            return;
-        }
-        
-        // Select the node
-        this.renderer.selectNodes([node.id]);
-        
-        // Show properties panel
-        this.propertiesPanel.showNodeProperties(node.id);
-        
-        this.updateStatus(`Selected node: ${node.name || node.id}`);
-    }
+		// Check if in connect-by-click mode
+		if (this.connectByClickActive) {
+			this.completeConnectByClick(node);
+			return;
+		}
+		
+		// Check if in shortest path mode
+		if (this.currentTool === 'shortest-path') {
+			this.selectPathNode(node);
+			return;
+		}
+		
+		// Clear edge selection and select the node
+		this.renderer.selectedEdges.clear();
+		this.renderer.selectNodes([node.id]);
+		
+		// Show properties panel
+		this.propertiesPanel.showNodeProperties(node.id);
+		
+		this.updateStatus(`Selected node: ${node.name || node.id}`);
+	}
 
     /**
      * Handle edge click
      */
     handleEdgeClick(edge) {
-        // Select the edge
-        this.renderer.selectEdges([edge.id]);
-        
-        // Show properties panel
-        this.propertiesPanel.showEdgeProperties(edge.id);
-        
-        this.updateStatus(`Selected edge: ${edge.name || edge.id}`);
-    }
+		// Clear node selection and select the edge
+		this.renderer.selectedNodes.clear();
+		this.renderer.selectEdges([edge.id]);
+		
+		// Show properties panel
+		this.propertiesPanel.showEdgeProperties(edge.id);
+		
+		this.updateStatus(`Selected edge: ${edge.name || edge.id}`);
+	}
 
     /**
      * Handle canvas click

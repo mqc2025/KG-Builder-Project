@@ -485,23 +485,22 @@ body {
     filter: drop-shadow(0 0 2px rgba(52, 152, 219, 0.6));
 }
 
+/* Edge selection - CONSOLIDATED RULES */
 .edge.selected path:first-child {
     stroke: #f39c12 !important;
-    stroke-width: 6px !important;
-    filter: drop-shadow(0 0 8px rgba(243, 156, 18, 1)) !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 4px rgba(243, 156, 18, 0.6)) !important;
     animation: edge-selection-pulse 0.3s ease;
 }
 
 @keyframes edge-selection-pulse {
     0% { stroke-width: 2px !important; }
-    50% { stroke-width: 8px !important; }
-    100% { stroke-width: 6px !important; }
+    50% { stroke-width: 4px !important; }
+    100% { stroke-width: 3px !important; }
 }
 
 .edge.selected .edge-label {
-    fill: #f39c12;
-    font-weight: 700;
-    font-size: 12px;
+    /* Keep label styling normal - no changes */
 }
 
 .edge.highlighted path:first-child {
@@ -527,12 +526,6 @@ body {
     cursor: pointer;
 }
 
-.edge.selected {
-    stroke-width: 5px !important;
-    filter: drop-shadow(0 0 5px rgba(243, 156, 18, 1)) !important;
-    stroke: #f39c12 !important;
-}
-
 .edge.highlighted {
     stroke-width: 4px;
     filter: drop-shadow(0 0 3px rgba(231, 76, 60, 0.8));
@@ -555,11 +548,6 @@ body {
     font-weight: 600;
     pointer-events: none;
     user-select: none;
-}
-
-.edge.selected .edge-label {
-    fill: #f39c12;
-    font-weight: 700;
 }
 
 .edge.highlighted .edge-label {
