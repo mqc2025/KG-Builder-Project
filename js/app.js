@@ -891,11 +891,34 @@ class KnowledgeGraphApp {
     }
     
     /**
+     * Generate next available node name
+     * @returns {string} Suggested node name (e.g., "Node 1", "Node 2")
+     */
+    generateNextNodeName() {
+        // Find all nodes with names matching "Node X" pattern
+        const nodeNumberPattern = /^Node (\d+)$/;
+        const existingNumbers = this.graph.nodes
+            .map(node => {
+                const match = node.name.match(nodeNumberPattern);
+                return match ? parseInt(match[1]) : 0;
+            })
+            .filter(num => num > 0);
+        
+        // Find the highest number
+        const maxNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+        
+        // Return next available number
+        return `Node ${maxNumber + 1}`;
+    }
+	
+	
+	/**
      * Add node at specific position (called from context menu)
      */
     async addNode(x, y) {
-        const name = prompt('Enter node name:');
-        if (!name) return;
+        const suggestedName = this.generateNextNodeName();
+		const name = prompt('Enter node name:', suggestedName);
+		if (!name) return;
 
         const node = await this.graph.addNode({
             name: name,
