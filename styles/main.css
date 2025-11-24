@@ -17,7 +17,7 @@
     --hover-color: #34495e;
     --sidebar-width: 200px;
     --toolbar-height: 60px;
-    --statusbar-height: 30px;
+    --statusbar-height: 45px;
     --ad-banner-height: 90px;
 }
 
@@ -217,17 +217,36 @@ body {
     width: 0;
 }
 
-/* Status Bar */
+/* Status Bar - TWO LINE LAYOUT */
 .status-bar {
     height: var(--statusbar-height);
     background-color: var(--dark-bg);
     color: #ecf0f1;
     display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 15px;
+    flex-direction: column;  /* CHANGED: Stack lines vertically */
+    justify-content: space-around;  /* CHANGED: Distribute space between lines */
+    padding: 4px 20px;  /* CHANGED: Reduced vertical padding */
     font-size: 12px;
     box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+/* Status Line Container */
+.status-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Line 1: Selection and Details */
+.status-line-selection {
+    font-weight: 500;
+    color: #ecf0f1;
+}
+
+/* Line 2: Stats */
+.status-line-stats {
+    color: #bdc3c7;
 }
 
 .status-bar .separator {

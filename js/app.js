@@ -766,28 +766,90 @@ class KnowledgeGraphApp {
         document.getElementById('status-edges').textContent = `Edges: ${stats.edgeCount}`;
     }
 
-    /**
-     * Update status message
-     */
-    updateStatus(message) {
-        const selectedNode = Array.from(this.renderer.selectedNodes)[0];
-        const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
-        
-        let selectionText = 'None';
-        if (selectedNode) {
-            const node = this.graph.getNode(selectedNode);
-            selectionText = node ? `Node: ${node.name || selectedNode}` : `Node: ${selectedNode}`;
-        } else if (selectedEdge) {
-            const edge = this.graph.getEdge(selectedEdge);
-            if (edge) {
-                selectionText = `Edge: ${edge.name || edge.relationship || selectedEdge}`;
-            } else {
-                selectionText = `Edge: ${selectedEdge}`;
-            }
-        }
-        
-        document.getElementById('status-selection').textContent = `Selected: ${selectionText}`;
-    }
+    /* ===========================================
+	   APP.JS MODIFICATION - updateStatus() FUNCTION
+	   WITH EXTRA SPACING BEFORE DESCRIPTION
+	   =========================================== */
+
+	/* LOCATION: In js/app.js, replace the existing updateStatus() function */
+
+	/**
+	 * Update status message with node/edge details
+	 * Displays selection info on line 1, stats on line 2
+	 */
+	updateStatus(message) {
+		const selectedNode = Array.from(this.renderer.selectedNodes)[0];
+		const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
+		
+		let selectionText = 'Selected: None';
+		
+		if (selectedNode) {
+			const node = this.graph.getNode(selectedNode);
+			if (node) {
+				// Build node selection text with properties
+				const parts = [`Selected: ${node.name || selectedNode}`];
+				
+				// Add Category if exists
+				if (node.category && node.category.trim() !== '') {
+					parts.push(`Category: ${node.category}`);
+				}
+				
+				// Add Sub-Category if exists
+				if (node.subCat && node.subCat.trim() !== '') {
+					parts.push(`Sub-Category: ${node.subCat}`);
+				}
+				
+				// Add Priority if exists
+				if (node.priority && node.priority.trim() !== '') {
+					parts.push(`Priority: ${node.priority}`);
+				}
+				
+				// Add Deadline if exists
+				if (node.deadline && node.deadline.trim() !== '') {
+					parts.push(`Deadline: ${node.deadline}`);
+				}
+				
+				// Join the parts so far
+				selectionText = parts.join(' | ');
+				
+				// Add truncated Description with extra spacing if exists
+				if (node.description && node.description.trim() !== '') {
+					const maxDescLength = 80;
+					const desc = node.description.length > maxDescLength 
+						? node.description.substring(0, maxDescLength) + '...' 
+						: node.description;
+					selectionText += `    ||     Description: ${desc}`;  // EXTRA SPACING BEFORE DESCRIPTION
+				}
+			} else {
+				selectionText = `Selected: Node ${selectedNode}`;
+			}
+		} else if (selectedEdge) {
+			const edge = this.graph.getEdge(selectedEdge);
+			if (edge) {
+				// Build edge selection text
+				const parts = [`Selected: Edge: ${edge.name || edge.relationship || selectedEdge}`];
+				
+				// Add relationship if different from name
+				if (edge.relationship && edge.relationship !== edge.name) {
+					parts.push(`Relationship: ${edge.relationship}`);
+				}
+				
+				// Add source and target node names
+				const sourceNode = this.graph.getNode(edge.source);
+				const targetNode = this.graph.getNode(edge.target);
+				if (sourceNode && targetNode) {
+					parts.push(`From: ${sourceNode.name || edge.source}`);
+					parts.push(`To: ${targetNode.name || edge.target}`);
+				}
+				
+				selectionText = parts.join(' | ');
+			} else {
+				selectionText = `Selected: Edge ${selectedEdge}`;
+			}
+		}
+		
+		document.getElementById('status-selection').textContent = selectionText;
+	}
 
     /**
      * Save current state to history

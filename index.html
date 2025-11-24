@@ -180,23 +180,29 @@
             </div>
         </div>
 
-    <!-- Status Bar -->
+    <!-- Status Bar - MODIFIED TO TWO LINES -->
     <footer class="status-bar">
-        <span id="status-nodes">Nodes: 0</span>
-        <span class="separator">|</span>
-        <span id="status-edges">Edges: 0</span>
-        <span class="separator">|</span>
-        <span id="status-zoom">Zoom: 100%</span>
-        <span class="separator">|</span>
-        <span id="status-selection">Selected: None</span>
-        <span class="separator">|</span>
-        <span id="status-simulation">Simulation: Active</span>
-        <span class="separator">|</span>
-        <span id="status-privacy" class="status-privacy" title="Click for privacy information">
-            🔒 Private & Local
-        </span>
-		<span class="separator">|</span>
-		<span style="margin-left: auto; padding-right: 10px;">© 2025 MQC inc.</span>
+        <!-- Line 1: Selection details -->
+        <div class="status-line status-line-selection">
+            <span id="status-selection">Selected: None</span>
+        </div>
+        
+        <!-- Line 2: Stats and info -->
+        <div class="status-line status-line-stats">
+            <span id="status-nodes">Nodes: 0</span>
+            <span class="separator">|</span>
+            <span id="status-edges">Edges: 0</span>
+            <span class="separator">|</span>
+            <span id="status-zoom">Zoom: 100%</span>
+            <span class="separator">|</span>
+            <span id="status-simulation">Simulation: Active</span>
+            <span class="separator">|</span>
+            <span id="status-privacy" class="status-privacy" title="Click for privacy information">
+                🔒 Private & Local
+            </span>
+            <span class="separator">|</span>
+            <span style="margin-left: auto; padding-right: 10px;">© 2025 MQC inc.</span>
+        </div>
     </footer>
 
     <!-- Hidden File Input -->
