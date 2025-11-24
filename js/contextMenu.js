@@ -142,64 +142,68 @@ class ContextMenuManager {
     }
 
     /**
-     * Show context menu
-     */
-    show(items, x, y) {
-        if (!this.menu) return;
+	 * Show context menu (with XSS protection)
+	 */
+	show(items, x, y) {
+		if (!this.menu) return;
 
-        // Build menu HTML
-        const html = items.map(item => {
-            if (item.separator) {
-                return '<div class="context-menu-separator"></div>';
-            }
+		// Build menu HTML with sanitization
+		const html = items.map(item => {
+			if (item.separator) {
+				return '<div class="context-menu-separator"></div>';
+			}
 
-            const disabled = item.disabled ? 'disabled' : '';
-            const className = item.className || '';
+			const disabled = item.disabled ? 'disabled' : '';
+			const className = item.className || '';
+			
+			// Security: Sanitize icon and label to prevent XSS
+			const safeIcon = Utils.sanitizeHtml(item.icon || '');
+			const safeLabel = Utils.sanitizeHtml(item.label || '');
 
-            return `
-                <button class="context-menu-item ${disabled} ${className}" data-action="${items.indexOf(item)}">
-                    <span class="context-menu-icon">${item.icon}</span>
-                    <span class="context-menu-label">${item.label}</span>
-                    ${item.submenu ? '<span class="context-menu-arrow">▶</span>' : ''}
-                </button>
-            `;
-        }).join('');
+			return `
+				<button class="context-menu-item ${disabled} ${className}" data-action="${items.indexOf(item)}">
+					<span class="context-menu-icon">${safeIcon}</span>
+					<span class="context-menu-label">${safeLabel}</span>
+					${item.submenu ? '<span class="context-menu-arrow">▶</span>' : ''}
+				</button>
+			`;
+		}).join('');
 
-        this.menu.innerHTML = html;
+		this.menu.innerHTML = html;
 
-        // Position menu
-        this.menu.style.left = `${x}px`;
-        this.menu.style.top = `${y}px`;
+		// Position menu
+		this.menu.style.left = `${x}px`;
+		this.menu.style.top = `${y}px`;
 
-        // Show menu
-        this.menu.classList.remove('hidden');
+		// Show menu
+		this.menu.classList.remove('hidden');
 
-        // FIXED: Attach event listeners using data-action attribute instead of forEach index
-        this.menu.querySelectorAll('.context-menu-item').forEach((button) => {
-            if (!button.classList.contains('disabled')) {
-                button.addEventListener('click', () => {
-                    // Get the actual index from data-action attribute
-                    const actionIndex = parseInt(button.getAttribute('data-action'));
-                    const menuItem = items[actionIndex];
-                    if (menuItem && menuItem.action) {
-                        menuItem.action();
-                        this.hide();
-                    }
-                });
-            }
-        });
+		// FIXED: Attach event listeners using data-action attribute instead of forEach index
+		this.menu.querySelectorAll('.context-menu-item').forEach((button) => {
+			if (!button.classList.contains('disabled')) {
+				button.addEventListener('click', () => {
+					// Get the actual index from data-action attribute
+					const actionIndex = parseInt(button.getAttribute('data-action'));
+					const menuItem = items[actionIndex];
+					if (menuItem && menuItem.action) {
+						menuItem.action();
+						this.hide();
+					}
+				});
+			}
+		});
 
-        // Adjust position if menu goes off-screen
-        setTimeout(() => {
-            const rect = this.menu.getBoundingClientRect();
-            if (rect.right > window.innerWidth) {
-                this.menu.style.left = `${x - rect.width}px`;
-            }
-            if (rect.bottom > window.innerHeight) {
-                this.menu.style.top = `${y - rect.height}px`;
-            }
-        }, 0);
-    }
+		// Adjust position if menu goes off-screen
+		setTimeout(() => {
+			const rect = this.menu.getBoundingClientRect();
+			if (rect.right > window.innerWidth) {
+				this.menu.style.left = `${x - rect.width}px`;
+			}
+			if (rect.bottom > window.innerHeight) {
+				this.menu.style.top = `${y - rect.height}px`;
+			}
+		}, 0);
+	}
 
     /**
      * Hide context menu
