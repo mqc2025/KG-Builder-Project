@@ -27,7 +27,85 @@ class Graph {
         };
     }
 
-    /**
+	/**
+	 * Validation constants for security
+	 */
+	getValidationLimits() {
+		return {
+			MAX_NODES: 10000,           // Maximum nodes per graph
+			MAX_EDGES: 50000,           // Maximum edges per graph
+			MAX_STRING_LENGTH: 10000,   // Maximum length for text fields
+			MAX_NODE_SIZE: 100,         // Maximum node size property
+			MIN_NODE_SIZE: 1,           // Minimum node size property
+			MAX_EDGE_WEIGHT: 1000,      // Maximum edge weight
+			MIN_EDGE_WEIGHT: 0          // Minimum edge weight
+		};
+	}
+
+	/**
+	 * Validate and sanitize a string property
+	 * @param {any} value - Value to validate
+	 * @param {number} maxLength - Maximum allowed length
+	 * @param {string} defaultValue - Default if invalid
+	 * @returns {string} Sanitized string
+	 */
+	validateString(value, maxLength, defaultValue = '') {
+		if (value === null || value === undefined) {
+			return defaultValue;
+		}
+		
+		const str = String(value);
+		
+		// Truncate if too long
+		if (str.length > maxLength) {
+			console.warn(`String truncated from ${str.length} to ${maxLength} characters`);
+			return str.substring(0, maxLength);
+		}
+		
+		return str;
+	}
+
+	/**
+	 * Validate a number property
+	 * @param {any} value - Value to validate
+	 * @param {number} min - Minimum allowed value
+	 * @param {number} max - Maximum allowed value
+	 * @param {number} defaultValue - Default if invalid
+	 * @returns {number} Validated number
+	 */
+	validateNumber(value, min, max, defaultValue) {
+		const num = parseFloat(value);
+		
+		if (isNaN(num)) {
+			return defaultValue;
+		}
+		
+		// Clamp to min/max
+		if (num < min) return min;
+		if (num > max) return max;
+		
+		return num;
+	}
+
+	/**
+	 * Validate color hex code
+	 * @param {string} color - Color to validate
+	 * @returns {string} Valid color or default
+	 */
+	validateColor(color) {
+		if (!color || typeof color !== 'string') {
+			return '#3498db'; // Default blue
+		}
+		
+		// Check if valid hex color
+		if (/^#[0-9A-F]{6}$/i.test(color)) {
+			return color;
+		}
+		
+		return '#3498db'; // Default if invalid
+	}    
+	
+	/**
      * Add a new node to the graph
      * @param {Object} properties - Node properties (must include 'name')
      * @returns {Promise<Object>} Created node
@@ -685,104 +763,173 @@ class Graph {
     }
 
     /**
-     * Load graph from JSON
-     * @param {Object} json - JSON data
-     * @returns {boolean} Success
-     */
-    fromJSON(json) {
-        try {
-            if (!json.graph) {
-                throw new Error('Invalid graph format');
-            }
+	 * Load graph from JSON (with comprehensive validation)
+	 * @param {Object} json - JSON data
+	 * @returns {boolean} Success
+	 */
+	fromJSON(json) {
+		try {
+			if (!json.graph) {
+				throw new Error('Invalid graph format: Missing "graph" property');
+			}
 
-            this.metadata = json.graph.metadata || {
-                name: 'Imported Graph',
-                title: '',
-                description: '',
-                created: Utils.getCurrentDate(),
-                modified: Utils.getCurrentDate()
-            };
-            
-            // Load settings
-            this.settings = json.graph.settings || {
-                nodeLabelSize: 12,
-                edgeLabelSize: 10,
-                worldBoundary: {
-                    enabled: false,
-                    minX: -2000,
-                    maxX: 2000,
-                    minY: -2000,
-                    maxY: 2000
-                }
-            };
+			const limits = this.getValidationLimits();
 
-            this.nodes = json.graph.nodes || [];
-            this.edges = json.graph.edges || [];
+			// Validate metadata
+			this.metadata = {
+				name: this.validateString(json.graph.metadata?.name, 200, 'Imported Graph'),
+				title: this.validateString(json.graph.metadata?.title, 500, ''),
+				description: this.validateString(json.graph.metadata?.description, limits.MAX_STRING_LENGTH, ''),
+				created: this.validateString(json.graph.metadata?.created, 50, Utils.getCurrentDate()),
+				modified: this.validateString(json.graph.metadata?.modified, 50, Utils.getCurrentDate())
+			};
+			
+			// Validate settings
+			this.settings = {
+				nodeLabelSize: this.validateNumber(json.graph.settings?.nodeLabelSize, 8, 24, 12),
+				edgeLabelSize: this.validateNumber(json.graph.settings?.edgeLabelSize, 6, 20, 10),
+				worldBoundary: {
+					enabled: Boolean(json.graph.settings?.worldBoundary?.enabled),
+					minX: this.validateNumber(json.graph.settings?.worldBoundary?.minX, -10000, 0, -2000),
+					maxX: this.validateNumber(json.graph.settings?.worldBoundary?.maxX, 0, 10000, 2000),
+					minY: this.validateNumber(json.graph.settings?.worldBoundary?.minY, -10000, 0, -2000),
+					maxY: this.validateNumber(json.graph.settings?.worldBoundary?.maxY, 0, 10000, 2000)
+				}
+			};
 
-            // Validate nodes have required structure and restore position properties
-            this.nodes = this.nodes.filter(node => {
-                if (!node.id) return false;
-                
-                // Clean D3 properties if they exist
-                const cleaned = this.stripD3Properties(node);
-                Object.assign(node, cleaned);
-                
-                // Ensure required properties exist
-                node.name = node.name || node.id;
-                node.color = node.color || '#3498db';
-                node.size = node.size || 10;
-                node.description = node.description || '';
-                node.category = node.category || '';
-                node.subCat = node.subCat || '';
-                node.link1 = node.link1 || '';
-                node.link2 = node.link2 || '';
-                node.link3 = node.link3 || '';
-                node.link4 = node.link4 || '';
-				node.icon = node.icon || '';
-                
-                // Ensure date/priority properties exist
-                const now = new Date().toISOString();
-                node.priority = node.priority || 'Medium';
-                node.deadline = node.deadline || '';
-                node.userDate = node.userDate || '';
-                node.createdDate = node.createdDate || now;
-                node.modifiedDate = node.modifiedDate || now;
-                
-                return true;
-            });
+			// Security: Validate array sizes
+			const rawNodes = json.graph.nodes || [];
+			const rawEdges = json.graph.edges || [];
 
-            // Validate edges and clean D3 properties
-            this.edges = this.edges.filter(edge => {
-                if (!edge.id) return false;
-                
-                // Half-edges are allowed (source or target can be null)
-                if (!edge.source && !edge.target) return false;
-                
-                // Check if connected nodes exist
-                if (edge.source && !this.getNode(edge.source)) return false;
-                if (edge.target && !this.getNode(edge.target)) return false;
-                
-                // Clean D3 properties if they exist
-                const cleaned = this.stripD3Properties(edge);
-                Object.assign(edge, cleaned);
-                
-                // Ensure required properties exist
-                edge.name = edge.name || edge.id;
-                edge.relationship = edge.relationship || '';
-                edge.color = edge.color || '#95a5a6';
-                edge.weight = edge.weight || 1;
-                edge.directed = edge.directed !== undefined ? edge.directed : true;
-                edge.description = edge.description || '';
-                
-                return true;
-            });
+			if (!Array.isArray(rawNodes)) {
+				throw new Error('Invalid graph format: nodes must be an array');
+			}
+			if (!Array.isArray(rawEdges)) {
+				throw new Error('Invalid graph format: edges must be an array');
+			}
 
-            return true;
-        } catch (error) {
-            console.error('Error loading graph:', error);
-            return false;
-        }
-    }
+			if (rawNodes.length > limits.MAX_NODES) {
+				throw new Error(`Security Error: Too many nodes (${rawNodes.length}). Maximum allowed: ${limits.MAX_NODES}`);
+			}
+			if (rawEdges.length > limits.MAX_EDGES) {
+				throw new Error(`Security Error: Too many edges (${rawEdges.length}). Maximum allowed: ${limits.MAX_EDGES}`);
+			}
+
+			// Validate and sanitize nodes
+			this.nodes = rawNodes.filter(node => {
+				if (!node || typeof node !== 'object') {
+					console.warn('Skipping invalid node (not an object)');
+					return false;
+				}
+				
+				if (!node.id) {
+					console.warn('Skipping node without ID');
+					return false;
+				}
+				
+				// Clean D3 properties if they exist
+				const cleaned = this.stripD3Properties(node);
+				Object.assign(node, cleaned);
+				
+				// Validate and sanitize all properties
+				const now = new Date().toISOString();
+				
+				node.id = this.validateString(node.id, 500, node.id);
+				node.name = this.validateString(node.name, 500, node.id);
+				node.color = this.validateColor(node.color);
+				node.size = this.validateNumber(node.size, limits.MIN_NODE_SIZE, limits.MAX_NODE_SIZE, 10);
+				node.icon = this.validateString(node.icon, 10, ''); // Emoji max 10 chars
+				node.description = this.validateString(node.description, limits.MAX_STRING_LENGTH, '');
+				node.category = this.validateString(node.category, 200, '');
+				node.subCat = this.validateString(node.subCat, 200, '');
+				node.link1 = this.validateString(node.link1, 2000, '');
+				node.link2 = this.validateString(node.link2, 2000, '');
+				node.link3 = this.validateString(node.link3, 2000, '');
+				node.link4 = this.validateString(node.link4, 2000, '');
+				node.priority = this.validateString(node.priority, 50, 'Medium');
+				node.deadline = this.validateString(node.deadline, 50, '');
+				node.userDate = this.validateString(node.userDate, 50, '');
+				node.createdDate = this.validateString(node.createdDate, 50, now);
+				node.modifiedDate = this.validateString(node.modifiedDate, 50, now);
+				
+				// Validate position properties if they exist
+				if (node.x !== undefined) {
+					node.x = this.validateNumber(node.x, -100000, 100000, 0);
+				}
+				if (node.y !== undefined) {
+					node.y = this.validateNumber(node.y, -100000, 100000, 0);
+				}
+				if (node.fx !== undefined && node.fx !== null) {
+					node.fx = this.validateNumber(node.fx, -100000, 100000, node.fx);
+				}
+				if (node.fy !== undefined && node.fy !== null) {
+					node.fy = this.validateNumber(node.fy, -100000, 100000, node.fy);
+				}
+				
+				return true;
+			});
+
+			// Validate and sanitize edges
+			this.edges = rawEdges.filter(edge => {
+				if (!edge || typeof edge !== 'object') {
+					console.warn('Skipping invalid edge (not an object)');
+					return false;
+				}
+				
+				if (!edge.id) {
+					console.warn('Skipping edge without ID');
+					return false;
+				}
+				
+				// Half-edges are allowed (source or target can be null)
+				if (!edge.source && !edge.target) {
+					console.warn('Skipping edge with no source or target');
+					return false;
+				}
+				
+				// Check if connected nodes exist (if source/target are specified)
+				if (edge.source && !this.getNode(edge.source)) {
+					console.warn(`Skipping edge ${edge.id}: source node ${edge.source} not found`);
+					return false;
+				}
+				if (edge.target && !this.getNode(edge.target)) {
+					console.warn(`Skipping edge ${edge.id}: target node ${edge.target} not found`);
+					return false;
+				}
+				
+				// Clean D3 properties if they exist
+				const cleaned = this.stripD3Properties(edge);
+				Object.assign(edge, cleaned);
+				
+				// Validate and sanitize properties
+				edge.id = this.validateString(edge.id, 500, edge.id);
+				edge.name = this.validateString(edge.name, 500, edge.id);
+				edge.relationship = this.validateString(edge.relationship, 200, '');
+				edge.color = this.validateColor(edge.color);
+				edge.weight = this.validateNumber(edge.weight, limits.MIN_EDGE_WEIGHT, limits.MAX_EDGE_WEIGHT, 1);
+				edge.directed = Boolean(edge.directed !== undefined ? edge.directed : true);
+				edge.description = this.validateString(edge.description, limits.MAX_STRING_LENGTH, '');
+				
+				// Validate source/target (should be strings or null)
+				if (edge.source !== null && edge.source !== undefined) {
+					edge.source = this.validateString(edge.source, 500, edge.source);
+				}
+				if (edge.target !== null && edge.target !== undefined) {
+					edge.target = this.validateString(edge.target, 500, edge.target);
+				}
+				
+				return true;
+			});
+
+			console.log(`Graph loaded successfully: ${this.nodes.length} nodes, ${this.edges.length} edges`);
+			return true;
+			
+		} catch (error) {
+			console.error('Error loading graph:', error);
+			alert('Error loading graph: ' + error.message);
+			return false;
+		}
+	}
 }
 
 // Export for use in other modules
