@@ -8,6 +8,10 @@ class FileManager {
         // Track current filename for direct save
         this.currentFilename = null;
         
+        // Security: File size limits (in bytes)
+        this.MAX_JSON_SIZE = 50 * 1024 * 1024; // 50 MB for JSON files
+        this.MAX_EXCEL_SIZE = 100 * 1024 * 1024; // 100 MB for Excel files
+        
         this.fileInput = document.getElementById('file-input');
         this.exportModal = document.getElementById('export-modal');
         
@@ -98,36 +102,44 @@ class FileManager {
     }
 
     /**
-     * Handle dropped file
-     */
-    handleDroppedFile(file) {
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            try {
-                const json = JSON.parse(e.target.result);
-                
-                // Set the current filename (without .json extension)
-                this.currentFilename = file.name.replace('.json', '');
-                
-                // Load the graph directly
-                this.importGraph(json);
-                
-                // ✅ NEW: Auto-save after loading file
-                this.saveToLocalStorage();
-                
-                // Update status with filename
-                if (window.app) {
-                    window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
-                }
-            } catch (error) {
-                alert('Error reading dropped file: ' + error.message);
-                console.error('Drop error:', error);
-            }
-        };
+	 * Handle dropped file (with size validation)
+	 */
+	handleDroppedFile(file) {
+		// Security: Check file size before reading
+		if (file.size > this.MAX_JSON_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (this.MAX_JSON_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: File too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB\n\nPlease use a smaller file to prevent browser memory issues.`);
+			return;
+		}
+		
+		const reader = new FileReader();
+		
+		reader.onload = (e) => {
+			try {
+				const json = JSON.parse(e.target.result);
+				
+				// Set the current filename (without .json extension)
+				this.currentFilename = file.name.replace('.json', '');
+				
+				// Load the graph directly
+				this.importGraph(json);
+				
+				// ✅ NEW: Auto-save after loading file
+				this.saveToLocalStorage();
+				
+				// Update status with filename
+				if (window.app) {
+					window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
+				}
+			} catch (error) {
+				alert('Error reading dropped file: ' + error.message);
+				console.error('Drop error:', error);
+			}
+		};
 
-        reader.readAsText(file);
-    }
+		reader.readAsText(file);
+	}
 
     /**
      * Show export modal
@@ -327,44 +339,53 @@ class FileManager {
     }
 
     /**
-     * Handle file selection
-     * ✅ MODIFIED: Added auto-save after import
-     */
-    handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+	 * Handle file selection (with size validation)
+	 * ✅ MODIFIED: Added auto-save after import
+	 */
+	handleFileSelect(event) {
+		const file = event.target.files[0];
+		if (!file) return;
 
-        if (!file.name.endsWith('.json')) {
-            alert('Please select a JSON file');
-            return;
-        }
+		if (!file.name.endsWith('.json')) {
+			alert('Please select a JSON file');
+			return;
+		}
 
-        // Store the filename for future saves (without .json extension)
-        this.currentFilename = file.name.replace('.json', '');
+		// Security: Check file size before reading
+		if (file.size > this.MAX_JSON_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (this.MAX_JSON_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: File too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB\n\nPlease use a smaller file to prevent browser memory issues.`);
+			event.target.value = '';
+			return;
+		}
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const json = JSON.parse(e.target.result);
-                this.importGraph(json);
-                
-                // ✅ NEW: Auto-save after loading file
-                this.saveToLocalStorage();
-                
-                // Update status with filename
-                if (window.app) {
-                    window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
-                }
-            } catch (error) {
-                alert('Error reading file: ' + error.message);
-                console.error('Import error:', error);
-            }
-        };
+		// Store the filename for future saves (without .json extension)
+		this.currentFilename = file.name.replace('.json', '');
 
-        reader.readAsText(file);
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const json = JSON.parse(e.target.result);
+				this.importGraph(json);
+				
+				// ✅ NEW: Auto-save after loading file
+				this.saveToLocalStorage();
+				
+				// Update status with filename
+				if (window.app) {
+					window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
+				}
+			} catch (error) {
+				alert('Error reading file: ' + error.message);
+				console.error('Import error:', error);
+			}
+		};
 
-        event.target.value = '';
-    }
+		reader.readAsText(file);
+
+		event.target.value = '';
+	}
 
     /**
      * Import graph from JSON

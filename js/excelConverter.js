@@ -6,6 +6,9 @@ class ExcelConverter {
         this.graph = graph;
         this.renderer = renderer;
         
+        // Security: File size limit for Excel files (in bytes)
+        this.MAX_EXCEL_SIZE = 100 * 1024 * 1024; // 100 MB
+        
         // File inputs
         this.excelConverterInput = document.getElementById('excel-converter-input');
         this.excelDataInput = document.getElementById('excel-data-input');
@@ -52,11 +55,20 @@ class ExcelConverter {
      * Reads Excel file and creates header and placeholder nodes
      */
     async handleCreateConverter(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+		const file = event.target.files[0];
+		if (!file) return;
 
-        try {
-            const data = await this.readExcelFile(file);
+		// Security: Check file size before reading
+		if (file.size > this.MAX_EXCEL_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (this.MAX_EXCEL_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: Excel file too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB\n\nPlease use a smaller file.`);
+			event.target.value = '';
+			return;
+		}
+
+		try {
+			const data = await this.readExcelFile(file);
             if (!data || data.length === 0) {
                 alert('Excel file is empty or could not be read.');
                 return;
@@ -190,16 +202,25 @@ class ExcelConverter {
      * Uses the mapping to convert Excel data to graph structure
      */
     async handleExcelDataLoad(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+		const file = event.target.files[0];
+		if (!file) return;
 
-        if (!this.currentMapping) {
-            alert('No mapping loaded. Please start the process again.');
-            return;
-        }
+		if (!this.currentMapping) {
+			alert('No mapping loaded. Please start the process again.');
+			return;
+		}
 
-        try {
-            const data = await this.readExcelFile(file);
+		// Security: Check file size before reading
+		if (file.size > this.MAX_EXCEL_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (this.MAX_EXCEL_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: Excel file too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB\n\nPlease use a smaller file.`);
+			event.target.value = '';
+			return;
+		}
+
+		try {
+			const data = await this.readExcelFile(file);
             if (!data || data.length === 0) {
                 alert('Excel file is empty or could not be read.');
                 return;
