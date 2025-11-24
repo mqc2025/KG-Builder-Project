@@ -1,7 +1,6 @@
 I need these improvements, let's plan for them: The option to import and combine with the current graph with Import button.
 
-1. For the path finder, can I have the start and end nodes as a dropdown boxes with type search (to eventuallly select form the dowpdown)?
-2. can I have a hover effect that when hovering a node or an edge, thier the description, prioroty, deadline and custom properties be listed (the description and custom properties for an edge)?
+
 3. add another JSON file to combine with the current graph with Import button.
 4. Size of a node to be related to the number of edges it has.
 5. Physics force intensity setting during visualization.

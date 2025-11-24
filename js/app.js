@@ -834,7 +834,8 @@ class KnowledgeGraphApp {
             title: '',
             description: '',
             created: Utils.getCurrentDate(),
-            modified: Utils.getCurrentDate()
+            modified: Utils.getCurrentDate(),
+			copyright: 'Presented to you by MQC INC.'
         };
 
         // Clear the current filename so Save will prompt

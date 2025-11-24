@@ -784,25 +784,37 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Open link in new window
-     */
-    openLink(linkKey) {
-        const input = document.getElementById(`prop-${linkKey}`);
-        if (!input) return;
+	 * NEW: Open link in new window (with security validation)
+	 */
+	openLink(linkKey) {
+		const input = document.getElementById(`prop-${linkKey}`);
+		if (!input) return;
 
-        const link = input.value.trim();
-        if (!link) {
-            alert('No link to open');
-            return;
-        }
+		const link = input.value.trim();
+		if (!link) {
+			alert('No link to open');
+			return;
+		}
 
-        try {
-            // Open in new window/tab
-            window.open(link, '_blank', 'noopener,noreferrer');
-        } catch (error) {
-            alert(`Could not open link: ${error.message}`);
-        }
-    }
+		// Security validation: Block dangerous protocols
+		const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:'];
+		const lowerLink = link.toLowerCase();
+		
+		for (const protocol of dangerousProtocols) {
+			if (lowerLink.startsWith(protocol)) {
+				alert(`Security Error: "${protocol}" URLs are not allowed for safety reasons.\n\nPlease use http://, https://, or file paths only.`);
+				return;
+			}
+		}
+
+		// Allow http, https, and relative paths
+		try {
+			// Open in new window/tab
+			window.open(link, '_blank', 'noopener,noreferrer');
+		} catch (error) {
+			alert(`Could not open link: ${error.message}`);
+		}
+	}
 
     /**
      * Rename a node

@@ -7,7 +7,8 @@ class Graph {
             title: '',
             description: '',
             created: Utils.getCurrentDate(),
-            modified: Utils.getCurrentDate()
+            modified: Utils.getCurrentDate(),
+			copyright: 'Presented to you by MQC INC.'
         };
         this.nodes = [];
         this.edges = [];
