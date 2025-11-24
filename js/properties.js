@@ -540,30 +540,46 @@ class PropertiesPanel {
 		}
 
         // Standard properties for nodes
-        const nodePropertyInputs = ['prop-color', 'prop-size', 'prop-icon', 'prop-description', 
-                                    'prop-category', 'prop-subcat', 'prop-priority', 
-                                    'prop-deadline', 'prop-link1', 'prop-link2', 
-                                    'prop-link3', 'prop-link4'];
-        
-        nodePropertyInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.addEventListener('change', (e) => {
-                    const key = id.replace('prop-', '').replace('subcat', 'subCat');
-                    const value = e.target.type === 'number' ? 
-                        parseFloat(e.target.value) : e.target.value;
-                    this.updateProperty(key, value);
-                    
-                    // Update open button state for links
-                    if (key.startsWith('link')) {
-                        const openBtn = document.querySelector(`button[data-link="${key}"][data-action="open"]`);
-                        if (openBtn) {
-                            openBtn.disabled = !value;
-                        }
-                    }
-                });
-            }
-        });
+		const nodePropertyInputs = ['prop-color', 'prop-size', 'prop-icon', 'prop-description', 
+									'prop-category', 'prop-subcat', 'prop-priority', 
+									'prop-deadline', 'prop-link1', 'prop-link2', 
+									'prop-link3', 'prop-link4'];
+
+		nodePropertyInputs.forEach(id => {
+			const input = document.getElementById(id);
+			if (input) {
+				input.addEventListener('change', (e) => {
+					const key = id.replace('prop-', '').replace('subcat', 'subCat');
+					let value = e.target.type === 'number' ? 
+						parseFloat(e.target.value) : e.target.value;
+					
+					// Validate links before saving
+					if (key.startsWith('link')) {
+						const validation = this.validateUrl(value);
+						
+						if (!validation.valid) {
+							alert(validation.error);
+							// Restore previous value
+							const node = this.graph.getNode(this.currentSelection);
+							if (node) {
+								e.target.value = node[key] || '';
+							}
+							return; // Don't save invalid URL
+						}
+					}
+					
+					this.updateProperty(key, value);
+					
+					// Update open button state for links
+					if (key.startsWith('link')) {
+						const openBtn = document.querySelector(`button[data-link="${key}"][data-action="open"]`);
+						if (openBtn) {
+							openBtn.disabled = !value;
+						}
+					}
+				});
+			}
+		});
 
         // Standard properties for edges
         const edgePropertyInputs = ['prop-color', 'prop-weight', 'prop-description', 
@@ -762,26 +778,34 @@ class PropertiesPanel {
     }
 
     /**
-     * NEW: Set link (prompt for URL or file path)
-     */
-    setLink(linkKey) {
-        const input = document.getElementById(`prop-${linkKey}`);
-        if (!input) return;
+	 * NEW: Set link (prompt for URL or file path) - with validation
+	 */
+	setLink(linkKey) {
+		const input = document.getElementById(`prop-${linkKey}`);
+		if (!input) return;
 
-        const currentValue = input.value;
-        const newValue = prompt(`Enter URL or file path for ${linkKey.toUpperCase()}:`, currentValue);
-        
-        if (newValue !== null) {
-            input.value = newValue;
-            this.updateProperty(linkKey, newValue);
-            
-            // Update open button state
-            const openBtn = document.querySelector(`button[data-link="${linkKey}"][data-action="open"]`);
-            if (openBtn) {
-                openBtn.disabled = !newValue;
-            }
-        }
-    }
+		const currentValue = input.value;
+		const newValue = prompt(`Enter URL or file path for ${linkKey.toUpperCase()}:`, currentValue);
+		
+		if (newValue !== null) {
+			// Validate URL before saving
+			const validation = this.validateUrl(newValue);
+			
+			if (!validation.valid) {
+				alert(validation.error);
+				return; // Don't save invalid URL
+			}
+			
+			input.value = newValue;
+			this.updateProperty(linkKey, newValue);
+			
+			// Update open button state
+			const openBtn = document.querySelector(`button[data-link="${linkKey}"][data-action="open"]`);
+			if (openBtn) {
+				openBtn.disabled = !newValue;
+			}
+		}
+	}
 
     /**
 	 * NEW: Open link in new window (with security validation)
@@ -814,6 +838,44 @@ class PropertiesPanel {
 		} catch (error) {
 			alert(`Could not open link: ${error.message}`);
 		}
+	}
+	
+	/**
+	 * Validate URL for security (blocks dangerous protocols)
+	 * @param {string} url - URL to validate
+	 * @returns {Object} {valid: boolean, error: string}
+	 */
+	validateUrl(url) {
+		if (!url || url.trim() === '') {
+			return { valid: true, error: '' }; // Empty is OK
+		}
+
+		const trimmedUrl = url.trim();
+		const lowerUrl = trimmedUrl.toLowerCase();
+
+		// Security: Block dangerous protocols
+		const dangerousProtocols = ['javascript:', 'data:', 'vbscript:', 'file:', 'about:'];
+		
+		for (const protocol of dangerousProtocols) {
+			if (lowerUrl.startsWith(protocol)) {
+				return {
+					valid: false,
+					error: `Security Error: "${protocol}" URLs are not allowed.\n\nAllowed: http://, https://, or file paths (e.g., /docs/file.pdf)`
+				};
+			}
+		}
+
+		// Additional check: detect encoded attempts to bypass
+		if (lowerUrl.includes('%6a%61%76%61%73%63%72%69%70%74') || // javascript
+			lowerUrl.includes('%64%61%74%61') || // data
+			lowerUrl.includes('&#106;&#97;&#118;&#97;')) { // HTML entity encoded javascript
+			return {
+				valid: false,
+				error: 'Security Error: Encoded dangerous protocols are not allowed.'
+			};
+		}
+
+		return { valid: true, error: '' };
 	}
 
     /**
