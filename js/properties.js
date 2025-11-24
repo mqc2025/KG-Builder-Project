@@ -382,7 +382,7 @@ class PropertiesPanel {
                                'color', 'size', 'description', 'relationship', 'weight', 'directed', 
                                'category', 'subCat', 'link1', 'link2', 'link3', 'link4',
                                'priority', 'deadline', 'userDate', 'createdDate', 'modifiedDate',
-                               'freeSourceX', 'freeSourceY', 'freeTargetX', 'freeTargetY'];
+                               'freeSourceX', 'freeSourceY', 'freeTargetX', 'freeTargetY', 'icon'];
         const customProps = Object.entries(nodeOrEdge).filter(([key]) => 
             !standardProps.includes(key) && !key.startsWith('_') && !key.startsWith('merged_')
         );
@@ -415,6 +415,7 @@ class PropertiesPanel {
 
     /**
      * Render node connections
+     * UPDATED: Shows Source (source) →(relationship)→ Target (target) format
      */
     renderNodeConnections(nodeId) {
         const edges = this.getNodeEdges(nodeId);
@@ -426,26 +427,43 @@ class PropertiesPanel {
         return edges.map(edge => {
             const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
             const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
-            const otherNodeId = sourceId === nodeId ? targetId : sourceId;
-            const direction = sourceId === nodeId ? '→' : '←';
             
-            // Get display name for other node
-            let displayName = '(Free End)';
-            if (otherNodeId) {
-                const otherNode = this.graph.getNode(otherNodeId);
-                displayName = otherNode ? (otherNode.name || otherNodeId) : otherNodeId;
+            // Get source node display name
+            let sourceDisplayName = '(Free End)';
+            if (sourceId) {
+                const sourceNode = this.graph.getNode(sourceId);
+                sourceDisplayName = sourceNode ? (sourceNode.name || sourceId) : sourceId;
             }
+            
+            // Get target node display name
+            let targetDisplayName = '(Free End)';
+            if (targetId) {
+                const targetNode = this.graph.getNode(targetId);
+                targetDisplayName = targetNode ? (targetNode.name || targetId) : targetId;
+            }
+            
+            // Determine which node is "other" for the data attribute
+            const otherNodeId = sourceId === nodeId ? targetId : sourceId;
+            
+            // Build the relationship display
+            const relationshipText = edge.relationship ? Utils.sanitizeHtml(edge.relationship) : '';
+            const arrowDisplay = relationshipText 
+                ? `→${relationshipText}→` 
+                : '→';
             
             return `
                 <div class="connection-item" data-edge-id="${Utils.sanitizeHtml(edge.id)}" data-node-id="${Utils.sanitizeHtml(otherNodeId)}">
-                    <span class="connection-text">
-                        ${direction} ${Utils.sanitizeHtml(displayName)}
-                        ${edge.relationship ? `<span style="color: var(--text-secondary); font-style: italic;"> (${Utils.sanitizeHtml(edge.relationship)})</span>` : ''}
-                    </span>
-                    <div class="connection-actions">
-                        <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
-                        <button class="btn-view-edge-details" title="View edge details">⋯</button>
-                        <button class="btn-delete-connection" title="Delete connection">✕</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                        <span class="connection-text" style="flex: 1; line-height: 1.4;">
+                            <span style="font-weight: 600; color: var(--text-primary);">${Utils.sanitizeHtml(sourceDisplayName)}</span>
+                            <span style="color: var(--primary-color); margin: 0 4px; font-weight: 500;"> ${arrowDisplay} </span>
+                            <span style="font-weight: 600; color: var(--text-primary);">${Utils.sanitizeHtml(targetDisplayName)}</span>
+                        </span>
+                        <div class="connection-actions">
+                            <button class="btn-toggle-inline-edit" title="Edit connection">✎</button>
+                            <button class="btn-view-edge-details" title="View edge details">⋯</button>
+                            <button class="btn-delete-connection" title="Delete connection">✕</button>
+                        </div>
                     </div>
                 </div>
             `;
