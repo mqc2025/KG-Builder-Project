@@ -315,43 +315,129 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Complete connect by click
-     */
-    async completeConnectByClick(targetNode) {
-        // Check if same node
-        if (targetNode.id === this.connectByClickSourceNode.id) {
-            this.updateStatus('Cannot connect node to itself');
-            return;
-        }
-        
-        const sourceId = this.connectByClickSourceNode.id;
-        const targetId = targetNode.id;
-        
-        // Auto-generate edge name
-        const timestamp = Date.now();
-        const edgeName = `edge_${timestamp}`;
-        
-        // Create edge
-        await this.graph.addEdge({
-            name: edgeName,
-            source: sourceId,
-            target: targetId,
-            relationship: 'is a subset of',
-            directed: true
-        });
-        
-        this.renderer.render();
-        this.updateStats();
-        this.saveState();
-        
-        const sourceNodeName = this.connectByClickSourceNode.name || sourceId;
-        const targetNodeName = targetNode.name || targetId;
-        
-        // Cancel mode immediately after creating one edge
-        this.cancelConnectByClick();
-        
-        this.updateStatus(`Connected: ${sourceNodeName} → ${targetNodeName}`);
-    }
+	 * Complete connect by click
+	 */
+	async completeConnectByClick(targetNode) {
+		// Check if same node
+		if (targetNode.id === this.connectByClickSourceNode.id) {
+			this.updateStatus('Cannot connect node to itself');
+			return;
+		}
+		
+		const sourceId = this.connectByClickSourceNode.id;
+		const targetId = targetNode.id;
+		
+		// Get all existing relationships for the dropdown
+		const allRelationships = this.graph.getAllEdgeRelationships();
+		
+		// Create modal for relationship input
+		const modal = document.createElement('div');
+		modal.className = 'modal-overlay';
+		modal.innerHTML = `
+			<div class="modal-content">
+				<h3>Create Connection</h3>
+				<div class="form-group">
+					<label>From:</label>
+					<div style="padding: 8px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
+						${Utils.sanitizeHtml(this.connectByClickSourceNode.name || sourceId)}
+					</div>
+				</div>
+				<div class="form-group">
+					<label>To:</label>
+					<div style="padding: 8px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
+						${Utils.sanitizeHtml(targetNode.name || targetId)}
+					</div>
+				</div>
+				<div class="form-group">
+					<label>Relationship:</label>
+					<input type="text" id="quick-connect-relationship" class="property-input" 
+						   list="quick-relationship-list" 
+						   placeholder="Type or select..." autofocus>
+					<datalist id="quick-relationship-list">
+						${allRelationships.map(rel => `<option value="${Utils.sanitizeHtml(rel)}">`).join('')}
+					</datalist>
+				</div>
+				<div class="modal-actions">
+					<button class="btn-primary" id="btn-confirm-quick-connect">Connect</button>
+					<button class="btn-secondary" id="btn-cancel-quick-connect">Cancel</button>
+				</div>
+			</div>
+		`;
+		
+		document.body.appendChild(modal);
+		
+		const confirmBtn = modal.querySelector('#btn-confirm-quick-connect');
+		const cancelBtn = modal.querySelector('#btn-cancel-quick-connect');
+		const relationshipInput = modal.querySelector('#quick-connect-relationship');
+		
+		// Focus the input
+		setTimeout(() => relationshipInput.focus(), 100);
+		
+		// Handle confirm
+		const completeConnection = async () => {
+			const relationship = relationshipInput.value.trim();
+			
+			// Auto-generate edge name
+			const timestamp = Date.now();
+			const edgeName = `edge_${timestamp}`;
+			
+			// Create edge
+			await this.graph.addEdge({
+				name: edgeName,
+				source: sourceId,
+				target: targetId,
+				relationship: relationship || '',
+				directed: true
+			});
+			
+			this.renderer.render();
+			this.updateStats();
+			this.saveState();
+			
+			const sourceNodeName = this.connectByClickSourceNode.name || sourceId;
+			const targetNodeName = targetNode.name || targetId;
+			
+			// Cancel mode and remove modal
+			this.cancelConnectByClick();
+			document.body.removeChild(modal);
+			
+			this.updateStatus(`Connected: ${sourceNodeName} → ${targetNodeName}`);
+		};
+		
+		confirmBtn.addEventListener('click', completeConnection);
+		
+		// Allow Enter key to confirm
+		relationshipInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				completeConnection();
+			}
+		});
+		
+		// Handle cancel
+		const cancelConnection = () => {
+			document.body.removeChild(modal);
+			this.cancelConnectByClick();
+		};
+		
+		cancelBtn.addEventListener('click', cancelConnection);
+		
+		// Close on Escape
+		const escapeHandler = (e) => {
+			if (e.key === 'Escape') {
+				cancelConnection();
+				document.removeEventListener('keydown', escapeHandler);
+			}
+		};
+		document.addEventListener('keydown', escapeHandler);
+		
+		// Close on overlay click
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) {
+				cancelConnection();
+			}
+		});
+	}
 
     /**
      * Cancel connect by click mode
