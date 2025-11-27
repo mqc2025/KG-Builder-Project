@@ -7,8 +7,8 @@ const Utils = {
      * @returns {Promise<string>} SHA256 hash in hexadecimal
      */
     async generateSHA256(str) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(str);
+		const encoder = new TextEncoder();
+		const data = encoder.encode(str.toLowerCase()); // Convert to lowercase for case-insensitive IDs
         const hashBuffer = await crypto.subtle.digest('SHA-256', data);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
