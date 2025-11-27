@@ -78,6 +78,10 @@
                             <span>💾</span>
                             <span class="tool-label">Save As</span>
                         </button>
+						<button id="btn-open-in-new-tab" class="tool-btn" title="Open JSON in New Tab">
+							<span>🗗</span>
+							<span class="tool-label">Open in Tab</span>
+						</button>
                         <div class="tool-separator"></div>
                         <button id="btn-export" class="tool-btn" title="Export">
                             <span>📤</span>
@@ -216,6 +220,9 @@
     
     <!-- Hidden Mapping JSON Input for Convert Excel -->
     <input type="file" id="mapping-json-input" accept=".json" style="display: none;">
+	    
+	<!-- Hidden Open new File Input -->
+	<input type="file" id="file-input-new-tab" accept=".json" style="display: none;">
 
     <!-- Export Modal -->
     <div id="export-modal" class="modal hidden">

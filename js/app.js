@@ -50,6 +50,9 @@ class KnowledgeGraphApp {
         
         // Initial state
         this.saveState();
+		
+		// Check if we should load data for new tab
+		this.checkForNewTabData();
         
         // Make app globally accessible
         window.app = this;
@@ -125,6 +128,7 @@ class KnowledgeGraphApp {
         document.getElementById('btn-open')?.addEventListener('click', () => this.openGraph());
         document.getElementById('btn-save')?.addEventListener('click', () => this.saveGraph());
         document.getElementById('btn-save-as')?.addEventListener('click', () => this.saveGraphAs());
+		document.getElementById('btn-open-in-new-tab')?.addEventListener('click', () => this.openInNewTab());
         document.getElementById('btn-export')?.addEventListener('click', () => this.exportGraph());
         document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
         document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
@@ -1025,6 +1029,46 @@ class KnowledgeGraphApp {
     exportGraph() {
         this.fileManager.showExportModal();
     }
+	
+	/**
+	 * Open file in new tab
+	 */
+	openInNewTab() {
+		this.fileManager.openInNewTab();
+	}
+
+	/**
+	 * Check if there's data to load for new tab
+	 */
+	checkForNewTabData() {
+		try {
+			const tempData = localStorage.getItem('nodebook-open-in-new-tab');
+			if (!tempData) return;
+
+			const data = JSON.parse(tempData);
+			
+			// Check if data is fresh (less than 5 seconds old)
+			const age = Date.now() - data.timestamp;
+			if (age > 5000) {
+				// Too old, clean up
+				localStorage.removeItem('nodebook-open-in-new-tab');
+				return;
+			}
+
+			// Clear the temp data immediately
+			localStorage.removeItem('nodebook-open-in-new-tab');
+
+			// Load the graph
+			if (data.json && data.filename) {
+				this.fileManager.setCurrentFilename(data.filename);
+				this.loadGraph(data.json);
+				this.updateStatus(`Opened: ${data.filename}.json`);
+			}
+		} catch (error) {
+			console.error('Error loading new tab data:', error);
+			localStorage.removeItem('nodebook-open-in-new-tab');
+		}
+	}
 
     /**
      * Load graph from JSON

@@ -13,6 +13,7 @@ class FileManager {
         this.MAX_EXCEL_SIZE = 100 * 1024 * 1024; // 100 MB for Excel files
         
         this.fileInput = document.getElementById('file-input');
+		this.fileInputNewTab = document.getElementById('file-input-new-tab');
         this.exportModal = document.getElementById('export-modal');
         
         this.setupEventListeners();
@@ -53,6 +54,10 @@ class FileManager {
                 this.exportModal.classList.add('hidden');
             }
         });
+		
+		this.fileInputNewTab?.addEventListener('change', (e) => {
+			this.handleFileForNewTab(e);
+		});
     }
 
     /**
@@ -471,6 +476,61 @@ class FileManager {
             }
         }
     }
+	
+	/**
+	 * Open file picker for opening in new tab
+	 */
+	openInNewTab() {
+		this.fileInputNewTab?.click();
+	}
+
+	/**
+	 * Handle file selection for new tab
+	 */
+	handleFileForNewTab(event) {
+		const file = event.target.files[0];
+		if (!file) return;
+
+		if (!file.name.endsWith('.json')) {
+			alert('Please select a JSON file');
+			event.target.value = '';
+			return;
+		}
+
+		// Security: Check file size
+		if (file.size > this.MAX_JSON_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (this.MAX_JSON_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: File too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB`);
+			event.target.value = '';
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const json = JSON.parse(e.target.result);
+				
+				// Store in localStorage temporarily with timestamp
+				const tempData = {
+					json: json,
+					filename: file.name.replace('.json', ''),
+					timestamp: Date.now()
+				};
+				localStorage.setItem('nodebook-open-in-new-tab', JSON.stringify(tempData));
+				
+				// Open new tab
+				window.open(window.location.href, '_blank');
+				
+			} catch (error) {
+				alert('Error reading file: ' + error.message);
+				console.error('File read error:', error);
+			}
+		};
+
+		reader.readAsText(file);
+		event.target.value = '';
+	}
 
     /**
      * Get current filename
