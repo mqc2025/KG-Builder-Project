@@ -808,7 +808,8 @@ class Renderer {
      * Update highlight styling
      */
     updateHighlight() {
-        this.nodeGroup.selectAll('.node circle')
+        // Apply highlight classes to the entire node group (works for both circles and icons)
+        this.nodeGroup.selectAll('.node')
             .classed('highlighted', d => this.highlightedNodes.has(d.id))
             .classed('path-highlight', d => this.highlightedNodes.has(d.id));
 
