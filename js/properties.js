@@ -225,7 +225,6 @@ class PropertiesPanel {
                     <label class="property-label">Link 1</label>
                     <div class="link-input-group">
                         <input type="text" class="property-input link-input" id="prop-link1" value="${Utils.sanitizeHtml(node.link1 || '')}" placeholder="https:// or file path">
-                        <button class="btn-link-action" data-link="link1" data-action="set" title="Set link">📎</button>
                         <button class="btn-link-action" data-link="link1" data-action="open" title="Open link" ${!node.link1 ? 'disabled' : ''}>🔗</button>
                     </div>
                 </div>
@@ -234,7 +233,6 @@ class PropertiesPanel {
                     <label class="property-label">Link 2</label>
                     <div class="link-input-group">
                         <input type="text" class="property-input link-input" id="prop-link2" value="${Utils.sanitizeHtml(node.link2 || '')}" placeholder="https:// or file path">
-                        <button class="btn-link-action" data-link="link2" data-action="set" title="Set link">📎</button>
                         <button class="btn-link-action" data-link="link2" data-action="open" title="Open link" ${!node.link2 ? 'disabled' : ''}>🔗</button>
                     </div>
                 </div>
@@ -243,7 +241,6 @@ class PropertiesPanel {
                     <label class="property-label">Link 3</label>
                     <div class="link-input-group">
                         <input type="text" class="property-input link-input" id="prop-link3" value="${Utils.sanitizeHtml(node.link3 || '')}" placeholder="https:// or file path">
-                        <button class="btn-link-action" data-link="link3" data-action="set" title="Set link">📎</button>
                         <button class="btn-link-action" data-link="link3" data-action="open" title="Open link" ${!node.link3 ? 'disabled' : ''}>🔗</button>
                     </div>
                 </div>
@@ -252,7 +249,6 @@ class PropertiesPanel {
                     <label class="property-label">Link 4</label>
                     <div class="link-input-group">
                         <input type="text" class="property-input link-input" id="prop-link4" value="${Utils.sanitizeHtml(node.link4 || '')}" placeholder="https:// or file path">
-                        <button class="btn-link-action" data-link="link4" data-action="set" title="Set link">📎</button>
                         <button class="btn-link-action" data-link="link4" data-action="open" title="Open link" ${!node.link4 ? 'disabled' : ''}>🔗</button>
                     </div>
                 </div>
@@ -648,20 +644,14 @@ class PropertiesPanel {
             });
         }
 
-        // NEW: Link action buttons
-        const linkActionButtons = document.querySelectorAll('.btn-link-action');
-        linkActionButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const linkKey = e.target.dataset.link;
-                const action = e.target.dataset.action;
-                
-                if (action === 'set') {
-                    this.setLink(linkKey);
-                } else if (action === 'open') {
-                    this.openLink(linkKey);
-                }
-            });
-        });
+        // Link open buttons
+		const linkOpenButtons = document.querySelectorAll('.btn-link-action[data-action="open"]');
+		linkOpenButtons.forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const linkKey = e.target.dataset.link;
+				this.openLink(linkKey);
+			});
+		});
 
         // Custom properties - value changes
         const customValueInputs = document.querySelectorAll('.custom-property-value');
@@ -798,36 +788,6 @@ class PropertiesPanel {
             });
         });
     }
-
-    /**
-	 * NEW: Set link (prompt for URL or file path) - with validation
-	 */
-	setLink(linkKey) {
-		const input = document.getElementById(`prop-${linkKey}`);
-		if (!input) return;
-
-		const currentValue = input.value;
-		const newValue = prompt(`Enter URL or file path for ${linkKey.toUpperCase()}:`, currentValue);
-		
-		if (newValue !== null) {
-			// Validate URL before saving
-			const validation = this.validateUrl(newValue);
-			
-			if (!validation.valid) {
-				alert(validation.error);
-				return; // Don't save invalid URL
-			}
-			
-			input.value = newValue;
-			this.updateProperty(linkKey, newValue);
-			
-			// Update open button state
-			const openBtn = document.querySelector(`button[data-link="${linkKey}"][data-action="open"]`);
-			if (openBtn) {
-				openBtn.disabled = !newValue;
-			}
-		}
-	}
 
     /**
 	 * NEW: Open link in new window (with security validation)
