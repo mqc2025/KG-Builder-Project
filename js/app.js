@@ -130,6 +130,10 @@ class KnowledgeGraphApp {
         document.getElementById('btn-save-as')?.addEventListener('click', () => this.saveGraphAs());
 		document.getElementById('btn-open-in-new-tab')?.addEventListener('click', () => this.openInNewTab());
         document.getElementById('btn-export')?.addEventListener('click', () => this.exportGraph());
+		// Explode Graph button
+		document.getElementById('btn-explode-graph')?.addEventListener('click', () => {
+			ExplodeGraph.showExplodeDialog(this);
+		});
         document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
         document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
         document.getElementById('btn-filter')?.addEventListener('click', () => this.filterManager.showFilterModal());
