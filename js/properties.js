@@ -171,9 +171,31 @@ class PropertiesPanel {
                 </div>
 
                 <div class="property-item">
-                    <label class="property-label">Category</label>
-                    <input type="text" class="property-input" id="prop-category" value="${Utils.sanitizeHtml(node.category || '')}">
-                </div>
+					<label class="property-label">Category</label>
+					<input type="text" class="property-input" id="prop-category" list="category-suggestions" value="${Utils.sanitizeHtml(node.category || '')}">
+					<datalist id="category-suggestions">
+						<option value="Project">
+						<option value="Task">
+						<option value="Note">
+						<option value="Document">
+						<option value="Person">
+						<option value="Organization">
+						<option value="Concept">
+						<option value="Resource">
+						<option value="Event">
+						<option value="Goal">
+						<option value="Field">
+						<option value="Algorithm">
+						<option value="Application">
+						<option value="Reference">
+						<option value="Implementation">
+						<option value="Requirement">
+						<option value="Process">
+						<option value="Evidence">
+						<option value="Decision">
+						<option value="Risk">
+					</datalist>
+				</div>
 
                 <div class="property-item">
                     <label class="property-label">Sub-Category</label>
