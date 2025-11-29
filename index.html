@@ -32,12 +32,21 @@
             <h1 class="app-title">NodeBook</h1>
         </div>
         <div class="toolbar">
-            <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
+            <button id="btn-github" class="toolbar-btn" title="Visit GitHub Repository">
+                <span>⚙️</span>
+            </button>
+            <button id="btn-help" class="toolbar-btn" title="Help Documentation">
+                <span>❓</span>
+            </button>
+			<div class="toolbar-separator"></div>
+
+			<button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
                 <span>↶</span>
             </button>
             <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)" disabled>
                 <span>↷</span>
             </button>
+			
             <div class="toolbar-separator"></div>
             <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
             <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>

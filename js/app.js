@@ -134,6 +134,12 @@ class KnowledgeGraphApp {
 		document.getElementById('btn-explode-graph')?.addEventListener('click', () => {
 			ExplodeGraph.showExplodeDialog(this);
 		});
+		document.getElementById('btn-github')?.addEventListener('click', () => {
+            window.open('YOUR_GITHUB_PROJECT_URL', '_blank');
+        });
+        document.getElementById('btn-help')?.addEventListener('click', () => {
+            window.open('help.html', '_blank');
+        });
         document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
         document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
         document.getElementById('btn-filter')?.addEventListener('click', () => this.filterManager.showFilterModal());
