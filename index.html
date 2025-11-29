@@ -50,13 +50,9 @@
             <div class="toolbar-separator"></div>
             <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
             <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
-            <button id="btn-filter" class="toolbar-btn" title="Filter Graph">
-			<button id="btn-quick-priority" class="toolbar-btn-small" title="Quick Filter: Priority">⭐</button>
-            <button id="btn-quick-category" class="toolbar-btn-small" title="Quick Filter: Category">📂</button>
-            <button id="btn-quick-connections" class="toolbar-btn-small" title="Quick Filter: Connections">🔗</button>
-
-                <span>🔍</span> Filter
-            </button>
+			<button id="btn-filter" class="toolbar-btn" title="Filter Graph">
+				<span>🎯</span> Filter
+			</button>
         </div>
     </header>
 
@@ -344,42 +340,54 @@
                 </div>
 
                 <!-- Priority Filter -->
-                <div id="filter-priority" class="filter-type-content hidden">
-                    <div class="filter-group">
-                        <label class="filter-label">Select Priority:</label>
-                        <div class="filter-checkbox-group">
-                            <label class="filter-checkbox-label">
-                                <input type="checkbox" value="High" checked> High
-                            </label>
-                            <label class="filter-checkbox-label">
-                                <input type="checkbox" value="Medium" checked> Medium
-                            </label>
-                            <label class="filter-checkbox-label">
-                                <input type="checkbox" value="Low" checked> Low
-                            </label>
-                        </div>
-                    </div>
-                </div>
+				<div id="filter-priority" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Priority:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-priority">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-priority">Deselect All</button>
+						</div>
+						<div class="filter-checkbox-group" id="priority-checkboxes">
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="High" checked> High
+							</label>
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="Medium" checked> Medium
+							</label>
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="Low" checked> Low
+							</label>
+						</div>
+					</div>
+				</div>
 
                 <!-- Category Filter -->
-                <div id="filter-category" class="filter-type-content hidden">
-                    <div class="filter-group">
-                        <label class="filter-label">Select Categories:</label>
-                        <div id="category-checkboxes" class="filter-checkbox-group">
-                            <!-- Will be populated dynamically -->
-                        </div>
-                    </div>
-                </div>
+				<div id="filter-category" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Categories:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-category">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-category">Deselect All</button>
+						</div>
+						<div id="category-checkboxes" class="filter-checkbox-group">
+							<!-- Will be populated dynamically -->
+						</div>
+					</div>
+				</div>
 
                 <!-- Color Filter -->
-                <div id="filter-color" class="filter-type-content hidden">
-                    <div class="filter-group">
-                        <label class="filter-label">Select Colors:</label>
-                        <div id="color-checkboxes" class="filter-checkbox-group">
-                            <!-- Will be populated dynamically -->
-                        </div>
-                    </div>
-                </div>
+				<div id="filter-color" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Colors:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-color">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-color">Deselect All</button>
+						</div>
+						<div id="color-checkboxes" class="filter-checkbox-group">
+							<!-- Will be populated dynamically -->
+						</div>
+					</div>
+				</div>
 
                 <!-- Deadline Filter -->
                 <div id="filter-deadline" class="filter-type-content hidden">

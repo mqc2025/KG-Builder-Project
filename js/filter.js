@@ -60,6 +60,15 @@ class FilterManager {
         document.getElementById('btn-clear-filter')?.addEventListener('click', () => {
             this.clearFilter();
         });
+		
+		// Select All / Deselect All buttons
+		document.addEventListener('click', (e) => {
+			if (e.target.classList.contains('filter-select-btn')) {
+				const action = e.target.dataset.action;
+				const target = e.target.dataset.target;
+				this.handleSelectButtons(action, target);
+			}
+		});
     }
 
     /**
@@ -252,11 +261,14 @@ class FilterManager {
             this.isFilterActive = true;
 
             // Highlight filtered nodes
-            const nodeIds = filteredNodes.map(n => n.id);
-            this.renderer.highlightNodes(nodeIds);
+			const nodeIds = filteredNodes.map(n => n.id);
+			this.renderer.highlightNodes(nodeIds);
 
-            // Update button states
-            this.updateFilterButtonState();
+			// Apply dimming to non-filtered nodes and edges
+			this.applyFilterDimming(nodeIds);
+
+			// Update button states
+			this.updateFilterButtonState();
 
             this.hideFilterModal();
 
@@ -453,10 +465,13 @@ class FilterManager {
         this.isFilterActive = false;
 
         // Clear highlights
-        this.renderer.clearHighlight();
+		this.renderer.clearHighlight();
 
-        // Update button states
-        this.updateFilterButtonState();
+		// Clear dimming effect
+		this.renderer.clearDistanceDimming();
+
+		// Update button states
+		this.updateFilterButtonState();
         
         // Clear quick filter button states
         document.querySelectorAll('.toolbar-btn-small').forEach(btn => btn.classList.remove('active'));
@@ -509,6 +524,62 @@ class FilterManager {
         div.textContent = text;
         return div.innerHTML;
     }
+	
+	/**
+	 * Handle Select All / Deselect All buttons
+	 * @param {string} action - 'select-all' or 'deselect-all'
+	 * @param {string} target - 'filter-priority', 'filter-category', or 'filter-color'
+	 */
+	handleSelectButtons(action, target) {
+		let checkboxes;
+		
+		if (target === 'filter-priority') {
+			checkboxes = document.querySelectorAll('#priority-checkboxes input[type="checkbox"]');
+		} else if (target === 'filter-category') {
+			checkboxes = document.querySelectorAll('#category-checkboxes input[type="checkbox"]');
+		} else if (target === 'filter-color') {
+			checkboxes = document.querySelectorAll('#color-checkboxes input[type="checkbox"]');
+		}
+		
+		if (!checkboxes) return;
+		
+		const shouldCheck = action === 'select-all';
+		checkboxes.forEach(checkbox => {
+			checkbox.checked = shouldCheck;
+		});
+	}
+	/**
+	 * Apply dimming to nodes/edges that don't match the filter
+	 * @param {Array} filteredNodeIds - Array of node IDs that passed the filter
+	 */
+	applyFilterDimming(filteredNodeIds) {
+		const filteredSet = new Set(filteredNodeIds);
+		
+		// Clear previous dimming
+		this.renderer.dimmedNodes.clear();
+		this.renderer.dimmedEdges.clear();
+		
+		// Dim all nodes NOT in the filtered set
+		this.graph.nodes.forEach(node => {
+			if (!filteredSet.has(node.id)) {
+				this.renderer.dimmedNodes.add(node.id);
+			}
+		});
+		
+		// Dim edges where BOTH endpoints are NOT in the filtered set
+		this.graph.edges.forEach(edge => {
+			const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+			const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+			
+			// Only dim edge if BOTH nodes are not in filter results
+			if (!filteredSet.has(sourceId) && !filteredSet.has(targetId)) {
+				this.renderer.dimmedEdges.add(edge.id);
+			}
+		});
+		
+		this.renderer.isDimmingActive = true;
+		this.renderer.updateDimming();
+	}	
 }
 
 // Export

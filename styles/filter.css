@@ -119,3 +119,32 @@
     background-color: rgba(52, 152, 219, 0.3);
     border-color: var(--primary-color);
 }
+/* Select All/Deselect All Controls */
+.filter-select-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.filter-select-btn {
+    flex: 1;
+    padding: 6px 12px;
+    background-color: white;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.filter-select-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.filter-select-btn:active {
+    transform: translateY(1px);
+}

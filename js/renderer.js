@@ -805,18 +805,28 @@ class Renderer {
     }
 
     /**
-     * Update highlight styling
-     */
-    updateHighlight() {
-        // Apply highlight classes to the entire node group (works for both circles and icons)
-        this.nodeGroup.selectAll('.node')
-            .classed('highlighted', d => this.highlightedNodes.has(d.id))
-            .classed('path-highlight', d => this.highlightedNodes.has(d.id));
+	 * Update highlight styling
+	 */
+	updateHighlight() {
+		// Apply highlight classes to the entire node group
+		this.nodeGroup.selectAll('.node')
+			.classed('highlighted', d => this.highlightedNodes.has(d.id))
+			.classed('path-highlight', d => this.highlightedNodes.has(d.id));
+		
+		// ALSO apply to child circle elements (for non-icon nodes)
+		this.nodeGroup.selectAll('.node circle:not(.node-hitbox)')
+			.classed('highlighted', d => this.highlightedNodes.has(d.id))
+			.classed('path-highlight', d => this.highlightedNodes.has(d.id));
+		
+		// ALSO apply to icon elements (for icon nodes)
+		this.nodeGroup.selectAll('.node .node-icon')
+			.classed('highlighted', d => this.highlightedNodes.has(d.id))
+			.classed('path-highlight', d => this.highlightedNodes.has(d.id));
 
-        this.edgeGroup.selectAll('.edge path:first-child')
-            .classed('highlighted', d => this.highlightedEdges.has(d.id))
-            .classed('path-highlight', d => this.highlightedEdges.has(d.id));
-    }
+		this.edgeGroup.selectAll('.edge path:first-child')
+			.classed('highlighted', d => this.highlightedEdges.has(d.id))
+			.classed('path-highlight', d => this.highlightedEdges.has(d.id));
+	}
 
     /**
      * Reset zoom

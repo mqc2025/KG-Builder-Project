@@ -257,10 +257,10 @@ class KnowledgeGraphApp {
     }
 
     /**
-     * Handle node click
-     */
-    handleNodeClick(node) {
-		// Check if in connect-by-click mode
+	 * Handle node click
+	 */
+	handleNodeClick(node) {
+		// Check if in connect by click mode
 		if (this.connectByClickActive) {
 			this.completeConnectByClick(node);
 			return;
@@ -270,6 +270,11 @@ class KnowledgeGraphApp {
 		if (this.currentTool === 'shortest-path') {
 			this.selectPathNode(node);
 			return;
+		}
+		
+		// Clear filter if active
+		if (this.filterManager && this.filterManager.isActive()) {
+			this.filterManager.clearFilter();
 		}
 		
 		// Clear edge selection and select the node
@@ -283,9 +288,14 @@ class KnowledgeGraphApp {
 	}
 
     /**
-     * Handle edge click
-     */
-    handleEdgeClick(edge) {
+	 * Handle edge click
+	 */
+	handleEdgeClick(edge) {
+		// Clear filter if active
+		if (this.filterManager && this.filterManager.isActive()) {
+			this.filterManager.clearFilter();
+		}
+		
 		// Clear node selection and select the edge
 		this.renderer.selectedNodes.clear();
 		this.renderer.selectEdges([edge.id]);
