@@ -372,7 +372,7 @@ Do you want to proceed?`;
                     ' [Exploded on ' + Utils.getCurrentDate() + ']';
                 
                 // Reinitialize visualization
-                app.visualization.init();
+                app.renderer.render();
                 
                 alert('✅ Graph successfully exploded!\n\n' +
                       `Nodes: ${result.nodes.length}\n` +
