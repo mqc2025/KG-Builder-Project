@@ -51,6 +51,10 @@
             <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
             <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
             <button id="btn-filter" class="toolbar-btn" title="Filter Graph">
+			<button id="btn-quick-priority" class="toolbar-btn-small" title="Quick Filter: Priority">⭐</button>
+            <button id="btn-quick-category" class="toolbar-btn-small" title="Quick Filter: Category">📂</button>
+            <button id="btn-quick-connections" class="toolbar-btn-small" title="Quick Filter: Connections">🔗</button>
+
                 <span>🔍</span> Filter
             </button>
         </div>
@@ -304,23 +308,137 @@
                 <button class="modal-close">✕</button>
             </div>
             <div class="modal-body">
+                <!-- Filter Type Selector -->
                 <div class="filter-group">
-                    <label class="filter-label">Property Name:</label>
-                    <input type="text" id="filter-property" class="filter-input" placeholder="e.g., category, priority">
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">Property Value:</label>
-                    <input type="text" id="filter-value" class="filter-input" placeholder="e.g., High, Field">
-                </div>
-                <div class="filter-group">
-                    <label class="filter-label">Match Type:</label>
-                    <select id="filter-match-type" class="filter-select">
-                        <option value="exact">Exact Match</option>
-                        <option value="contains">Contains</option>
-                        <option value="starts">Starts With</option>
-                        <option value="ends">Ends With</option>
+                    <label class="filter-label">Filter Type:</label>
+                    <select id="filter-type-select" class="filter-select">
+                        <option value="custom">Custom Property</option>
+                        <option value="priority">Priority</option>
+                        <option value="category">Category</option>
+                        <option value="color">Color</option>
+                        <option value="deadline">Deadline (Date Range)</option>
+                        <option value="dateRange">Date Range (Created/Modified)</option>
+                        <option value="connections">Connected to Node</option>
                     </select>
                 </div>
+
+                <!-- Custom Property Filter (default) -->
+                <div id="filter-custom" class="filter-type-content">
+                    <div class="filter-group">
+                        <label class="filter-label">Property Name:</label>
+                        <input type="text" id="filter-property" class="filter-input" placeholder="e.g., category, priority">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Property Value:</label>
+                        <input type="text" id="filter-value" class="filter-input" placeholder="e.g., High, Field">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Match Type:</label>
+                        <select id="filter-match-type" class="filter-select">
+                            <option value="exact">Exact Match</option>
+                            <option value="contains">Contains</option>
+                            <option value="starts">Starts With</option>
+                            <option value="ends">Ends With</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Priority Filter -->
+                <div id="filter-priority" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Select Priority:</label>
+                        <div class="filter-checkbox-group">
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" value="High" checked> High
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" value="Medium" checked> Medium
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" value="Low" checked> Low
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div id="filter-category" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Select Categories:</label>
+                        <div id="category-checkboxes" class="filter-checkbox-group">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Filter -->
+                <div id="filter-color" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Select Colors:</label>
+                        <div id="color-checkboxes" class="filter-checkbox-group">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deadline Filter -->
+                <div id="filter-deadline" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Deadline Range:</label>
+                        <input type="date" id="filter-deadline-start" class="filter-input">
+                        <span style="margin: 5px 0; display: block; text-align: center;">to</span>
+                        <input type="date" id="filter-deadline-end" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-checkbox-label">
+                            <input type="checkbox" id="filter-deadline-include-empty"> Include nodes without deadline
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date Range Filter (Created/Modified) -->
+                <div id="filter-dateRange" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Date Field:</label>
+                        <select id="filter-date-field" class="filter-select">
+                            <option value="createdDate">Created Date</option>
+                            <option value="modifiedDate">Modified Date</option>
+                            <option value="userDate">User Date</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date Range:</label>
+                        <input type="date" id="filter-date-start" class="filter-input">
+                        <span style="margin: 5px 0; display: block; text-align: center;">to</span>
+                        <input type="date" id="filter-date-end" class="filter-input">
+                    </div>
+                </div>
+
+                <!-- Connections Filter -->
+                <div id="filter-connections" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Show nodes connected to:</label>
+                        <select id="filter-connection-node" class="filter-select">
+                            <option value="">Select a node...</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Connection Type:</label>
+                        <div class="filter-checkbox-group">
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-outgoing" checked> Outgoing (this → others)
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-incoming" checked> Incoming (others → this)
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-include-selected"> Include selected node
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
                 <button id="btn-apply-filter" class="modal-btn">Apply Filter</button>
                 <button id="btn-clear-filter" class="modal-btn" style="background-color: var(--border-color);">Clear Filter</button>
             </div>

@@ -1,4 +1,4 @@
-// Filter Manager for Property-Based Filtering (Feature 1)
+// Enhanced Filter Manager with Multiple Filter Types
 
 class FilterManager {
     constructor(graph, renderer) {
@@ -17,9 +17,20 @@ class FilterManager {
      * Setup event listeners
      */
     setupEventListeners() {
-        // Filter button
+        // Main filter button
         this.filterBtn?.addEventListener('click', () => {
             this.showFilterModal();
+        });
+
+        // Quick filter buttons
+        document.getElementById('btn-quick-priority')?.addEventListener('click', () => {
+            this.showQuickFilter('priority');
+        });
+        document.getElementById('btn-quick-category')?.addEventListener('click', () => {
+            this.showQuickFilter('category');
+        });
+        document.getElementById('btn-quick-connections')?.addEventListener('click', () => {
+            this.showQuickFilter('connections');
         });
 
         // Modal close
@@ -35,6 +46,11 @@ class FilterManager {
             }
         });
 
+        // Filter type selector
+        document.getElementById('filter-type-select')?.addEventListener('change', (e) => {
+            this.switchFilterType(e.target.value);
+        });
+
         // Apply filter button
         document.getElementById('btn-apply-filter')?.addEventListener('click', () => {
             this.applyFilter();
@@ -47,13 +63,138 @@ class FilterManager {
     }
 
     /**
+     * Show quick filter with pre-selected type
+     */
+    showQuickFilter(filterType) {
+        this.showFilterModal();
+        document.getElementById('filter-type-select').value = filterType;
+        this.switchFilterType(filterType);
+        
+        // Update quick button states
+        document.querySelectorAll('.toolbar-btn-small').forEach(btn => btn.classList.remove('active'));
+        if (filterType === 'priority') {
+            document.getElementById('btn-quick-priority')?.classList.add('active');
+        } else if (filterType === 'category') {
+            document.getElementById('btn-quick-category')?.classList.add('active');
+        } else if (filterType === 'connections') {
+            document.getElementById('btn-quick-connections')?.classList.add('active');
+        }
+    }
+
+    /**
+     * Switch between filter types
+     */
+    switchFilterType(type) {
+        // Hide all filter type contents
+        document.querySelectorAll('.filter-type-content').forEach(el => {
+            el.classList.add('hidden');
+        });
+
+        // Show selected filter type
+        const targetContent = document.getElementById(`filter-${type}`);
+        if (targetContent) {
+            targetContent.classList.remove('hidden');
+        }
+
+        // Populate dynamic content based on type
+        if (type === 'category') {
+            this.populateCategoryCheckboxes();
+        } else if (type === 'color') {
+            this.populateColorCheckboxes();
+        } else if (type === 'connections') {
+            this.populateConnectionNodes();
+        }
+    }
+
+    /**
+     * Populate category checkboxes dynamically
+     */
+    populateCategoryCheckboxes() {
+        const container = document.getElementById('category-checkboxes');
+        if (!container) return;
+
+        // Get unique categories from graph
+        const categories = new Set();
+        this.graph.nodes.forEach(node => {
+            if (node.category && node.category.trim()) {
+                categories.add(node.category.trim());
+            }
+        });
+
+        if (categories.size === 0) {
+            container.innerHTML = '<p style="color: #999; padding: 10px;">No categories found in graph</p>';
+            return;
+        }
+
+        // Create checkboxes
+        container.innerHTML = Array.from(categories).sort().map(cat => `
+            <label class="filter-checkbox-label">
+                <input type="checkbox" value="${this.escapeHtml(cat)}" checked> ${this.escapeHtml(cat)}
+            </label>
+        `).join('');
+    }
+
+    /**
+     * Populate color checkboxes dynamically
+     */
+    populateColorCheckboxes() {
+        const container = document.getElementById('color-checkboxes');
+        if (!container) return;
+
+        // Get unique colors from graph
+        const colors = new Set();
+        this.graph.nodes.forEach(node => {
+            if (node.color) {
+                colors.add(node.color);
+            }
+        });
+
+        if (colors.size === 0) {
+            container.innerHTML = '<p style="color: #999; padding: 10px;">No colors found in graph</p>';
+            return;
+        }
+
+        // Create checkboxes with color swatches
+        container.innerHTML = Array.from(colors).map(color => `
+            <label class="filter-checkbox-label color-checkbox-label">
+                <input type="checkbox" value="${this.escapeHtml(color)}" checked>
+                <span class="color-checkbox-swatch" style="background-color: ${this.escapeHtml(color)}"></span>
+                <span>${this.escapeHtml(color)}</span>
+            </label>
+        `).join('');
+    }
+
+    /**
+     * Populate connection node dropdown
+     */
+    populateConnectionNodes() {
+        const select = document.getElementById('filter-connection-node');
+        if (!select) return;
+
+        // Clear existing options except first
+        select.innerHTML = '<option value="">Select a node...</option>';
+
+        // Add all nodes
+        this.graph.nodes.forEach(node => {
+            const option = document.createElement('option');
+            option.value = node.id;
+            option.textContent = node.name || node.id;
+            select.appendChild(option);
+        });
+    }
+
+    /**
      * Show filter modal
      */
     showFilterModal() {
         this.modal?.classList.remove('hidden');
         
-        // Focus on property input
-        document.getElementById('filter-property')?.focus();
+        // Initialize with custom filter type
+        const filterTypeSelect = document.getElementById('filter-type-select');
+        if (filterTypeSelect && !filterTypeSelect.value) {
+            filterTypeSelect.value = 'custom';
+            this.switchFilterType('custom');
+        }
     }
 
     /**
@@ -64,9 +205,75 @@ class FilterManager {
     }
 
     /**
-     * Apply filter
+     * Apply filter based on selected type
      */
     applyFilter() {
+        const filterType = document.getElementById('filter-type-select')?.value;
+        let filteredNodes = [];
+
+        try {
+            switch (filterType) {
+                case 'custom':
+                    filteredNodes = this.applyCustomFilter();
+                    break;
+                case 'priority':
+                    filteredNodes = this.applyPriorityFilter();
+                    break;
+                case 'category':
+                    filteredNodes = this.applyCategoryFilter();
+                    break;
+                case 'color':
+                    filteredNodes = this.applyColorFilter();
+                    break;
+                case 'deadline':
+                    filteredNodes = this.applyDeadlineFilter();
+                    break;
+                case 'dateRange':
+                    filteredNodes = this.applyDateRangeFilter();
+                    break;
+                case 'connections':
+                    filteredNodes = this.applyConnectionsFilter();
+                    break;
+                default:
+                    alert('Unknown filter type');
+                    return;
+            }
+
+            if (filteredNodes.length === 0) {
+                alert('No nodes match the filter criteria');
+                return;
+            }
+
+            // Store current filter
+            this.currentFilter = {
+                type: filterType,
+                nodeCount: filteredNodes.length
+            };
+            this.isFilterActive = true;
+
+            // Highlight filtered nodes
+            const nodeIds = filteredNodes.map(n => n.id);
+            this.renderer.highlightNodes(nodeIds);
+
+            // Update button states
+            this.updateFilterButtonState();
+
+            this.hideFilterModal();
+
+            if (window.app) {
+                window.app.updateStatus(`Filter active: ${filteredNodes.length} nodes matched`);
+            }
+
+        } catch (error) {
+            console.error('Filter error:', error);
+            alert('Error applying filter: ' + error.message);
+        }
+    }
+
+    /**
+     * Apply custom property filter
+     */
+    applyCustomFilter() {
         const propertyInput = document.getElementById('filter-property');
         const valueInput = document.getElementById('filter-value');
         const matchTypeSelect = document.getElementById('filter-match-type');
@@ -76,38 +283,166 @@ class FilterManager {
         const matchType = matchTypeSelect?.value || 'exact';
 
         if (!propertyKey || !propertyValue) {
-            alert('Please enter both property name and value');
-            return;
+            throw new Error('Please enter both property name and value');
         }
 
-        // Filter nodes
-        const filteredNodes = this.graph.filterNodes(propertyKey, propertyValue, matchType);
+        return this.graph.filterNodes(propertyKey, propertyValue, matchType);
+    }
 
-        if (filteredNodes.length === 0) {
-            alert('No nodes match the filter criteria');
-            return;
+    /**
+     * Apply priority filter
+     */
+    applyPriorityFilter() {
+        const checkboxes = document.querySelectorAll('#filter-priority input[type="checkbox"]:checked');
+        const selectedPriorities = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedPriorities.length === 0) {
+            throw new Error('Please select at least one priority level');
         }
 
-        // Store current filter
-        this.currentFilter = {
-            propertyKey,
-            propertyValue,
-            matchType
-        };
-        this.isFilterActive = true;
+        return this.graph.nodes.filter(node => {
+            return node.priority && selectedPriorities.includes(node.priority);
+        });
+    }
 
-        // Highlight filtered nodes
-        const nodeIds = filteredNodes.map(n => n.id);
-        this.renderer.highlightNodes(nodeIds);
+    /**
+     * Apply category filter
+     */
+    applyCategoryFilter() {
+        const checkboxes = document.querySelectorAll('#filter-category input[type="checkbox"]:checked');
+        const selectedCategories = Array.from(checkboxes).map(cb => cb.value);
 
-        // Update filter button to show active state
-        this.updateFilterButtonState();
-
-        this.hideFilterModal();
-
-        if (window.app) {
-            window.app.updateStatus(`Filter active: ${filteredNodes.length} nodes matched`);
+        if (selectedCategories.length === 0) {
+            throw new Error('Please select at least one category');
         }
+
+        return this.graph.nodes.filter(node => {
+            return node.category && selectedCategories.includes(node.category);
+        });
+    }
+
+    /**
+     * Apply color filter
+     */
+    applyColorFilter() {
+        const checkboxes = document.querySelectorAll('#filter-color input[type="checkbox"]:checked');
+        const selectedColors = Array.from(checkboxes).map(cb => cb.value);
+
+        if (selectedColors.length === 0) {
+            throw new Error('Please select at least one color');
+        }
+
+        return this.graph.nodes.filter(node => {
+            return node.color && selectedColors.includes(node.color);
+        });
+    }
+
+    /**
+     * Apply deadline filter
+     */
+    applyDeadlineFilter() {
+        const startInput = document.getElementById('filter-deadline-start');
+        const endInput = document.getElementById('filter-deadline-end');
+        const includeEmpty = document.getElementById('filter-deadline-include-empty');
+
+        const startDate = startInput?.value ? new Date(startInput.value) : null;
+        const endDate = endInput?.value ? new Date(endInput.value) : null;
+
+        if (!startDate && !endDate) {
+            throw new Error('Please select at least one date');
+        }
+
+        return this.graph.nodes.filter(node => {
+            if (!node.deadline || !node.deadline.trim()) {
+                return includeEmpty?.checked;
+            }
+
+            const nodeDeadline = new Date(node.deadline);
+            
+            if (startDate && endDate) {
+                return nodeDeadline >= startDate && nodeDeadline <= endDate;
+            } else if (startDate) {
+                return nodeDeadline >= startDate;
+            } else if (endDate) {
+                return nodeDeadline <= endDate;
+            }
+            
+            return false;
+        });
+    }
+
+    /**
+     * Apply date range filter (created/modified/user dates)
+     */
+    applyDateRangeFilter() {
+        const dateField = document.getElementById('filter-date-field')?.value;
+        const startInput = document.getElementById('filter-date-start');
+        const endInput = document.getElementById('filter-date-end');
+
+        const startDate = startInput?.value ? new Date(startInput.value) : null;
+        const endDate = endInput?.value ? new Date(endInput.value) : null;
+
+        if (!startDate && !endDate) {
+            throw new Error('Please select at least one date');
+        }
+
+        return this.graph.nodes.filter(node => {
+            const nodeDate = node[dateField] ? new Date(node[dateField]) : null;
+            
+            if (!nodeDate) return false;
+
+            if (startDate && endDate) {
+                return nodeDate >= startDate && nodeDate <= endDate;
+            } else if (startDate) {
+                return nodeDate >= startDate;
+            } else if (endDate) {
+                return nodeDate <= endDate;
+            }
+            
+            return false;
+        });
+    }
+
+    /**
+     * Apply connections filter
+     */
+    applyConnectionsFilter() {
+        const nodeSelect = document.getElementById('filter-connection-node');
+        const outgoingCheck = document.getElementById('filter-conn-outgoing');
+        const incomingCheck = document.getElementById('filter-conn-incoming');
+        const includeSelectedCheck = document.getElementById('filter-conn-include-selected');
+
+        const selectedNodeId = nodeSelect?.value;
+
+        if (!selectedNodeId) {
+            throw new Error('Please select a node');
+        }
+
+        if (!outgoingCheck?.checked && !incomingCheck?.checked) {
+            throw new Error('Please select at least one connection type');
+        }
+
+        const connectedNodeIds = new Set();
+
+        // Check all edges
+        this.graph.edges.forEach(edge => {
+            const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+            const targetId = typeof edge.target === 'object' ? edge.target.id : edge.target;
+
+            if (outgoingCheck?.checked && sourceId === selectedNodeId) {
+                connectedNodeIds.add(targetId);
+            }
+            if (incomingCheck?.checked && targetId === selectedNodeId) {
+                connectedNodeIds.add(sourceId);
+            }
+        });
+
+        // Include the selected node itself if requested
+        if (includeSelectedCheck?.checked) {
+            connectedNodeIds.add(selectedNodeId);
+        }
+
+        return this.graph.nodes.filter(node => connectedNodeIds.has(node.id));
     }
 
     /**
@@ -120,8 +455,11 @@ class FilterManager {
         // Clear highlights
         this.renderer.clearHighlight();
 
-        // Update filter button state
+        // Update button states
         this.updateFilterButtonState();
+        
+        // Clear quick filter button states
+        document.querySelectorAll('.toolbar-btn-small').forEach(btn => btn.classList.remove('active'));
 
         this.hideFilterModal();
 
@@ -130,10 +468,10 @@ class FilterManager {
         }
 
         // Clear input fields
-        const propertyInput = document.getElementById('filter-property');
-        const valueInput = document.getElementById('filter-value');
-        if (propertyInput) propertyInput.value = '';
-        if (valueInput) valueInput.value = '';
+        document.getElementById('filter-property').value = '';
+        document.getElementById('filter-value').value = '';
+        document.getElementById('filter-type-select').value = 'custom';
+        this.switchFilterType('custom');
     }
 
     /**
@@ -142,7 +480,7 @@ class FilterManager {
     updateFilterButtonState() {
         if (this.isFilterActive) {
             this.filterBtn?.classList.add('active');
-            this.filterBtn.title = `Filter active (${this.currentFilter.propertyKey}: ${this.currentFilter.propertyValue})`;
+            this.filterBtn.title = `Filter active (${this.currentFilter.nodeCount} nodes)`;
         } else {
             this.filterBtn?.classList.remove('active');
             this.filterBtn.title = 'Filter Graph';
@@ -161,6 +499,15 @@ class FilterManager {
      */
     isActive() {
         return this.isFilterActive;
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
