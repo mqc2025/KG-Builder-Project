@@ -138,7 +138,7 @@ class KnowledgeGraphApp {
 			ExplodeGraph.showExplodeDialog(this);
 		});
 		document.getElementById('btn-github')?.addEventListener('click', () => {
-            window.open('YOUR_GITHUB_PROJECT_URL', '_blank');
+            window.open('https://github.com/mqc2025/KG-Builder-Project', '_blank');
         });
         document.getElementById('btn-help')?.addEventListener('click', () => {
             window.open('help.html', '_blank');

@@ -354,6 +354,7 @@
 
             <h4>🔄 Convert Excel</h4>
             <p>Imports data from an Excel file created by the Excel Converter tool, automatically creating nodes and edges.</p>
+			
 
             <h4>💥 Explode</h4>
             <p>Breaks down complex nodes into their component parts:</p>
@@ -401,13 +402,24 @@
                     </ul>
                 </li>
             </ol>
-
-            <h4>⚙️ Force Strength Slider</h4>
-            <p>Controls the physics simulation strength:</p>
+			
+			<h4>➕ Add Graph</h4>
+            <p>Merges another graph file into your current graph:</p>
             <ul>
-                <li><strong>Weak (50):</strong> Loose, spread-out layout</li>
-                <li><strong>Medium (200):</strong> Balanced default setting</li>
-                <li><strong>Strong (500):</strong> Tight, compact layout</li>
+                <li>Opens a file picker to select a JSON graph file</li>
+                <li>Adds all nodes and edges from the selected file to your current graph</li>
+                <li>Useful for combining multiple data sources or building composite graphs</li>
+                <li>Maintains all properties and relationships from both graphs</li>
+            </ul>
+
+            <h4>⚙️ Force Strength Control</h4>
+            <p>Adjusts the strength of the force-directed layout simulation:</p>
+            <ul>
+                <li><strong>Slider Range:</strong> 50 (Weak) to 500 (Strong)</li>
+                <li><strong>Default:</strong> 200 - balanced for most graphs</li>
+                <li><strong>Weak Force:</strong> Nodes stay closer together, more compact layout</li>
+                <li><strong>Strong Force:</strong> Nodes spread out more, better separation for dense graphs</li>
+                <li>Adjust in real-time to find the optimal layout for your graph</li>
             </ul>
 
             <h3>Search & Filter</h3>
@@ -637,6 +649,7 @@
                         <td><span class="kbd">Right-Click</span></td>
                         <td>Open Context Menu</td>
                     </tr>
+					
                 </tbody>
             </table>
 
@@ -648,36 +661,45 @@
         <!-- PRIVACY -->
         <section id="privacy">
             <h2>Privacy & Data Security</h2>
-
+            
             <h3>🔒 Your Data Stays Private</h3>
             <p>NodeBook is designed with privacy as a core principle:</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>100% Client-Side</h4>
+                    <p>All processing happens in your browser. No server communication required for core functionality.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>No Data Collection</h4>
+                    <p>We don't collect, store, or transmit any of your graph data, files, or personal information.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Local Storage Only</h4>
+                    <p>Your preferences and settings are stored locally in your browser using localStorage.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Open Source</h4>
+                    <p>Our code is transparent and can be audited by anyone.</p>
+                </div>
+            </div>
 
+            <h3>Privacy Banner</h3>
+            <p>On first visit, you'll see a privacy banner at the top of the page explaining that NodeBook runs entirely in your browser. You can:</p>
             <ul>
-                <li><strong>Client-Side Only:</strong> All processing happens entirely in your browser</li>
-                <li><strong>No Server Communication:</strong> No data is sent to external servers</li>
-                <li><strong>No Tracking:</strong> We don't collect analytics or usage data</li>
-                <li><strong>Local Storage:</strong> Files are only saved to your computer</li>
-                <li><strong>Open Source:</strong> Code is transparent and auditable</li>
+                <li>Click "Got it" to dismiss the banner - your choice is remembered</li>
+                <li>Click the privacy icon (🔒 Private & Local) in the status bar to view privacy details anytime</li>
             </ul>
 
-            <h3>File Storage</h3>
-            <p>When you save a graph:</p>
+            <h3>What Gets Stored Locally?</h3>
+            <p>Only these preferences are saved in your browser's localStorage:</p>
             <ul>
-                <li>Files are downloaded directly to your computer</li>
-                <li>You have full control over where files are stored</li>
-                <li>No copies are kept by NodeBook</li>
-            </ul>
-
-            <h3>Browser Requirements</h3>
-            <p>NodeBook works best with modern browsers:</p>
-            <ul>
-                <li>Chrome/Edge (recommended)</li>
-                <li>Firefox</li>
-                <li>Safari</li>
+                <li>Privacy banner dismissal status</li>
+                <li>No graph data or file content is ever stored automatically</li>
             </ul>
 
             <div class="note">
-                <strong>📌 Note:</strong> Some features require JavaScript to be enabled. Ad blockers and privacy extensions are fully compatible.
+                <strong>💡 Important:</strong> You are responsible for saving your work. Use File → Save to download your graphs as JSON files on your device.
             </div>
         </section>
 
