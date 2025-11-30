@@ -151,6 +151,12 @@ class KnowledgeGraphApp {
         document.getElementById('btn-freeze')?.addEventListener('click', () => this.toggleFreeze());
         document.getElementById('btn-layout')?.addEventListener('click', () => this.resimulate());
         document.getElementById('btn-shortest-path')?.addEventListener('click', () => this.startShortestPath());
+		document.getElementById('btn-add-graph')?.addEventListener('click', () => this.addGraphFromFile());
+
+		// Add graph file input handler
+		const addGraphInput = document.getElementById('add-graph-input');
+		addGraphInput?.addEventListener('change', (e) => this.handleAddGraphFile(e));
+		
 		// Force strength slider
 		document.getElementById('force-slider')?.addEventListener('input', (e) => {
 			this.updateForceStrength(parseInt(e.target.value));
@@ -602,6 +608,157 @@ class KnowledgeGraphApp {
         
         this.updateStatus('Select start and end nodes for shortest path');
     }
+	
+	/**
+	 * Add graph from file - prompts user and consolidates nodes
+	 */
+	addGraphFromFile() {
+		if (!confirm('You are about to add the content of another JSON file to the current graph.\n\nNodes with the same "name" will be consolidated, but all edges will be preserved (including multiple edges between nodes).\n\nContinue?')) {
+			return;
+		}
+		
+		const fileInput = document.getElementById('add-graph-input');
+		if (fileInput) {
+			fileInput.click();
+		}
+	}
+	
+	/**
+	 * Handle add graph file selection
+	 */
+	async handleAddGraphFile(event) {
+		const file = event.target.files[0];
+		if (!file) return;
+
+		if (!file.name.endsWith('.json')) {
+			alert('Please select a JSON file');
+			event.target.value = '';
+			return;
+		}
+
+		// Security: Check file size
+		const MAX_JSON_SIZE = 50 * 1024 * 1024; // 50MB
+		if (file.size > MAX_JSON_SIZE) {
+			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+			const maxSizeMB = (MAX_JSON_SIZE / (1024 * 1024)).toFixed(0);
+			alert(`Security Error: File too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB`);
+			event.target.value = '';
+			return;
+		}
+
+		const reader = new FileReader();
+		reader.onload = async (e) => {
+			try {
+				const json = JSON.parse(e.target.result);
+				await this.addGraphToCurrentGraph(json);
+				event.target.value = '';
+			} catch (error) {
+				alert('Error reading file: ' + error.message);
+				console.error('Add graph error:', error);
+				event.target.value = '';
+			}
+		};
+
+		reader.readAsText(file);
+	}
+
+	/**
+	 * Add graph to current graph with node consolidation
+	 */
+	async addGraphToCurrentGraph(newGraphJson) {
+		Utils.showLoading();
+		
+		try {
+			// Extract nodes and edges from new graph
+			const newNodes = newGraphJson.graph?.nodes || newGraphJson.nodes || [];
+			const newEdges = newGraphJson.graph?.edges || newGraphJson.edges || [];
+			
+			if (newNodes.length === 0) {
+				throw new Error('No nodes found in the selected graph');
+			}
+			
+			// Create a map of existing node names to IDs
+			const existingNodesByName = new Map();
+			this.graph.nodes.forEach(node => {
+				if (node.name) {
+					existingNodesByName.set(node.name.toLowerCase(), node.id);
+				}
+			});
+			
+			// Map to track old IDs to new IDs (for edge updating)
+			const idMapping = new Map();
+			
+			// Process new nodes
+			let nodesAdded = 0;
+			let nodesConsolidated = 0;
+			
+			for (const newNode of newNodes) {
+				if (!newNode.name) {
+					console.warn('Skipping node without name:', newNode);
+					continue;
+				}
+				
+				const nameLower = newNode.name.toLowerCase();
+				
+				// Check if node with same name exists
+				if (existingNodesByName.has(nameLower)) {
+					// Node exists - map old ID to existing ID
+					const existingId = existingNodesByName.get(nameLower);
+					idMapping.set(newNode.id, existingId);
+					nodesConsolidated++;
+				} else {
+					// Node doesn't exist - add it
+					const addedNode = await this.graph.addNode(newNode);
+					idMapping.set(newNode.id, addedNode.id);
+					existingNodesByName.set(nameLower, addedNode.id);
+					nodesAdded++;
+				}
+			}
+			
+			// Process edges with updated node references
+			let edgesAdded = 0;
+			
+			for (const newEdge of newEdges) {
+				// Map source and target to new IDs
+				const sourceId = idMapping.get(newEdge.source) || newEdge.source;
+				const targetId = idMapping.get(newEdge.target) || newEdge.target;
+				
+				// Add edge (even if duplicate - as per requirements)
+				await this.graph.addEdge({
+					...newEdge,
+					source: sourceId,
+					target: targetId
+				});
+				
+				edgesAdded++;
+			}
+			
+			// Render and update
+			this.renderer.render();
+			
+			setTimeout(() => {
+				this.renderer.fitToView();
+			}, 150);
+			
+			this.updateStats();
+			this.saveState();
+			
+			Utils.hideLoading();
+			
+			const message = `Graph added successfully!\n\n` +
+						   `Nodes added: ${nodesAdded}\n` +
+						   `Nodes consolidated: ${nodesConsolidated}\n` +
+						   `Edges added: ${edgesAdded}`;
+			
+			alert(message);
+			this.updateStatus(`Added graph: ${nodesAdded} new nodes, ${nodesConsolidated} consolidated, ${edgesAdded} edges`);
+			
+		} catch (error) {
+			Utils.hideLoading();
+			alert('Error adding graph: ' + error.message);
+			console.error('Add graph error:', error);
+		}
+	}	
 
     /**
      * Setup path modal
