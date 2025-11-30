@@ -53,9 +53,12 @@ class KnowledgeGraphApp {
 		
 		// Check if we should load data for new tab
 		this.checkForNewTabData();
-        
-        // Make app globally accessible
-        window.app = this;
+
+		// Prompt for welcome graph if empty (after a short delay to let everything initialize)
+		setTimeout(() => this.promptForWelcomeGraphIfEmpty(), 100);
+
+		// Make app globally accessible
+		window.app = this;
     }
 	
 	/**
@@ -1088,6 +1091,284 @@ class KnowledgeGraphApp {
 			console.error('Error loading new tab data:', error);
 			localStorage.removeItem('nodebook-open-in-new-tab');
 		}
+	}
+	
+	/**
+	 * Prompt user to choose between empty graph or welcome graph
+	 */
+	async promptForWelcomeGraphIfEmpty() {
+		// Check if graph is truly empty (no nodes)
+		if (this.graph.nodes.length > 0) {
+			return; // Already has data
+		}
+		
+		// Check if there's saved data in localStorage
+		const savedData = localStorage.getItem('nodebook-autosave');
+		if (savedData) {
+			try {
+				const json = JSON.parse(savedData);
+				if (json.graph && json.graph.nodes && json.graph.nodes.length > 0) {
+					return; // Has saved data, don't prompt
+				}
+			} catch (e) {
+				// Ignore parsing errors
+			}
+		}
+		
+		// Show modal asking user what they want
+		this.showWelcomeGraphModal();
+	}
+
+	/**
+	 * Show modal for choosing empty or welcome graph
+	 */
+	showWelcomeGraphModal() {
+		// Create modal HTML
+		const modal = document.createElement('div');
+		modal.id = 'welcome-graph-modal';
+		modal.style.cssText = `
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.7);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 10000;
+			backdrop-filter: blur(4px);
+		`;
+		
+		modal.innerHTML = `
+			<div style="
+				background: var(--bg-primary, #1a1a2e);
+				border-radius: 12px;
+				padding: 2rem;
+				max-width: 500px;
+				box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+				border: 1px solid var(--border-color, #34495e);
+			">
+				<h2 style="
+					margin: 0 0 1rem 0;
+					color: var(--text-primary, #ecf0f1);
+					font-size: 1.5rem;
+					display: flex;
+					align-items: center;
+					gap: 0.5rem;
+				">
+					<span style="font-size: 2rem;">👋</span>
+					Welcome to NodeBook!
+				</h2>
+				<p style="
+					color: var(--text-secondary, #bdc3c7);
+					line-height: 1.6;
+					margin-bottom: 1.5rem;
+				">
+					It looks like you're starting fresh. Would you like to begin with an empty canvas, 
+					or see a quick welcome graph with helpful tips?
+				</p>
+				<div style="
+					display: flex;
+					gap: 1rem;
+					justify-content: flex-end;
+				">
+					<button id="btn-welcome-empty" style="
+						padding: 0.75rem 1.5rem;
+						background: #34495e;
+						color: #ecf0f1;
+						border: 1px solid #7f8c8d;
+						border-radius: 6px;
+						cursor: pointer;
+						font-size: 0.95rem;
+						font-weight: 500;
+						transition: all 0.2s;
+					">
+						Empty Graph
+					</button>
+					<button id="btn-welcome-guided" style="
+						padding: 0.75rem 1.5rem;
+						background: #3498db;
+						color: white;
+						border: none;
+						border-radius: 6px;
+						cursor: pointer;
+						font-size: 0.95rem;
+						font-weight: 500;
+						transition: all 0.2s;
+					">
+						Show Welcome Graph 🎉
+					</button>
+				</div>
+			</div>
+		`;
+		
+		document.body.appendChild(modal);
+		
+		// Add hover effects
+		const emptyBtn = modal.querySelector('#btn-welcome-empty');
+		const guidedBtn = modal.querySelector('#btn-welcome-guided');
+		
+		emptyBtn.addEventListener('mouseenter', () => {
+			emptyBtn.style.background = '#4a5f7f';
+			emptyBtn.style.borderColor = '#95a5a6';
+		});
+		emptyBtn.addEventListener('mouseleave', () => {
+			emptyBtn.style.background = '#34495e';
+			emptyBtn.style.borderColor = '#7f8c8d';
+		});
+		
+		guidedBtn.addEventListener('mouseenter', () => {
+			guidedBtn.style.background = '#2980b9';
+		});
+		guidedBtn.addEventListener('mouseleave', () => {
+			guidedBtn.style.background = '#3498db';
+		});
+		
+		// Handle button clicks
+		emptyBtn.addEventListener('click', () => {
+			modal.remove();
+			this.updateStatus('Empty graph ready. Right-click to start building!');
+		});
+		
+		guidedBtn.addEventListener('click', async () => {
+			modal.remove();
+			await this.loadWelcomeGraph();
+		});
+	}
+
+	/**
+	 * Load a welcome graph with helpful instructions
+	 */
+	async loadWelcomeGraph() {
+		// Create welcome graph with humorous instructions
+		const welcomeGraph = {
+			graph: {
+				metadata: {
+					name: 'Welcome to NodeBook! 🎉',
+					title: 'Your First Graph',
+					description: 'A friendly introduction to get you started',
+					created: Utils.getCurrentDate(),
+					modified: Utils.getCurrentDate(),
+					copyright: 'Presented to you by MQC INC.'
+				},
+				settings: {
+					nodeLabelSize: 12,
+					edgeLabelSize: 10,
+					worldBoundary: {
+						enabled: false,
+						minX: -2000,
+						maxX: 2000,
+						minY: -2000,
+						maxY: 2000
+					}
+				},
+				nodes: [
+					{
+						id: await Utils.generateSHA256('start'),
+						name: 'Start Here! 👋',
+						color: '#3498db',
+						size: 20,
+						icon: '🎯',
+						description: 'Right-click anywhere on the canvas to add nodes! Click on me to see my properties.',
+						x: 400,
+						y: 300,
+						fx: 400,
+						fy: 300
+					},
+					{
+						id: await Utils.generateSHA256('drag'),
+						name: 'Drag Me!',
+						color: '#2ecc71',
+						size: 15,
+						icon: '🏃',
+						description: 'Hold spacebar and drag to pan around. Or just drag nodes to move them!',
+						x: 600,
+						y: 250,
+						fx: 600,
+						fy: 250
+					},
+					{
+						id: await Utils.generateSHA256('tools'),
+						name: 'Tools & Shortcuts',
+						color: '#9b59b6',
+						size: 15,
+						icon: '🛠️',
+						description: 'Press F to freeze/unfreeze physics. Ctrl+N for new graph. Ctrl+S to save. Check the Help tab for more!',
+						x: 400,
+						y: 450,
+						fx: 400,
+						fy: 450
+					},
+					{
+						id: await Utils.generateSHA256('edges'),
+						name: 'Connect Nodes',
+						color: '#e67e22',
+						size: 15,
+						icon: '🔗',
+						description: 'Right-click on a node and choose "Add Edge" to connect nodes. You can also use the Tools panel!',
+						x: 200,
+						y: 300,
+						fx: 200,
+						fy: 300
+					},
+					{
+						id: await Utils.generateSHA256('delete'),
+						name: 'Delete Me! (When Ready)',
+						color: '#e74c3c',
+						size: 12,
+						icon: '🗑️',
+						description: 'Select any node and press Delete or use Ctrl+N to start fresh. We won\'t cry... much. 😢',
+						x: 600,
+						y: 400,
+						fx: 600,
+						fy: 400
+					}
+				],
+				edges: [
+					{
+						id: await Utils.generateSHA256('edge1'),
+						source: await Utils.generateSHA256('start'),
+						target: await Utils.generateSHA256('drag'),
+						relationship: 'leads to',
+						color: '#95a5a6',
+						weight: 1,
+						directed: true
+					},
+					{
+						id: await Utils.generateSHA256('edge2'),
+						source: await Utils.generateSHA256('start'),
+						target: await Utils.generateSHA256('edges'),
+						relationship: 'connects to',
+						color: '#95a5a6',
+						weight: 1,
+						directed: true
+					},
+					{
+						id: await Utils.generateSHA256('edge3'),
+						source: await Utils.generateSHA256('start'),
+						target: await Utils.generateSHA256('tools'),
+						relationship: 'shows',
+						color: '#95a5a6',
+						weight: 1,
+						directed: true
+					},
+					{
+						id: await Utils.generateSHA256('edge4'),
+						source: await Utils.generateSHA256('tools'),
+						target: await Utils.generateSHA256('delete'),
+						relationship: 'helps with',
+						color: '#95a5a6',
+						weight: 1,
+						directed: true
+					}
+				]
+			}
+		};
+		
+		// Load the welcome graph
+		this.loadGraph(welcomeGraph);
+		this.updateStatus('Welcome! Right-click on canvas to start building 🚀');
 	}
 
     /**
