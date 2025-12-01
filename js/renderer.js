@@ -680,23 +680,62 @@ class Renderer {
                 .attr('d', path);
             
             // Update edge label position
-            const source = typeof d.source === 'object' ? d.source : { x: d.sourceX || 0, y: d.sourceY || 0 };
-            const target = typeof d.target === 'object' ? d.target : { x: d.targetX || 0, y: d.targetY || 0 };
-            
-            const midX = (source.x + target.x) / 2;
-            const midY = (source.y + target.y) / 2;
-            
-            const dx = target.x - source.x;
-            const dy = target.y - source.y;
-            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-            
-            // Rotate text to be readable (don't flip upside down)
-            const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
-            
-            d3.select(this).select('.edge-label')
-                .attr('x', midX)
-                .attr('y', midY)
-                .attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
+			const source = typeof d.source === 'object' ? d.source : { x: d.sourceX || 0, y: d.sourceY || 0 };
+			const target = typeof d.target === 'object' ? d.target : { x: d.targetX || 0, y: d.targetY || 0 };
+
+			let midX = (source.x + target.x) / 2;
+			let midY = (source.y + target.y) / 2;
+
+			// Check if this edge has a curve (same logic as calculateEdgePath)
+			const edgeSource = typeof d.source === 'object' ? d.source.id : d.source;
+			const edgeTarget = typeof d.target === 'object' ? d.target.id : d.target;
+
+			const parallelEdges = self.graph.edges.filter(e => {
+				const eSource = typeof e.source === 'object' ? e.source.id : e.source;
+				const eTarget = typeof e.target === 'object' ? e.target.id : e.target;
+				
+				return (eSource === edgeSource && eTarget === edgeTarget) ||
+					   (eSource === edgeTarget && eTarget === edgeSource);
+			});
+
+			// If curved, adjust label position to follow the curve
+			if (parallelEdges.length > 1) {
+				const edgeIndex = parallelEdges.findIndex(e => e.id === d.id);
+				
+				const dx = target.x - source.x;
+				const dy = target.y - source.y;
+				const dist = Math.sqrt(dx * dx + dy * dy);
+				
+				if (dist > 0) {
+					// Calculate the same offset as in calculateEdgePath
+					let offset;
+					if (edgeIndex === 0) {
+						offset = 0;
+					} else {
+						const magnitude = Math.ceil(edgeIndex / 2) * 20;
+						offset = (edgeIndex % 2 === 1) ? magnitude : -magnitude;
+					}
+					
+					const offsetX = (-dy / dist) * offset;
+					const offsetY = (dx / dist) * offset;
+					
+					// Position label at the curve's control point (midpoint + offset)
+					midX = midX + offsetX;
+					midY = midY + offsetY;
+				}
+			}
+
+			const dx = target.x - source.x;
+			const dy = target.y - source.y;
+			const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+			// Rotate text to be readable (don't flip upside down)
+			const textAngle = angle > 90 || angle < -90 ? angle + 180 : angle;
+
+			d3.select(this).select('.edge-label')
+				.attr('x', midX)
+				.attr('y', midY)
+				.attr('transform', `rotate(${textAngle}, ${midX}, ${midY})`);
         });
         
         // Update minimap viewport (not full redraw, just viewport position)
@@ -704,38 +743,91 @@ class Renderer {
     }
 
     /**
-     * Calculate edge path (straight or curved for multiple edges)
-     */
-    calculateEdgePath(edge) {
-        let sourceX, sourceY, targetX, targetY;
-        
-        // Feature 10: Handle half-edges
-        if (typeof edge.source === 'object' && edge.source !== null) {
-            const angle = edge.target ? 
-                Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
-            const sourceRadius = edge.source.size || 10;
-            sourceX = edge.source.x + Math.cos(angle) * sourceRadius;
-            sourceY = edge.source.y + Math.sin(angle) * sourceRadius;
-        } else {
-            // Free source end
-            sourceX = edge.sourceX || 0;
-            sourceY = edge.sourceY || 0;
-        }
-        
-        if (typeof edge.target === 'object' && edge.target !== null) {
-            const angle = edge.source ? 
-                Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
-            const targetRadius = edge.target.size || 10;
-            targetX = edge.target.x - Math.cos(angle) * (targetRadius + 5);
-            targetY = edge.target.y - Math.sin(angle) * (targetRadius + 5);
-        } else {
-            // Free target end
-            targetX = edge.targetX || 0;
-            targetY = edge.targetY || 0;
-        }
+	 * Calculate edge path (straight or curved for multiple edges)
+	 */
+	calculateEdgePath(edge) {
+		let sourceX, sourceY, targetX, targetY;
+		
+		// Feature 10: Handle half-edges
+		if (typeof edge.source === 'object' && edge.source !== null) {
+			const angle = edge.target ? 
+				Math.atan2((edge.target.y || edge.targetY || 0) - edge.source.y, (edge.target.x || edge.targetX || 0) - edge.source.x) : 0;
+			const sourceRadius = edge.source.size || 10;
+			sourceX = edge.source.x + Math.cos(angle) * sourceRadius;
+			sourceY = edge.source.y + Math.sin(angle) * sourceRadius;
+		} else {
+			// Free source end
+			sourceX = edge.sourceX || 0;
+			sourceY = edge.sourceY || 0;
+		}
+		
+		if (typeof edge.target === 'object' && edge.target !== null) {
+			const angle = edge.source ? 
+				Math.atan2(edge.target.y - (edge.source.y || edge.sourceY || 0), edge.target.x - (edge.source.x || edge.sourceX || 0)) : 0;
+			const targetRadius = edge.target.size || 10;
+			targetX = edge.target.x - Math.cos(angle) * (targetRadius + 5);
+			targetY = edge.target.y - Math.sin(angle) * (targetRadius + 5);
+		} else {
+			// Free target end
+			targetX = edge.targetX || 0;
+			targetY = edge.targetY || 0;
+		}
 
-        return `M${sourceX},${sourceY} L${targetX},${targetY}`;
-    }
+		// Find all edges between the same two nodes (in any direction)
+		const edgeSource = typeof edge.source === 'object' ? edge.source.id : edge.source;
+		const edgeTarget = typeof edge.target === 'object' ? edge.target.id : edge.target;
+		
+		const parallelEdges = this.graph.edges.filter(e => {
+			const eSource = typeof e.source === 'object' ? e.source.id : e.source;
+			const eTarget = typeof e.target === 'object' ? e.target.id : e.target;
+			
+			// Check if edge connects the same two nodes (in either direction)
+			return (eSource === edgeSource && eTarget === edgeTarget) ||
+				   (eSource === edgeTarget && eTarget === edgeSource);
+		});
+
+		// If there are multiple edges between the same nodes, curve them
+		if (parallelEdges.length > 1) {
+			// Find the index of the current edge in the group
+			const edgeIndex = parallelEdges.findIndex(e => e.id === edge.id);
+			
+			// Create a curved path for multiple edges
+			const midX = (sourceX + targetX) / 2;
+			const midY = (sourceY + targetY) / 2;
+			
+			// Calculate perpendicular offset
+			const dx = targetX - sourceX;
+			const dy = targetY - sourceY;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+			
+			if (dist === 0) {
+				// Handle case where source and target are at same position
+				return `M${sourceX},${sourceY} L${targetX},${targetY}`;
+			}
+			
+			// Distribute edges: first edge gets offset -20, second gets +20, third gets -40, fourth gets +40, etc.
+			// Pattern: 0, +20, -20, +40, -40, +60, -60...
+			let offset;
+			if (edgeIndex === 0) {
+				offset = 0; // First edge stays straight
+			} else {
+				const magnitude = Math.ceil(edgeIndex / 2) * 20;
+				offset = (edgeIndex % 2 === 1) ? magnitude : -magnitude;
+			}
+			
+			const offsetX = (-dy / dist) * offset;
+			const offsetY = (dx / dist) * offset;
+			
+			// Control point for quadratic curve
+			const controlX = midX + offsetX;
+			const controlY = midY + offsetY;
+			
+			return `M${sourceX},${sourceY} Q${controlX},${controlY} ${targetX},${targetY}`;
+		} else {
+			// Straight line for single edges
+			return `M${sourceX},${sourceY} L${targetX},${targetY}`;
+		}
+	}
 
     /**
      * Select nodes

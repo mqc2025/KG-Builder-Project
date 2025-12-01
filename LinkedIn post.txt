@@ -1,0 +1,4 @@
+It has been a while since I was developing this idea about a notebook that can actually keep all notes connected and at the same time have a visual presentation that resebles our brains. I read about Knowledge Graph, JSON and D3, and I started to develop a multip-purpose web app. My use for it is as a notebook, and also a process and workflow application. This is a pretty secure application and collects no information on any server as it is solely browser-based (so make sure you keep your saved files). The idea is to have a single notebook that has it all. This is to invide you to try it and help me develop it furthur by your feedbacks. 
+Disclaimer: 1. I wanted to nest it in a domain of its own however it is less expenssive for me to nest it initially in my own website. 
+2. The app never meant to be mobile friendly
+https://materialsqc.ca/graph-editor/index.html
