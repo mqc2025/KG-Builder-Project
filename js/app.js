@@ -197,7 +197,7 @@ class KnowledgeGraphApp {
 			});
 			
 			// Close sidebar when a tool is selected on mobile
-			document.querySelectorAll('.tool-btn, .sidebar-tab').forEach(btn => {
+			document.querySelectorAll('.tool-btn').forEach(btn => {
 				btn.addEventListener('click', () => {
 					if (window.innerWidth <= 768) {
 						setTimeout(() => {
