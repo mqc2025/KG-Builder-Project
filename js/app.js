@@ -184,6 +184,30 @@ class KnowledgeGraphApp {
         this.renderer.onNodeContextMenu = (node, event) => this.contextMenuManager.showNodeMenu(node, event);
         this.renderer.onEdgeContextMenu = (edge, event) => this.contextMenuManager.showEdgeMenu(edge, event);
         this.renderer.onCanvasContextMenu = (event) => this.contextMenuManager.showCanvasMenu(event);
+		
+		// Mobile sidebar toggle
+		const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+		const leftSidebar = document.querySelector('.left-sidebar');
+
+		if (mobileSidebarToggle && leftSidebar) {
+			mobileSidebarToggle.addEventListener('click', () => {
+				leftSidebar.classList.toggle('mobile-open');
+				mobileSidebarToggle.classList.toggle('open');
+
+			});
+			
+			// Close sidebar when a tool is selected on mobile
+			document.querySelectorAll('.tool-btn, .sidebar-tab').forEach(btn => {
+				btn.addEventListener('click', () => {
+					if (window.innerWidth <= 768) {
+						setTimeout(() => {
+							leftSidebar.classList.remove('mobile-open');
+							mobileSidebarToggle.classList.remove('open');
+						}, 300);
+					}
+				});
+			});
+		}
     }
 
     /**

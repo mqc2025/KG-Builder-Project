@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="styles/minimap.css">
     <link rel="stylesheet" href="styles/contextMenu.css">
     <link rel="stylesheet" href="styles/filter.css">
+	<link rel="stylesheet" href="styles/mobile.css">
 </head>
 <body>
 	<!-- Privacy Banner (add this right after <body>) -->
@@ -62,7 +63,14 @@
     <div class="main-content">
         <!-- Left Sidebar: File & Tools Tabs -->
         <aside class="left-sidebar">
-            <!-- Tab Headers -->
+            
+			<!-- Mobile toggle button for left sidebar -->
+			<button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle">
+				<span>📁 Tools & Files</span>
+				<span class="toggle-icon">▼</span>
+			</button>
+			
+			<!-- Tab Headers -->
             <div class="sidebar-tabs">
                 <button class="sidebar-tab active" data-tab="file">File</button>
                 <button class="sidebar-tab" data-tab="tools">Tools</button>

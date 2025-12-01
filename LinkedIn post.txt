@@ -1,4 +1,39 @@
-It has been a while since I was developing this idea about a notebook that can actually keep all notes connected and at the same time have a visual presentation that resebles our brains. I read about Knowledge Graph, JSON and D3, and I started to develop a multip-purpose web app. My use for it is as a notebook, and also a process and workflow application. This is a pretty secure application and collects no information on any server as it is solely browser-based (so make sure you keep your saved files). The idea is to have a single notebook that has it all. This is to invide you to try it and help me develop it furthur by your feedbacks. 
-Disclaimer: 1. I wanted to nest it in a domain of its own however it is less expenssive for me to nest it initially in my own website. 
-2. The app never meant to be mobile friendly
-https://materialsqc.ca/graph-editor/index.html
+🧠 What if your notebook worked like your brain?
+
+It's been a while since I started developing this idea—a notebook where all notes stay connected, with a visual presentation that resembles how our minds actually work.
+
+I read about Knowledge Graphs, JSON, and D3.js, and I started building NodeBook: a multi-purpose web app that I use as both a notebook and a process/workflow application.
+
+The goal? One notebook that has it all.
+
+✨ What it does:
+
+- Interactive, force-directed graph visualization
+
+- Map relationships between ideas, concepts, and processes
+
+- Find the paths between nodes
+
+- Import/export with tables for bulk data
+
+- Combine/Explode JSONs
+
+- Full undo/redo history (50 levels)
+
+- Export to JSON, PNG, SVG
+
+🔒 Privacy by design: This app collects nothing. No servers. No accounts. No tracking. It runs entirely in your browser—your data never leaves your device. (Just remember to save your files!)
+
+👉 Try it here: https://materialsqc.ca/graph-editor/index.html
+
+I'm inviting you to test it and help me develop it further with your feedback. What features would you want? What's confusing? What's broken? I want to hear it all.
+
+A couple of notes:
+
+Currently hosted on my website to keep costs down while I develop it
+
+Desktop-focused—not designed for mobile
+
+Thanks for being part of this journey. 🙏
+
+#KnowledgeGraph #BuildInPublic #DataVisualization #ProductivityTools #Privacy
