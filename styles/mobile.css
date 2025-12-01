@@ -37,12 +37,17 @@
     
     /* Header adjustments */
     .header {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
         height: 50px;
         min-height: 50px;
         max-height: 50px;
         padding: 0 10px;
         flex-wrap: nowrap;
         flex-shrink: 0;
+        z-index: 1000;
     }
     
     .app-title {
@@ -74,64 +79,78 @@
         flex-direction: column;
         position: relative;
         min-height: 0;
-        height: 0; /* Force flex child to respect flex-grow */
+        height: 0;
         overflow: hidden;
+        padding-top: 50px;
     }
     
-    /* LEFT SIDEBAR - Move to top, collapsible */
+    /* LEFT SIDEBAR - compact when collapsed, full width when open */
     .left-sidebar {
-        width: 100% !important;
+        width: 45px !important;
         height: auto;
-        max-height: 0;
-        min-height: 0;
+        max-height: 45px;
+        min-height: 45px;
         overflow: hidden;
         border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        transition: max-height 0.3s ease-in-out;
+        border-bottom: none;
+        transition: max-height 0.3s ease-in-out, width 0.3s ease-in-out;
         position: relative;
         z-index: 200;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: none;
         flex-shrink: 0;
+        background-color: transparent;
     }
     
     .left-sidebar.mobile-open {
+        width: 100% !important;
         max-height: 60vh;
         overflow-y: auto;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-bottom: 1px solid var(--border-color);
     }
     
-    /* Mobile toggle button for left sidebar */
+    /* Mobile toggle button for left sidebar - compact icon only */
     .mobile-sidebar-toggle {
         display: flex !important;
-        width: 100%;
-        padding: 12px;
+        width: 45px;
+        height: 45px;
+        min-height: 45px;
+        padding: 0;
         background-color: var(--dark-bg);
         color: white;
         border: none;
         border-bottom: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
         cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        text-align: center;
+        font-size: 18px;
         justify-content: center;
         align-items: center;
-        gap: 8px;
         z-index: 201;
         position: relative;
+        border-radius: 0 0 6px 0;
     }
     
     .mobile-sidebar-toggle:active {
         background-color: var(--hover-color);
     }
     
+    /* Hide the text span, show only icon */
+    .mobile-sidebar-toggle span:not(.toggle-icon) {
+        display: none;
+    }
+    
     .mobile-sidebar-toggle .toggle-icon {
         display: inline-block;
         transition: transform 0.3s ease;
-        font-size: 12px;
+        font-size: 14px;
     }
     
     .mobile-sidebar-toggle.open .toggle-icon {
         transform: rotate(180deg);
     }
+    
+    
     
     /* Sidebar tabs - horizontal scroll on mobile */
     .sidebar-tabs {
@@ -203,7 +222,7 @@
         background-color: var(--dark-bg);
         color: white;
         border-bottom: 1px solid var(--border-color);
-        display: flex;
+        display: none;
         justify-content: space-between;
         align-items: center;
         flex-shrink: 0;

@@ -91,6 +91,10 @@
     .toolbar-btn span {
         display: none;
     }
+	
+	.toolbar-btn span:first-child {
+        display: inline !important;
+    }
     
     .toolbar-btn {
         padding: 8px 12px;
