@@ -381,13 +381,22 @@ class KnowledgeGraphApp {
 			return;
 		}
 		
-		const sourceId = this.connectByClickSourceNode.id;
-		const targetId = targetNode.id;
+		const initialSourceId = this.connectByClickSourceNode.id;
+		const initialTargetId = targetNode.id;
 		
 		// Get all existing relationships for the dropdown
 		const allRelationships = this.graph.getAllEdgeRelationships();
 		
-		// Create modal for relationship input
+		// Get all nodes for the dropdowns
+		const allNodes = this.graph.getAllNodeIds().map(id => {
+			const node = this.graph.getNode(id);
+			return {
+				id: id,
+				name: node ? (node.name || id) : id
+			};
+		});
+		
+		// Create modal for connection input
 		const modal = document.createElement('div');
 		modal.className = 'modal-overlay';
 		modal.innerHTML = `
@@ -395,21 +404,38 @@ class KnowledgeGraphApp {
 				<h3>Create Connection</h3>
 				<div class="form-group">
 					<label>From:</label>
-					<div style="padding: 8px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
-						${Utils.sanitizeHtml(this.connectByClickSourceNode.name || sourceId)}
-					</div>
+					<select id="quick-connect-from" class="property-input">
+						${allNodes.map(node => 
+							`<option value="${Utils.sanitizeHtml(node.id)}" ${node.id === initialSourceId ? 'selected' : ''}>${Utils.sanitizeHtml(node.name)}</option>`
+						).join('')}
+					</select>
 				</div>
 				<div class="form-group">
 					<label>To:</label>
-					<div style="padding: 8px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
-						${Utils.sanitizeHtml(targetNode.name || targetId)}
+					<select id="quick-connect-to" class="property-input">
+						${allNodes.map(node => 
+							`<option value="${Utils.sanitizeHtml(node.id)}" ${node.id === initialTargetId ? 'selected' : ''}>${Utils.sanitizeHtml(node.name)}</option>`
+						).join('')}
+					</select>
+				</div>
+				<div class="form-group">
+					<label>Direction:</label>
+					<div class="direction-radio-group">
+						<label class="radio-option">
+							<input type="radio" name="quick-connection-direction" value="outgoing" checked>
+							<span>→ Outgoing (from this node)</span>
+						</label>
+						<label class="radio-option">
+							<input type="radio" name="quick-connection-direction" value="incoming">
+							<span>← Incoming (to this node)</span>
+						</label>
 					</div>
 				</div>
 				<div class="form-group">
-					<label>Relationship:</label>
+					<label>Relationship (optional):</label>
 					<input type="text" id="quick-connect-relationship" class="property-input" 
 						   list="quick-relationship-list" 
-						   placeholder="Type or select..." autofocus>
+						   placeholder="Type or select...">
 					<datalist id="quick-relationship-list">
 						${allRelationships.map(rel => `<option value="${Utils.sanitizeHtml(rel)}">`).join('')}
 					</datalist>
@@ -432,27 +458,59 @@ class KnowledgeGraphApp {
 		
 		// Handle confirm
 		const completeConnection = async () => {
+			const fromSelect = modal.querySelector('#quick-connect-from');
+			const toSelect = modal.querySelector('#quick-connect-to');
+			const directionRadio = modal.querySelector('input[name="quick-connection-direction"]:checked');
 			const relationship = relationshipInput.value.trim();
+			
+			const selectedFromId = fromSelect.value;
+			const selectedToId = toSelect.value;
+			const direction = directionRadio ? directionRadio.value : 'outgoing';
+			
+			// Validate not same node
+			if (selectedFromId === selectedToId) {
+				alert('Cannot connect a node to itself.');
+				return;
+			}
+			
+			// Determine actual source and target based on direction
+			let actualSourceId, actualTargetId;
+			if (direction === 'outgoing') {
+				actualSourceId = selectedFromId;
+				actualTargetId = selectedToId;
+			} else {
+				// Incoming: swap from/to
+				actualSourceId = selectedToId;
+				actualTargetId = selectedFromId;
+			}
 			
 			// Auto-generate edge name
 			const timestamp = Date.now();
 			const edgeName = `edge_${timestamp}`;
 			
-			// Create edge
-			await this.graph.addEdge({
+			// Create edge object
+			const edgeData = {
 				name: edgeName,
-				source: sourceId,
-				target: targetId,
-				relationship: relationship || '',
+				source: actualSourceId,
+				target: actualTargetId,
 				directed: true
-			});
+			};
+			
+			// Add relationship if provided
+			if (relationship) {
+				edgeData.relationship = relationship;
+			}
+			
+			await this.graph.addEdge(edgeData);
 			
 			this.renderer.render();
 			this.updateStats();
 			this.saveState();
 			
-			const sourceNodeName = this.connectByClickSourceNode.name || sourceId;
-			const targetNodeName = targetNode.name || targetId;
+			const sourceNode = this.graph.getNode(actualSourceId);
+			const targetNodeObj = this.graph.getNode(actualTargetId);
+			const sourceNodeName = sourceNode ? (sourceNode.name || actualSourceId) : actualSourceId;
+			const targetNodeName = targetNodeObj ? (targetNodeObj.name || actualTargetId) : actualTargetId;
 			
 			// Cancel mode and remove modal
 			this.cancelConnectByClick();
