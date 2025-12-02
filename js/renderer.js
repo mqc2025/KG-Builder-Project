@@ -42,9 +42,15 @@ class Renderer {
         
         // Initialize force simulation
         this.simulation = d3.forceSimulation()
-            .force('link', d3.forceLink().id(d => d.id).distance(100).strength(0.5))
-            .force('charge', d3.forceManyBody().strength(-200))
-            .force('center', d3.forceCenter(this.width / 2, this.height / 2).strength(0.1))
+            .force('link', d3.forceLink().id(d => d.id).distance(100).strength(1.5))
+			.force('charge', d3.forceManyBody().strength(d => {
+				// Pinned nodes don't exert charge force
+				if (d.fx !== null && d.fx !== undefined) {
+					return 0;
+				}
+				return -200;
+			}))            
+			.force('center', d3.forceCenter(this.width / 2, this.height / 2).strength(0.1))
             .force('collision', d3.forceCollide().radius(30))
             .force('x', d3.forceX(this.width / 2).strength(0.05))
             .force('y', d3.forceY(this.height / 2).strength(0.05))
