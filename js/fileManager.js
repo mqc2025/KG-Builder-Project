@@ -19,6 +19,7 @@ class FileManager {
         this.setupEventListeners();
         this.setupAutoSave();
         this.setupDragAndDrop();
+		this.setupPageCloseProtection(); 
     }
 
     /**
@@ -552,6 +553,26 @@ class FileManager {
     clearCurrentFilename() {
         this.currentFilename = null;
     }
+	
+	/**
+     * Setup protection against accidental page closure
+     * Auto-saves on close and warns if there are unsaved changes
+     */
+    setupPageCloseProtection() {
+        window.addEventListener('beforeunload', (event) => {
+            // Always auto-save when closing
+            this.saveToLocalStorage();
+            
+            // Check if there's a current filename (means user has worked on a file)
+            // and warn them that changes are only in browser storage
+            if (this.currentFilename || this.graph.nodes.length > 0) {
+                // Show browser warning
+                event.preventDefault();
+                event.returnValue = ''; // Required for Chrome
+                return ''; // For other browsers
+            }
+        });
+    }	
 }
 
 // Export

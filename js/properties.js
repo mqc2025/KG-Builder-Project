@@ -69,19 +69,19 @@ class PropertiesPanel {
         this.show();
 
         const html = `
-            <div class="property-group">
-                <div class="property-group-title">Node Information</div>
-                
-                <div class="property-item">
-                    <label class="property-label">Name</label>
-                    <input type="text" class="property-input" id="prop-node-name" value="${Utils.sanitizeHtml(node.name || node.id)}">
-                    <p class="property-hint">Press Enter to save (will regenerate ID)</p>
-                </div>
+            <div class="property-item">
+				<label class="property-label">Name</label>
+				<input type="text" class="property-input" id="prop-node-name" value="${Utils.sanitizeHtml(node.name || node.id)}">
+				<p class="property-hint">Press Enter to save (will regenerate ID)</p>
+			</div>
 
-                
+			<div class="property-item">
+				<label class="property-label">Description</label>
+				<textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(node.description || '')}</textarea>
+			</div>
 
-                <div class="property-item">
-                    <label class="property-label">Color (Feature 8: Palette)</label>
+			<div class="property-item">
+				<label class="property-label">Color (Feature 8: Palette)</label>
                     <div class="color-palette">
                         ${this.colorPalette.map(color => `
                             <button class="color-swatch ${node.color === color ? 'selected' : ''}" 
@@ -201,12 +201,7 @@ class PropertiesPanel {
                     <label class="property-label">Sub-Category</label>
                     <input type="text" class="property-input" id="prop-subcat" value="${Utils.sanitizeHtml(node.subCat || '')}">
                 </div>
-
-                <div class="property-item">
-                    <label class="property-label">Description</label>
-                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(node.description || '')}</textarea>
-                </div>
-
+                
                 <div class="property-item">
                     <label class="property-label">Priority (Feature 3)</label>
                     <select class="property-input" id="prop-priority">
@@ -303,69 +298,67 @@ class PropertiesPanel {
                 <div class="property-group-title">Edge Information</div>
                 
                 <div class="property-item">
-                    <label class="property-label">Name</label>
-                    <input type="text" class="property-input" id="prop-edge-name" value="${Utils.sanitizeHtml(edge.name || edge.id)}">
-                    <p class="property-hint">Press Enter to save (will regenerate ID)</p>
-                </div>
+					<label class="property-label">Relationship</label>
+					<input type="text" class="property-input" id="prop-relationship" 
+						   value="${Utils.sanitizeHtml(edge.relationship || '')}" 
+						   list="relationship-list" 
+						   placeholder="e.g., parent-child, implementation">
+					<datalist id="relationship-list">
+						${allRelationships.map(rel => `<option value="${Utils.sanitizeHtml(rel)}">`).join('')}
+					</datalist>
+				</div>
 
-                
+				<div class="property-item">
+					<label class="property-label">Description</label>
+					<textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(edge.description || '')}</textarea>
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Source</label>
-                    <select class="property-input" id="prop-source">
-                        <option value="">${sourceId ? '(Disconnect)' : '(Free End)'}</option>
-                        ${allNodeIds.map(id => {
-                            const node = this.graph.getNode(id);
-                            const displayName = node ? (node.name || id) : id;
-                            return `<option value="${Utils.sanitizeHtml(id)}" ${id === sourceId ? 'selected' : ''}>${Utils.sanitizeHtml(displayName)}</option>`;
-                        }).join('')}
-                    </select>
-                </div>
+				<div class="property-item">
+					<label class="property-label">Target</label>
+					<select class="property-input" id="prop-target">
+						<option value="">${targetId ? '(Disconnect)' : '(Free End)'}</option>
+						${allNodeIds.map(id => {
+							const node = this.graph.getNode(id);
+							const displayName = node ? (node.name || id) : id;
+							return `<option value="${Utils.sanitizeHtml(id)}" ${id === targetId ? 'selected' : ''}>${Utils.sanitizeHtml(displayName)}</option>`;
+						}).join('')}
+					</select>
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Target</label>
-                    <select class="property-input" id="prop-target">
-                        <option value="">${targetId ? '(Disconnect)' : '(Free End)'}</option>
-                        ${allNodeIds.map(id => {
-                            const node = this.graph.getNode(id);
-                            const displayName = node ? (node.name || id) : id;
-                            return `<option value="${Utils.sanitizeHtml(id)}" ${id === targetId ? 'selected' : ''}>${Utils.sanitizeHtml(displayName)}</option>`;
-                        }).join('')}
-                    </select>
-                </div>
+				<div class="property-item">
+					<label class="property-label">Source</label>
+					<select class="property-input" id="prop-source">
+						<option value="">${sourceId ? '(Disconnect)' : '(Free End)'}</option>
+						${allNodeIds.map(id => {
+							const node = this.graph.getNode(id);
+							const displayName = node ? (node.name || id) : id;
+							return `<option value="${Utils.sanitizeHtml(id)}" ${id === sourceId ? 'selected' : ''}>${Utils.sanitizeHtml(displayName)}</option>`;
+						}).join('')}
+					</select>
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Relationship</label>
-                    <input type="text" class="property-input" id="prop-relationship" 
-                           value="${Utils.sanitizeHtml(edge.relationship || '')}" 
-                           list="relationship-list" 
-                           placeholder="e.g., parent-child, implementation">
-                    <datalist id="relationship-list">
-                        ${allRelationships.map(rel => `<option value="${Utils.sanitizeHtml(rel)}">`).join('')}
-                    </datalist>
-                </div>
+				<div class="property-item">
+					<label class="property-label">Name</label>
+					<input type="text" class="property-input" id="prop-edge-name" value="${Utils.sanitizeHtml(edge.name || edge.id)}">
+					<p class="property-hint">Press Enter to save (will regenerate ID)</p>
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Color</label>
-                    <input type="color" class="property-input" id="prop-color" value="${edge.color || '#95a5a6'}">
-                </div>
+				<div class="property-item">
+					<label class="property-label">Color</label>
+					<input type="color" class="property-input" id="prop-color" value="${edge.color || '#95a5a6'}">
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">Weight</label>
-                    <input type="number" class="property-input" id="prop-weight" value="${edge.weight || 1}" min="0.1" step="0.1">
-                </div>
+				<div class="property-item">
+					<label class="property-label">Weight</label>
+					<input type="number" class="property-input" id="prop-weight" value="${edge.weight || 1}" min="0.1" step="0.1">
+				</div>
 
-                <div class="property-item">
-                    <label class="property-label">
-                        <input type="checkbox" id="prop-directed" ${edge.directed ? 'checked' : ''}>
-                        <span>Show arrow direction</span>
-                    </label>
-                </div>
-
-                <div class="property-item">
-                    <label class="property-label">Description</label>
-                    <textarea class="property-textarea" id="prop-description">${Utils.sanitizeHtml(edge.description || '')}</textarea>
-                </div>
+				<div class="property-item">
+					<label class="property-label">
+						<input type="checkbox" id="prop-directed" ${edge.directed ? 'checked' : ''}>
+						<span>Show arrow direction</span>
+					</label>
+				</div>
             </div>
 
             <div class="property-group">
