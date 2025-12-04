@@ -277,12 +277,15 @@
     }
     
     /* Modal adjustments */
-    .modal-overlay .modal-content {
-        min-width: auto;
-        width: 90%;
-        max-width: 400px;
-        padding: 20px;
-    }
+	.modal-overlay .modal-content {
+		min-width: unset !important;
+		width: 95%;
+		max-width: 95vw;
+		max-height: 85vh;
+		overflow-y: auto;
+		padding: 16px;
+		margin: 10px;
+	}
     
     /* Filter panel adjustments */
     .filter-panel {
