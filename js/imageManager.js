@@ -3,12 +3,12 @@
  */
 class ImageManager {
     constructor() {
-        this.dbName = 'NodeBookImages';
-        this.storeName = 'images';
-        this.db = null;
-        this.loadedImages = {}; // Images loaded from companion JSON
-        this.init();
-    }
+		this.dbName = 'NodeBookImages';
+		this.storeName = 'images';
+		this.db = null;
+		this.loadedImages = {}; // Images loaded from companion JSON
+		this.ready = this.init(); // Store promise for ready state
+	}
 
     /**
      * Initialize IndexedDB

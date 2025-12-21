@@ -18,6 +18,15 @@ class KnowledgeGraphApp {
         this.filterManager = new FilterManager(this.graph, this.renderer);
 		
 		this.imageManager = new ImageManager();
+
+		// Wait for ImageManager to be ready
+		this.imageManager.ready.then(() => {
+			console.log('ImageManager initialized successfully');
+		}).catch(error => {
+			console.error('ImageManager initialization failed:', error);
+			this.updateStatus('⚠️ Image storage initialization failed');
+		});
+
 		
         this.contextMenuManager = new ContextMenuManager(this);
         this.excelConverter = new ExcelConverter(this.graph, this.renderer);
@@ -1714,13 +1723,16 @@ class KnowledgeGraphApp {
                 const reader = new FileReader();
 
                 reader.onload = async (e) => {
-                    try {
-                        // Generate image ID
-                        const imageId = this.imageManager.generateImageId();
-                        const dataUrl = e.target.result;
+					try {
+						// Wait for ImageManager to be ready
+						await this.imageManager.ready;
+						
+						// Generate image ID
+						const imageId = this.imageManager.generateImageId();
+						const dataUrl = e.target.result;
 
-                        // Store in IndexedDB
-                        await this.imageManager.storeImage(imageId, dataUrl);
+						// Store in IndexedDB
+						await this.imageManager.storeImage(imageId, dataUrl);
 
                         // Find first available link field
                         const linkField = this.findAvailableLinkField(selectedNode);
