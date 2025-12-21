@@ -1145,6 +1145,13 @@ class KnowledgeGraphApp {
 	 * Displays selection info on line 1, stats on line 2
 	 */
 	updateStatus(message) {
+		// If a custom message is provided, display it
+		if (message) {
+			document.getElementById('status-selection').textContent = message;
+			return;
+		}
+		
+		// Otherwise, display automatic selection details
 		const selectedNode = Array.from(this.renderer.selectedNodes)[0];
 		const selectedEdge = Array.from(this.renderer.selectedEdges)[0];
 		
@@ -1185,7 +1192,7 @@ class KnowledgeGraphApp {
 					const desc = node.description.length > maxDescLength 
 						? node.description.substring(0, maxDescLength) + '...' 
 						: node.description;
-					selectionText += `    ||     Description: ${desc}`;  // EXTRA SPACING BEFORE DESCRIPTION
+					selectionText += `    ||     Description: ${desc}`;
 				}
 			} else {
 				selectionText = `Selected: Node ${selectedNode}`;
@@ -1704,7 +1711,9 @@ class KnowledgeGraphApp {
         }
 
         // Check if a node is selected
-        const selectedNode = this.renderer.getSelectedNode();
+        // Get selected node ID from renderer
+		const selectedNodeId = Array.from(this.renderer.selectedNodes)[0];
+		const selectedNode = selectedNodeId ? this.graph.getNode(selectedNodeId) : null;
         if (!selectedNode) {
             this.updateStatus('⚠️ Paste image: Please select a node first');
             return;
@@ -1738,17 +1747,28 @@ class KnowledgeGraphApp {
                         const linkField = this.findAvailableLinkField(selectedNode);
                         
                         if (linkField) {
-                            selectedNode[linkField] = `image://${imageId}`;
-                            selectedNode.modifiedDate = new Date().toISOString();
-                            
-                            this.renderer.render();
-                            this.propertiesPanel.showNodeProperties(selectedNode.id);
-                            this.saveState();
-                            
-                            this.updateStatus(`✓ Image pasted and stored in ${linkField.toUpperCase()}`);
-                        } else {
-                            this.updateStatus('⚠️ All link fields are occupied. Please clear one first.');
-                        }
+							selectedNode[linkField] = `image://${imageId}`;
+							selectedNode.modifiedDate = new Date().toISOString();
+							
+							this.renderer.render();
+							this.saveState();
+							
+							// Show flashing success message
+							const statusElement = document.getElementById('status-selection');
+							statusElement.classList.add('status-flash');
+							this.updateStatus(`✓ Image pasted successfully. Link added to ${linkField.replace('link', 'Link ')} section`);
+
+							// Remove flash class after animation completes (3 flashes × 0.5s = 1.5s)
+							setTimeout(() => {
+								statusElement.classList.remove('status-flash');
+								// Update to normal selection status
+								this.updateStatus();
+							}, 2500);							
+							// Update properties panel after status message
+							this.propertiesPanel.showNodeProperties(selectedNode.id);
+						} else {
+							this.updateStatus('⚠️ All link fields are occupied. Please clear one first.');
+						}
                     } catch (error) {
                         console.error('Error storing image:', error);
                         this.updateStatus('❌ Error storing image');

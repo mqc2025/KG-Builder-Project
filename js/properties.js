@@ -671,7 +671,7 @@ class PropertiesPanel {
             });
         });
 
-        // ADD THIS: Image preview handlers
+        // Image preview handlers
         this.loadImageThumbnails();
         
         const previewBtns = document.querySelectorAll('.btn-preview-image');
@@ -681,6 +681,21 @@ class PropertiesPanel {
                 this.previewFullImage(imageId);
             });
         });
+		
+		// Image thumbnail click handlers (show full preview)
+		const thumbnails = document.querySelectorAll('.image-thumbnail');
+		thumbnails.forEach(img => {
+			img.style.cursor = 'pointer';
+			img.addEventListener('click', async (e) => {
+				const imageId = e.target.dataset.imageId;
+				if (imageId && window.app && window.app.imageManager) {
+					const dataUrl = await window.app.imageManager.getImage(imageId);
+					if (dataUrl) {
+						this.showImageModal(dataUrl);
+					}
+				}
+			});
+		});
 
         // Custom properties
         const customProps = document.querySelectorAll('.custom-property-value');
@@ -1624,6 +1639,45 @@ class PropertiesPanel {
         }
     }
 	
+	
+	/**
+	 * Show image in modal popup
+	 */
+	showImageModal(dataUrl) {
+		// Create modal overlay
+		const modal = document.createElement('div');
+		modal.className = 'image-modal-overlay';
+		modal.innerHTML = `
+			<div class="image-modal-content">
+				<button class="image-modal-close">✕</button>
+				<img src="${dataUrl}" alt="Full size preview">
+			</div>
+		`;
+		
+		document.body.appendChild(modal);
+		
+		// Close button handler
+		const closeBtn = modal.querySelector('.image-modal-close');
+		closeBtn.addEventListener('click', () => {
+			modal.remove();
+		});
+		
+		// Click outside to close
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) {
+				modal.remove();
+			}
+		});
+		
+		// Escape key to close
+		const escapeHandler = (e) => {
+			if (e.key === 'Escape') {
+				modal.remove();
+				document.removeEventListener('keydown', escapeHandler);
+			}
+		};
+		document.addEventListener('keydown', escapeHandler);
+	}
 }
 
 // Export for use in other modules
