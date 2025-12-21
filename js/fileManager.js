@@ -345,21 +345,38 @@ class FileManager {
     }
 
     /**
-	 * Handle file selection (with size validation)
-	 * ✅ MODIFIED: Added auto-save after import
+	 * Handle file selection (with size validation and multi-file support)
+	 * Automatically loads companion *_images.json if present
 	 */
 	handleFileSelect(event) {
-		const file = event.target.files[0];
-		if (!file) return;
+		const files = Array.from(event.target.files);
+		if (files.length === 0) return;
 
-		if (!file.name.endsWith('.json')) {
-			alert('Please select a JSON file');
+		// Separate main files and images files
+		const mainFiles = [];
+		const imageFiles = [];
+		
+		files.forEach(file => {
+			if (file.name.endsWith('_images.json')) {
+				imageFiles.push(file);
+			} else if (file.name.endsWith('.json')) {
+				mainFiles.push(file);
+			}
+		});
+
+		// Must have at least one main file
+		if (mainFiles.length === 0) {
+			alert('Please select at least one JSON file');
+			event.target.value = '';
 			return;
 		}
 
+		// Process the first main file
+		const mainFile = mainFiles[0];
+		
 		// Security: Check file size before reading
-		if (file.size > this.MAX_JSON_SIZE) {
-			const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+		if (mainFile.size > this.MAX_JSON_SIZE) {
+			const sizeMB = (mainFile.size / (1024 * 1024)).toFixed(2);
 			const maxSizeMB = (this.MAX_JSON_SIZE / (1024 * 1024)).toFixed(0);
 			alert(`Security Error: File too large!\n\nFile size: ${sizeMB} MB\nMaximum allowed: ${maxSizeMB} MB\n\nPlease use a smaller file to prevent browser memory issues.`);
 			event.target.value = '';
@@ -367,31 +384,29 @@ class FileManager {
 		}
 
 		// Store the filename for future saves (without .json extension)
-		this.currentFilename = file.name.replace('.json', '');
+		this.currentFilename = mainFile.name.replace('.json', '');
+
+		// Look for matching images file
+		const expectedImageFileName = `${this.currentFilename}_images.json`;
+		const matchingImageFile = imageFiles.find(f => f.name === expectedImageFileName);
 
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			try {
 				const json = JSON.parse(e.target.result);
-				this.importGraph(json);
 				
-				// ✅ NEW: Auto-save after loading file
+				// Import the graph first
+				this.importGraph(json, matchingImageFile);
+				
+				// Auto-save after loading file
 				this.saveToLocalStorage();
-				
-				this.graph.loadFromJSON(data);
-                this.currentFilename = file.name;
-                this.renderer.render();
-                window.app.updateStatus(`Opened: ${file.name}`);
-                window.app.resetUndoStack();
-                
-                // Check for image references and prompt
-                if (window.app.imageManager.hasImageReferences(this.graph)) {
-                    this.promptForImagesFile(file.name);
-                }
 				
 				// Update status with filename
 				if (window.app) {
-					window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
+					const statusMsg = matchingImageFile ? 
+						`Loaded: ${this.currentFilename}.json + images` : 
+						`Loaded: ${this.currentFilename}.json`;
+					window.app.updateStatus(statusMsg);
 				}
 			} catch (error) {
 				alert('Error reading file: ' + error.message);
@@ -399,50 +414,59 @@ class FileManager {
 			}
 		};
 
-		reader.readAsText(file);
-
+		reader.readAsText(mainFile);
 		event.target.value = '';
 	}
 
     /**
-     * Import graph from JSON
-     */
-    importGraph(json) {
-        Utils.showLoading();
+	 * Import graph from JSON
+	 * @param {Object} json - The graph JSON data
+	 * @param {File} imagesFile - Optional companion images file
+	 */
+	importGraph(json, imagesFile = null) {
+		Utils.showLoading();
 
-        setTimeout(() => {
-            try {
-                const success = this.graph.fromJSON(json);
+		setTimeout(() => {
+			try {
+				const success = this.graph.fromJSON(json);
 
-                if (!success) {
-                    throw new Error('Invalid graph format');
-                }
+				if (!success) {
+					throw new Error('Invalid graph format');
+				}
 
-                this.renderer.render();
+				this.renderer.render();
 
-                setTimeout(() => {
-                    this.renderer.fitToView();
-                }, 150);
+				setTimeout(() => {
+					this.renderer.fitToView();
+				}, 150);
 
-                if (window.app) {
-                    window.app.updateStats();
-                    window.app.saveState();
-                    window.app.propertiesPanel.hide();
+				if (window.app) {
+					window.app.updateStats();
+					window.app.saveState();
+					window.app.propertiesPanel.hide();
 					
-					// Check for image references and prompt
-                    if (window.app.imageManager.hasImageReferences(this.graph)) {
-                        this.promptForImagesFile(this.currentFilename);
-                    }
-                }
+					// Handle images
+					const hasImageRefs = window.app.imageManager.hasImageReferences(this.graph);
+					
+					if (hasImageRefs) {
+						if (imagesFile) {
+							// Automatically load the provided images file
+							this.loadImagesFile(imagesFile);
+						} else {
+							// No images file provided, prompt user
+							this.promptForImagesFile(this.currentFilename);
+						}
+					}
+				}
 
-                Utils.hideLoading();
-            } catch (error) {
-                Utils.hideLoading();
-                alert('Error importing graph: ' + error.message);
-                console.error('Import error:', error);
-            }
-        }, 100);
-    }
+				Utils.hideLoading();
+			} catch (error) {
+				Utils.hideLoading();
+				alert('Error importing graph: ' + error.message);
+				console.error('Import error:', error);
+			}
+		}, 100);
+	}
 
     /**
      * Save graph directly (Ctrl+S behavior)
@@ -692,6 +716,34 @@ class FileManager {
             input.click();
         }
     }
+	
+	/**
+	 * Load images from a file object
+	 * @param {File} file - The images JSON file
+	 */
+	loadImagesFile(file) {
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			try {
+				const imagesData = JSON.parse(event.target.result);
+				window.app.imageManager.loadImagesFromJSON(imagesData);
+				window.app.updateStatus(`✓ Loaded images from: ${file.name}`);
+				
+				// Refresh properties panel if open
+				if (window.app.propertiesPanel.panel && 
+					!window.app.propertiesPanel.panel.classList.contains('hidden')) {
+					const currentSelection = window.app.propertiesPanel.currentSelection;
+					const currentType = window.app.propertiesPanel.currentType;
+					if (currentType === 'node') {
+						window.app.propertiesPanel.showNodeProperties(currentSelection);
+					}
+				}
+			} catch (error) {
+				alert('Error loading images file: ' + error.message);
+			}
+		};
+		reader.readAsText(file);
+	}
 
 }
 
