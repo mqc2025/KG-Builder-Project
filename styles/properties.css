@@ -1496,3 +1496,42 @@
 .icon-picker-item:active {
     transform: scale(1.05);
 }
+
+/* Image Preview Styles */
+.image-preview-container {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 2px solid #ddd;
+    cursor: pointer;
+}
+
+.image-thumbnail:hover {
+    border-color: var(--primary-color);
+}
+
+.btn-preview-image {
+    padding: 6px 12px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.btn-preview-image:hover {
+    background-color: #2980b9;
+}

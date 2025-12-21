@@ -378,6 +378,17 @@ class FileManager {
 				// ✅ NEW: Auto-save after loading file
 				this.saveToLocalStorage();
 				
+				this.graph.loadFromJSON(data);
+                this.currentFilename = file.name;
+                this.renderer.render();
+                window.app.updateStatus(`Opened: ${file.name}`);
+                window.app.resetUndoStack();
+                
+                // Check for image references and prompt
+                if (window.app.imageManager.hasImageReferences(this.graph)) {
+                    this.promptForImagesFile(file.name);
+                }
+				
 				// Update status with filename
 				if (window.app) {
 					window.app.updateStatus(`Loaded: ${this.currentFilename}.json`);
@@ -417,6 +428,11 @@ class FileManager {
                     window.app.updateStats();
                     window.app.saveState();
                     window.app.propertiesPanel.hide();
+					
+					// Check for image references and prompt
+                    if (window.app.imageManager.hasImageReferences(this.graph)) {
+                        this.promptForImagesFile(this.currentFilename);
+                    }
                 }
 
                 Utils.hideLoading();
@@ -433,17 +449,44 @@ class FileManager {
      * - If filename exists: save with that name
      * - If no filename: prompt for name (same as Save As)
      */
-    save() {
+    async save() {
         if (this.currentFilename) {
             // Direct save with existing filename
             const json = this.graph.toJSON();
             const jsonString = JSON.stringify(json, null, 2);
             const filename = `${this.currentFilename}.json`;
             
+            // Check for images and create companion file
+            const hasImages = window.app.imageManager.hasImageReferences(this.graph);
+            
+            if (hasImages) {
+                // Get all images from IndexedDB
+                const images = await window.app.imageManager.getAllImages();
+                
+                // Also include loaded images
+                const allImages = { ...images, ...window.app.imageManager.loadedImages };
+                
+                if (Object.keys(allImages).length > 0) {
+                    // Create images JSON
+                    const imagesJson = JSON.stringify(allImages, null, 2);
+                    const imagesFilename = `${this.currentFilename}_images.json`;
+                    
+                    // Download images file
+                    Utils.downloadFile(imagesFilename, imagesJson, 'application/json');
+                    
+                    // Short delay before main file
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            
             Utils.downloadFile(filename, jsonString, 'application/json');
             
             if (window.app) {
-                window.app.updateStatus(`Saved: ${filename}`);
+                if (hasImages && Object.keys(await window.app.imageManager.getAllImages()).length > 0) {
+                    window.app.updateStatus(`✓ Saved: ${filename} and ${this.currentFilename}_images.json`);
+                } else {
+                    window.app.updateStatus(`Saved: ${filename}`);
+                }
             }
         } else {
             // No filename yet, prompt for one
@@ -454,7 +497,7 @@ class FileManager {
     /**
      * Save graph with custom name (always prompts)
      */
-    saveAs() {
+    async saveAs() {
         // Suggest current filename or graph metadata name
         const suggestedName = this.currentFilename || this.graph.metadata.name.replace(/\s+/g, '_');
         
@@ -470,10 +513,37 @@ class FileManager {
             const jsonString = JSON.stringify(json, null, 2);
             const filename = `${cleanName}.json`;
             
+            // Check for images and create companion file
+            const hasImages = window.app.imageManager.hasImageReferences(this.graph);
+            
+            if (hasImages) {
+                // Get all images from IndexedDB
+                const images = await window.app.imageManager.getAllImages();
+                
+                // Also include loaded images
+                const allImages = { ...images, ...window.app.imageManager.loadedImages };
+                
+                if (Object.keys(allImages).length > 0) {
+                    // Create images JSON
+                    const imagesJson = JSON.stringify(allImages, null, 2);
+                    const imagesFilename = `${cleanName}_images.json`;
+                    
+                    // Download images file
+                    Utils.downloadFile(imagesFilename, imagesJson, 'application/json');
+                    
+                    // Short delay before main file
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            
             Utils.downloadFile(filename, jsonString, 'application/json');
             
             if (window.app) {
-                window.app.updateStatus(`Saved as: ${filename}`);
+                if (hasImages && Object.keys(await window.app.imageManager.getAllImages()).length > 0) {
+                    window.app.updateStatus(`✓ Saved as: ${filename} and ${cleanName}_images.json`);
+                } else {
+                    window.app.updateStatus(`Saved as: ${filename}`);
+                }
             }
         }
     }
@@ -573,6 +643,56 @@ class FileManager {
             }
         });
     }	
+	
+	
+	/**
+     * Prompt user to load companion images file
+     */
+    promptForImagesFile(mainFilename) {
+        const imagesFilename = `${mainFilename}_images.json`;
+        
+        const shouldLoad = confirm(
+            `This graph contains embedded images.\n\n` +
+            `Please also open "${imagesFilename}" to view the images.\n\n` +
+            `Would you like to select the images file now?`
+        );
+        
+        if (shouldLoad) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imagesData = JSON.parse(event.target.result);
+                        window.app.imageManager.loadImagesFromJSON(imagesData);
+                        window.app.updateStatus(`✓ Loaded images from: ${file.name}`);
+                        
+                        // Refresh properties panel if open
+                        if (window.app.propertiesPanel.panel && 
+                            !window.app.propertiesPanel.panel.classList.contains('hidden')) {
+                            const currentSelection = window.app.propertiesPanel.currentSelection;
+                            const currentType = window.app.propertiesPanel.currentType;
+                            if (currentType === 'node') {
+                                window.app.propertiesPanel.showNodeProperties(currentSelection);
+                            }
+                        }
+                    } catch (error) {
+                        alert('Error loading images file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+    }
+
 }
 
 // Export

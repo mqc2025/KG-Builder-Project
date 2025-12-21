@@ -16,6 +16,9 @@ class KnowledgeGraphApp {
         this.searchManager = new SearchManager(this.graph, this.renderer);
         this.fileManager = new FileManager(this.graph, this.renderer);
         this.filterManager = new FilterManager(this.graph, this.renderer);
+		
+		this.imageManager = new ImageManager();
+		
         this.contextMenuManager = new ContextMenuManager(this);
         this.excelConverter = new ExcelConverter(this.graph, this.renderer);
         
@@ -184,6 +187,9 @@ class KnowledgeGraphApp {
         this.renderer.onNodeContextMenu = (node, event) => this.contextMenuManager.showNodeMenu(node, event);
         this.renderer.onEdgeContextMenu = (edge, event) => this.contextMenuManager.showEdgeMenu(edge, event);
         this.renderer.onCanvasContextMenu = (event) => this.contextMenuManager.showCanvasMenu(event);
+		
+		// Paste image handler
+		document.addEventListener('paste', (e) => this.handlePasteImage(e));
 		
 		// Mobile sidebar toggle
 		const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
@@ -1674,6 +1680,86 @@ class KnowledgeGraphApp {
         this.updateStats();
         this.saveState();
         this.updateStatus(`Added node: ${name}`);
+    }
+	
+	/**
+     * Handle paste image event
+     */
+    async handlePasteImage(event) {
+        // Check if pasting in an input field
+        const activeElement = document.activeElement;
+        if (activeElement && (activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' || 
+            activeElement.isContentEditable)) {
+            return; // Allow normal paste in input fields
+        }
+
+        // Check if a node is selected
+        const selectedNode = this.renderer.getSelectedNode();
+        if (!selectedNode) {
+            this.updateStatus('⚠️ Paste image: Please select a node first');
+            return;
+        }
+
+        // Get clipboard items
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        // Find image in clipboard
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                event.preventDefault();
+                
+                const blob = items[i].getAsFile();
+                const reader = new FileReader();
+
+                reader.onload = async (e) => {
+                    try {
+                        // Generate image ID
+                        const imageId = this.imageManager.generateImageId();
+                        const dataUrl = e.target.result;
+
+                        // Store in IndexedDB
+                        await this.imageManager.storeImage(imageId, dataUrl);
+
+                        // Find first available link field
+                        const linkField = this.findAvailableLinkField(selectedNode);
+                        
+                        if (linkField) {
+                            selectedNode[linkField] = `image://${imageId}`;
+                            selectedNode.modifiedDate = new Date().toISOString();
+                            
+                            this.renderer.render();
+                            this.propertiesPanel.showNodeProperties(selectedNode.id);
+                            this.saveState();
+                            
+                            this.updateStatus(`✓ Image pasted and stored in ${linkField.toUpperCase()}`);
+                        } else {
+                            this.updateStatus('⚠️ All link fields are occupied. Please clear one first.');
+                        }
+                    } catch (error) {
+                        console.error('Error storing image:', error);
+                        this.updateStatus('❌ Error storing image');
+                    }
+                };
+
+                reader.readAsDataURL(blob);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Find first available link field in node
+     */
+    findAvailableLinkField(node) {
+        const linkFields = ['link1', 'link2', 'link3', 'link4'];
+        for (const field of linkFields) {
+            if (!node[field] || node[field].trim() === '') {
+                return field;
+            }
+        }
+        return null;
     }
 }
 

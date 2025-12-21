@@ -222,6 +222,12 @@ class PropertiesPanel {
                         <input type="text" class="property-input link-input" id="prop-link1" value="${Utils.sanitizeHtml(node.link1 || '')}" placeholder="https:// or file path">
                         <button class="btn-link-action" data-link="link1" data-action="open" title="Open link" ${!node.link1 ? 'disabled' : ''}>🔗</button>
                     </div>
+                    ${node.link1?.startsWith('image://') ? `
+                        <div class="image-preview-container">
+                            <img class="image-thumbnail" data-image-id="${node.link1.replace('image://', '')}" src="" alt="Loading...">
+                            <button class="btn-preview-image" data-image-id="${node.link1.replace('image://', '')}" title="View full size">👁️ Preview</button>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div class="property-item">
@@ -230,6 +236,12 @@ class PropertiesPanel {
                         <input type="text" class="property-input link-input" id="prop-link2" value="${Utils.sanitizeHtml(node.link2 || '')}" placeholder="https:// or file path">
                         <button class="btn-link-action" data-link="link2" data-action="open" title="Open link" ${!node.link2 ? 'disabled' : ''}>🔗</button>
                     </div>
+                    ${node.link2?.startsWith('image://') ? `
+                        <div class="image-preview-container">
+                            <img class="image-thumbnail" data-image-id="${node.link2.replace('image://', '')}" src="" alt="Loading...">
+                            <button class="btn-preview-image" data-image-id="${node.link2.replace('image://', '')}" title="View full size">👁️ Preview</button>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div class="property-item">
@@ -238,6 +250,12 @@ class PropertiesPanel {
                         <input type="text" class="property-input link-input" id="prop-link3" value="${Utils.sanitizeHtml(node.link3 || '')}" placeholder="https:// or file path">
                         <button class="btn-link-action" data-link="link3" data-action="open" title="Open link" ${!node.link3 ? 'disabled' : ''}>🔗</button>
                     </div>
+                    ${node.link3?.startsWith('image://') ? `
+                        <div class="image-preview-container">
+                            <img class="image-thumbnail" data-image-id="${node.link3.replace('image://', '')}" src="" alt="Loading...">
+                            <button class="btn-preview-image" data-image-id="${node.link3.replace('image://', '')}" title="View full size">👁️ Preview</button>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div class="property-item">
@@ -246,6 +264,12 @@ class PropertiesPanel {
                         <input type="text" class="property-input link-input" id="prop-link4" value="${Utils.sanitizeHtml(node.link4 || '')}" placeholder="https:// or file path">
                         <button class="btn-link-action" data-link="link4" data-action="open" title="Open link" ${!node.link4 ? 'disabled' : ''}>🔗</button>
                     </div>
+                    ${node.link4?.startsWith('image://') ? `
+                        <div class="image-preview-container">
+                            <img class="image-thumbnail" data-image-id="${node.link4.replace('image://', '')}" src="" alt="Loading...">
+                            <button class="btn-preview-image" data-image-id="${node.link4.replace('image://', '')}" title="View full size">👁️ Preview</button>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
 
@@ -637,15 +661,30 @@ class PropertiesPanel {
             });
         }
 
-        // Link open buttons
-		const linkOpenButtons = document.querySelectorAll('.btn-link-action[data-action="open"]');
-		linkOpenButtons.forEach(btn => {
-			btn.addEventListener('click', (e) => {
-				const linkKey = e.target.dataset.link;
-				this.openLink(linkKey);
-			});
-		});
+		// Link buttons (open/copy)
+        const linkActionBtns = document.querySelectorAll('.btn-link-action');
+        linkActionBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const linkField = e.target.dataset.link;
+                const action = e.target.dataset.action;
+                this.handleLinkAction(linkField, action);
+            });
+        });
 
+        // ADD THIS: Image preview handlers
+        this.loadImageThumbnails();
+        
+        const previewBtns = document.querySelectorAll('.btn-preview-image');
+        previewBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const imageId = e.target.dataset.imageId;
+                this.previewFullImage(imageId);
+            });
+        });
+
+        // Custom properties
+        const customProps = document.querySelectorAll('.custom-property-value');
+		
         // Custom properties - value changes
         const customValueInputs = document.querySelectorAll('.custom-property-value');
         customValueInputs.forEach(input => {
@@ -781,7 +820,35 @@ class PropertiesPanel {
             });
         });
     }
+	
+	/**
+     * Handle link action (open or copy)
+     */
+    async handleLinkAction(linkField, action) {
+        let node;
+        if (this.currentType === 'node') {
+            node = this.graph.getNode(this.currentSelection);
+        }
+        
+        if (!node) return;
+        
+        const linkValue = node[linkField];
+        if (!linkValue) return;
 
+        // ADD THIS: Handle image links
+        if (linkValue.startsWith('image://')) {
+            const imageId = linkValue.replace('image://', '');
+            await this.previewFullImage(imageId);
+            return;
+        }
+
+        // Existing code for regular links continues...
+        if (action === 'open') {
+            this.openLink(linkField);
+        }
+	}
+	
+	
     /**
 	 * NEW: Open link in new window (with security validation)
 	 */
@@ -1498,6 +1565,64 @@ class PropertiesPanel {
 			}
 		});
 	}
+	
+	/**
+     * Load image thumbnails
+     */
+    async loadImageThumbnails() {
+        const thumbnails = document.querySelectorAll('.image-thumbnail');
+        
+        for (const thumbnail of thumbnails) {
+            const imageId = thumbnail.dataset.imageId;
+            try {
+                const dataUrl = await window.app.imageManager.getImage(imageId);
+                if (dataUrl) {
+                    thumbnail.src = dataUrl;
+                    thumbnail.alt = 'Image preview';
+                } else {
+                    thumbnail.alt = 'Image not found';
+                    thumbnail.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading thumbnail:', error);
+                thumbnail.alt = 'Error loading image';
+            }
+        }
+    }
+
+    /**
+     * Preview full size image
+     */
+    async previewFullImage(imageId) {
+        try {
+            const dataUrl = await window.app.imageManager.getImage(imageId);
+            if (dataUrl) {
+                // Open in new tab
+                const newTab = window.open();
+                newTab.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Image Preview</title>
+                        <style>
+                            body { margin: 0; display: flex; justify-content: center; align-items: center; 
+                                   min-height: 100vh; background: #2c3e50; }
+                            img { max-width: 95%; max-height: 95vh; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${dataUrl}" alt="Full size preview">
+                    </body>
+                    </html>
+                `);
+            } else {
+                alert('Image not found');
+            }
+        } catch (error) {
+            console.error('Error previewing image:', error);
+            alert('Error loading image');
+        }
+    }
 	
 }
 
