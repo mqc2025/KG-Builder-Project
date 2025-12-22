@@ -1725,13 +1725,43 @@ class KnowledgeGraphApp {
 
         // Find image in clipboard
         for (let i = 0; i < items.length; i++) {
-            if (items[i].type.indexOf('image') !== -1) {
-                event.preventDefault();
-                
-                const blob = items[i].getAsFile();
-                const reader = new FileReader();
+			if (items[i].type.indexOf('image') !== -1) {
+				event.preventDefault();
+				
+				const blob = items[i].getAsFile();
+				
+				// Security: Validate image size (max 5MB)
+				const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+				if (!blob) {
+					this.updateStatus('❌ Error: Invalid image data');
+					return;
+				}
+				
+				if (blob.size > MAX_IMAGE_SIZE) {
+					const sizeMB = (blob.size / (1024 * 1024)).toFixed(2);
+					this.updateStatus(`❌ Image too large: ${sizeMB}MB (max 5MB)`);
+					alert(`Image is too large: ${sizeMB}MB\n\nMaximum allowed size: 5MB\n\nPlease resize the image and try again.`);
+					return;
+				}
+				
+				// Security: Whitelist safe image types (exclude SVG which can contain scripts)
+				const ALLOWED_IMAGE_TYPES = [
+					'image/png',
+					'image/jpeg',
+					'image/jpg',
+					'image/gif',
+					'image/webp'
+				];
+				
+				if (!ALLOWED_IMAGE_TYPES.includes(blob.type)) {
+					this.updateStatus(`❌ Unsupported image type: ${blob.type}`);
+					alert(`Unsupported image format: ${blob.type}\n\nAllowed formats:\n• PNG\n• JPEG/JPG\n• GIF\n• WebP\n\nNote: SVG images are not allowed for security reasons.`);
+					return;
+				}
+				
+				const reader = new FileReader();
 
-                reader.onload = async (e) => {
+				reader.onload = async (e) => {
 					try {
 						// Wait for ImageManager to be ready
 						await this.imageManager.ready;
@@ -1740,11 +1770,58 @@ class KnowledgeGraphApp {
 						const imageId = this.imageManager.generateImageId();
 						const dataUrl = e.target.result;
 
-						// Store in IndexedDB
-						await this.imageManager.storeImage(imageId, dataUrl);
+						// Security: Validate data URL format
+						if (!dataUrl || typeof dataUrl !== 'string') {
+							this.updateStatus('❌ Error: Invalid data URL');
+							return;
+						}
+						
+						// Ensure it's a proper data URL with expected format
+						const dataUrlPattern = /^data:image\/(png|jpeg|jpg|gif|webp);base64,/;
+						if (!dataUrlPattern.test(dataUrl)) {
+							this.updateStatus('❌ Error: Invalid image data format');
+							console.error('Invalid data URL format:', dataUrl.substring(0, 50));
+							return;
+						}
+						
+						// Additional check: ensure base64 data exists and is not empty
+						const base64Data = dataUrl.split(',')[1];
+						if (!base64Data || base64Data.length === 0) {
+							this.updateStatus('❌ Error: Empty image data');
+							return;
+						}
 
-                        // Find first available link field
-                        const linkField = this.findAvailableLinkField(selectedNode);
+						// Store in IndexedDB with quota management
+						try {
+							await this.imageManager.storeImage(imageId, dataUrl);
+						} catch (storageError) {
+							// Handle quota exceeded errors specifically
+							if (storageError.code === 'QUOTA_EXCEEDED') {
+								this.updateStatus('❌ Storage full - cannot save image');
+								
+								let errorMessage = 'Storage quota exceeded!\n\n';
+								
+								if (storageError.quotaInfo) {
+									errorMessage += `Used: ${storageError.quotaInfo.usedMB}MB / ${storageError.quotaInfo.totalMB}MB (${storageError.quotaInfo.percentUsed}%)\n\n`;
+								}
+								
+								errorMessage += 'To free up space:\n';
+								errorMessage += '• Export your current graph (saves images to file)\n';
+								errorMessage += '• Delete unused images from nodes\n';
+								errorMessage += '• Clear browser data for this site\n';
+								errorMessage += '• Use smaller images (max 5MB each)';
+								
+								alert(errorMessage);
+							} else {
+								// Other storage errors
+								this.updateStatus('❌ Error storing image');
+								alert('Failed to store image: ' + storageError.message);
+							}
+							return;
+						}
+
+						// Find first available link field
+						const linkField = this.findAvailableLinkField(selectedNode);
                         
                         if (linkField) {
 							selectedNode[linkField] = `image://${imageId}`;
