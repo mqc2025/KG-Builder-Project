@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NodeBook - Help Documentation</title>
+    <title>NodeBook Help Documentation</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
             --danger-color: #e74c3c;
+            --warning-color: #f39c12;
             --dark-bg: #2c3e50;
             --light-bg: #ecf0f1;
             --border-color: #bdc3c7;
@@ -22,19 +17,25 @@
             --text-secondary: #7f8c8d;
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: var(--text-primary);
-            background-color: #f8f9fa;
+            background-color: var(--light-bg);
         }
 
         header {
-            background-color: var(--dark-bg);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 2rem;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 3rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         header h1 {
@@ -43,14 +44,13 @@
         }
 
         header p {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
         }
 
         nav {
             background-color: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -60,26 +60,29 @@
             list-style: none;
             display: flex;
             flex-wrap: wrap;
-            gap: 1.5rem;
             justify-content: center;
+            gap: 1rem;
+            padding: 1rem;
         }
 
         nav a {
-            color: var(--primary-color);
             text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-weight: 500;
         }
 
         nav a:hover {
-            color: var(--secondary-color);
-            text-decoration: underline;
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+            margin: 2rem auto;
+            padding: 0 2rem;
         }
 
         section {
@@ -214,6 +217,19 @@
             font-size: 0.9rem;
         }
 
+        pre {
+            background-color: var(--light-bg);
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
         footer {
             background-color: var(--dark-bg);
             color: white;
@@ -256,7 +272,9 @@
             <li><a href="#tools">Tools & Features</a></li>
             <li><a href="#editing">Editing</a></li>
             <li><a href="#navigation">Navigation</a></li>
+            <li><a href="#data-format">Data Format</a></li>
             <li><a href="#shortcuts">Keyboard Shortcuts</a></li>
+            <li><a href="#tips">Tips & Best Practices</a></li>
             <li><a href="#privacy">Privacy</a></li>
         </ul>
     </nav>
@@ -271,11 +289,11 @@
             <div class="feature-grid">
                 <div class="feature-card">
                     <h4>🎨 Interactive Visualization</h4>
-                    <p>Force-directed graph layout with customizable node colors, sizes, and edge relationships.</p>
+                    <p>Force-directed graph layout with customizable node colors, sizes, icons, and edge relationships.</p>
                 </div>
                 <div class="feature-card">
                     <h4>📝 Rich Editing</h4>
-                    <p>Add, edit, and delete nodes and edges with full property management and inline editing capabilities.</p>
+                    <p>Add, edit, and delete nodes and edges with full property management, custom properties, and inline editing capabilities.</p>
                 </div>
                 <div class="feature-card">
                     <h4>🔍 Search & Filter</h4>
@@ -291,7 +309,31 @@
                 </div>
                 <div class="feature-card">
                     <h4>🔒 Privacy First</h4>
-                    <p>All processing happens in your browser. No data is sent to servers.</p>
+                    <p>All processing happens in your browser. No data is stored on servers or transmitted anywhere.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📊 Excel Integration</h4>
+                    <p>Create Excel templates from your graph and import data from Excel files.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💥 Graph Explode</h4>
+                    <p>Break down complex nodes into their component properties for deeper analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📤 Multiple Export Formats</h4>
+                    <p>Export your graphs as PNG images, SVG vectors, or JSON data.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🖼️ Image Support</h4>
+                    <p>Paste images directly into the canvas to create visual nodes.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📱 Mobile Responsive</h4>
+                    <p>Works on desktop, tablet, and mobile devices with touch support.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🎯 Minimap Navigation</h4>
+                    <p>Quick navigation and overview of large graphs with the interactive minimap.</p>
                 </div>
             </div>
         </section>
@@ -299,24 +341,26 @@
         <!-- GETTING STARTED -->
         <section id="getting-started">
             <h2>Getting Started</h2>
-            
+
             <h3>Creating Your First Graph</h3>
             <ol>
-                <li>Click the <strong>File</strong> tab in the left sidebar</li>
-                <li>Click <strong>New</strong> to start with a blank canvas</li>
-                <li>Switch to the <strong>Tools</strong> tab</li>
-                <li>Start adding nodes and connections using the context menu (right-click on canvas)</li>
+                <li><strong>Add a Node:</strong> Right-click on the canvas and select "Add Node Here"</li>
+                <li><strong>Edit Properties:</strong> Click on the node to open the properties panel</li>
+                <li><strong>Connect Nodes:</strong> Right-click a node → "Connect to Another Node" → Click target node</li>
+                <li><strong>Customize:</strong> Change colors, sizes, add descriptions, and custom properties</li>
+                <li><strong>Save:</strong> Press Ctrl+S to save your work as a JSON file</li>
             </ol>
 
-            <h3>Opening an Existing Graph</h3>
-            <ol>
-                <li>Click <strong>File</strong> → <strong>Open</strong></li>
-                <li>Select a JSON file from your computer</li>
-                <li>Alternatively, drag and drop a JSON file directly onto the canvas</li>
-            </ol>
+            <h3>Opening Sample Graphs</h3>
+            <p>NodeBook uses the <code>sample_graph.json</code> format. You can:</p>
+            <ul>
+                <li>Click File → Open to load an existing JSON file</li>
+                <li>Check the <code>JSON Samples</code> folder for example graphs</li>
+                <li>Drag and drop JSON files onto the canvas</li>
+            </ul>
 
             <div class="tip">
-                <strong>💡 Tip:</strong> Sample graphs are available in the <code>JSON Samples</code> folder for testing and learning.
+                <strong>💡 Quick Start:</strong> Press Ctrl+N to create a new graph, add a few nodes, connect them, and press Ctrl+S to save. That's all you need to get started!
             </div>
         </section>
 
@@ -324,49 +368,72 @@
         <section id="file-operations">
             <h2>File Operations</h2>
 
-            <h3>File Tab Functions</h3>
+            <h3>File Menu (File Tab)</h3>
 
             <h4>📄 New (<span class="kbd">Ctrl+N</span>)</h4>
-            <p>Creates a new empty graph. You'll be prompted to save any unsaved changes.</p>
+            <p>Creates a new, empty graph. You'll be prompted to save any unsaved changes.</p>
 
             <h4>📂 Open (<span class="kbd">Ctrl+O</span>)</h4>
-            <p>Opens a JSON file from your computer. Supports the standard NodeBook JSON format.</p>
+            <p>Opens a JSON file from your computer. Supports the standard NodeBook JSON format (see <a href="#data-format">Data Format</a> section).</p>
 
             <h4>💾 Save (<span class="kbd">Ctrl+S</span>)</h4>
-            <p>Saves your current graph. If you haven't saved before, prompts for a filename.</p>
+            <p>Saves your current graph. If you haven't saved before, prompts for a filename. The file is downloaded to your device.</p>
 
             <h4>💾 Save As</h4>
-            <p>Saves the graph with a new filename, allowing you to create copies or versions.</p>
+            <p>Saves the graph with a new filename, allowing you to create copies or versions of your work.</p>
 
             <h4>🗗 Open in Tab</h4>
-            <p>Opens the current graph's JSON in a new browser tab, useful for viewing or copying the raw data.</p>
+            <p>Opens the current graph's JSON data in a new browser tab. Useful for:</p>
+            <ul>
+                <li>Viewing the raw JSON structure</li>
+                <li>Copying specific portions of the data</li>
+                <li>Debugging or inspecting the graph structure</li>
+            </ul>
 
             <h4>📤 Export</h4>
             <p>Export your graph in various formats:</p>
             <ul>
-                <li><strong>PNG Image:</strong> Export as a high-resolution image</li>
-                <li><strong>SVG Vector:</strong> Export as scalable vector graphics</li>
-                <li><strong>JSON Data:</strong> Export the raw graph data</li>
+                <li><strong>PNG Image:</strong> Export as a high-resolution image (useful for presentations and documentation)</li>
+                <li><strong>SVG Vector:</strong> Export as scalable vector graphics (maintains quality at any zoom level)</li>
+                <li><strong>JSON Data:</strong> Export the raw graph data (same as Save)</li>
             </ul>
 
             <h4>📊 Create Excel Converter</h4>
-            <p>Generates an Excel template based on your current graph structure that can be used to import data.</p>
+            <p>Generates an Excel template based on your current graph structure. This powerful feature:</p>
+            <ul>
+                <li>Analyzes all properties in your nodes and edges</li>
+                <li>Creates an Excel file with pre-formatted sheets for Nodes and Edges</li>
+                <li>Includes column headers matching your graph's property names</li>
+                <li>Allows bulk data entry in a familiar spreadsheet format</li>
+            </ul>
+            <div class="tip">
+                <strong>💡 Workflow:</strong> Create a small sample graph → Generate Excel Converter → Fill in bulk data → Import back using Convert Excel.
+            </div>
 
             <h4>🔄 Convert Excel</h4>
-            <p>Imports data from an Excel file created by the Excel Converter tool, automatically creating nodes and edges.</p>
-			
-
-            <h4>💥 Explode</h4>
-            <p>Breaks down complex nodes into their component parts:</p>
+            <p>Imports data from an Excel file created by the Excel Converter tool. This feature:</p>
             <ul>
-                <li>Splits nodes based on their properties</li>
-                <li>Creates new sub-nodes for nested data</li>
-                <li>Maintains relationships between original and exploded nodes</li>
-                <li>Useful for analyzing hierarchical or complex data structures</li>
+                <li>Reads the Nodes and Edges sheets from your Excel file</li>
+                <li>Automatically creates nodes and edges based on the data</li>
+                <li>Preserves all custom properties and relationships</li>
+                <li>Ideal for importing large datasets or collaborative work</li>
             </ul>
 
+            <h4>💥 Explode</h4>
+            <p>Breaks down complex nodes into their component parts. This advanced feature:</p>
+            <ul>
+                <li><strong>Splits Properties:</strong> Creates new nodes for each property of selected nodes</li>
+                <li><strong>Creates Sub-nodes:</strong> Nested data becomes separate, linked nodes</li>
+                <li><strong>Maintains Relationships:</strong> Links are created showing "has" and "is a" relationships</li>
+                <li><strong>Hierarchical Analysis:</strong> Perfect for analyzing complex data structures</li>
+                <li><strong>Example:</strong> A node with properties (name, category, links) becomes multiple nodes showing the relationships between the original node and its properties</li>
+            </ul>
+            <div class="warning">
+                <strong>⚠️ Warning:</strong> The Explode function can create many new nodes and edges. It's recommended to save your work before using this feature. You can always undo with Ctrl+Z.
+            </div>
+
             <div class="note">
-                <strong>📌 Note:</strong> NodeBook uses a specific JSON format. Ensure your files follow the standard structure (see sample_graph.json for reference).
+                <strong>📌 Note:</strong> NodeBook uses a specific JSON format. Ensure your files follow the standard structure (see <a href="#data-format">Data Format</a> section and <code>sample_graph.json</code> for reference).
             </div>
         </section>
 
@@ -382,72 +449,79 @@
             <h4>❄️ Freeze (<span class="kbd">F</span>)</h4>
             <p>Toggles the physics simulation:</p>
             <ul>
-                <li><strong>Frozen:</strong> Nodes stay in place, preventing automatic rearrangement</li>
-                <li><strong>Active:</strong> Force-directed layout continuously adjusts node positions</li>
+                <li><strong>Frozen:</strong> Nodes stay in place, preventing automatic rearrangement. Useful for large graphs or when you want precise positioning.</li>
+                <li><strong>Active:</strong> Force-directed layout continuously adjusts node positions for optimal spacing.</li>
             </ul>
 
             <h4>⊞ Shuffle</h4>
-            <p>Restarts the force simulation with a fresh layout. Useful when nodes overlap or the layout becomes cluttered.</p>
+            <p>Restarts the force simulation with a fresh layout. Useful when:</p>
+            <ul>
+                <li>Nodes overlap or cluster together</li>
+                <li>You want to reorganize the entire graph</li>
+                <li>After adding many new nodes</li>
+            </ul>
 
             <h4>⚡ Shortest Path</h4>
-            <p>Finds paths between nodes:</p>
+            <p>Finds the shortest path between two nodes:</p>
             <ol>
-                <li>Click the Path button</li>
-                <li>Click on a starting node</li>
-                <li>Click on a destination node</li>
-                <li>Choose:
-                    <ul>
-                        <li><strong>Shortest Path:</strong> Displays the fastest route</li>
-                        <li><strong>All Paths:</strong> Shows all possible routes between nodes</li>
-                    </ul>
-                </li>
+                <li>Click the "Shortest Path" tool</li>
+                <li>Click on the starting node (turns green)</li>
+                <li>Click on the ending node (turns green)</li>
+                <li>The shortest path is highlighted in red</li>
+                <li>Path details appear in the status bar</li>
             </ol>
-			
-			<h4>➕ Add Graph</h4>
-            <p>Merges another graph file into your current graph:</p>
+            <div class="tip">
+                <strong>💡 Tip:</strong> Use this to understand relationships and find connection routes between any two concepts in your graph.
+            </div>
+
+            <h4>🔍 Focus Mode</h4>
+            <p>Highlights selected node and its immediate connections while dimming everything else. Great for:</p>
             <ul>
-                <li>Opens a file picker to select a JSON graph file</li>
-                <li>Adds all nodes and edges from the selected file to your current graph</li>
-                <li>Useful for combining multiple data sources or building composite graphs</li>
-                <li>Maintains all properties and relationships from both graphs</li>
+                <li>Focusing on a specific node's relationships</li>
+                <li>Presentations and demonstrations</li>
+                <li>Understanding local graph structure</li>
             </ul>
 
-            <h4>⚙️ Force Strength Control</h4>
-            <p>Adjusts the strength of the force-directed layout simulation:</p>
+            <h4>📸 Screenshot</h4>
+            <p>Captures the current view of the graph as a PNG image. The screenshot includes:</p>
             <ul>
-                <li><strong>Slider Range:</strong> 50 (Weak) to 500 (Strong)</li>
-                <li><strong>Default:</strong> 200 - balanced for most graphs</li>
-                <li><strong>Weak Force:</strong> Nodes stay closer together, more compact layout</li>
-                <li><strong>Strong Force:</strong> Nodes spread out more, better separation for dense graphs</li>
-                <li>Adjust in real-time to find the optimal layout for your graph</li>
+                <li>All visible nodes and edges</li>
+                <li>Current zoom level and position</li>
+                <li>Node labels and colors</li>
             </ul>
 
-            <h3>Search & Filter</h3>
-
-            <h4>🔍 Search (<span class="kbd">Ctrl+F</span>)</h4>
-            <p>Search for nodes by name, description, or properties:</p>
-            <ul>
-                <li>Type in the search box in the toolbar</li>
-                <li>Matching nodes are highlighted</li>
-                <li>Click <strong>✕</strong> to clear search</li>
-            </ul>
-
-            <h4>🔍 Filter</h4>
-            <p>Advanced filtering options:</p>
-            <ul>
-                <li><strong>By Node Type:</strong> Show/hide specific node types</li>
-                <li><strong>By Relationship:</strong> Filter edges by relationship type</li>
-                <li><strong>By Color:</strong> Filter by node color</li>
-                <li><strong>Isolated Nodes:</strong> Show only disconnected nodes</li>
-            </ul>
-
-            <h3>Toolbar Functions</h3>
+            <h3>Header Toolbar</h3>
 
             <h4>↶ Undo (<span class="kbd">Ctrl+Z</span>)</h4>
-            <p>Reverses the last action. Supports up to 50 undo levels.</p>
+            <p>Reverts the last action. Supports up to 50 undo levels. Works for:</p>
+            <ul>
+                <li>Node/edge creation and deletion</li>
+                <li>Property changes</li>
+                <li>Position changes (when manually moved)</li>
+                <li>Bulk operations</li>
+            </ul>
 
             <h4>↷ Redo (<span class="kbd">Ctrl+Shift+Z</span> or <span class="kbd">Ctrl+Y</span>)</h4>
             <p>Re-applies an undone action.</p>
+
+            <h4>🔍 Search (<span class="kbd">Ctrl+F</span>)</h4>
+            <p>Searches for nodes by name or properties. Features:</p>
+            <ul>
+                <li>Real-time filtering as you type</li>
+                <li>Highlights matching nodes</li>
+                <li>Dims non-matching nodes</li>
+                <li>Case-insensitive search</li>
+                <li>Click the X button to clear search</li>
+            </ul>
+
+            <h4>🎯 Filter</h4>
+            <p>Advanced filtering options:</p>
+            <ul>
+                <li><strong>By Category:</strong> Filter nodes by their category property</li>
+                <li><strong>By Color:</strong> Show/hide nodes by color</li>
+                <li><strong>By Type:</strong> Filter by node type or classification</li>
+                <li><strong>Multiple Criteria:</strong> Combine filters for precise results</li>
+            </ul>
 
             <h4>⚙️ GitHub</h4>
             <p>Opens the project repository in a new tab (link to be configured).</p>
@@ -466,19 +540,21 @@
             <h4>Canvas Context Menu</h4>
             <ul>
                 <li><strong>Add Node Here:</strong> Creates a new node at the cursor position</li>
-                <li><strong>Paste Node:</strong> Pastes a previously copied node</li>
+                <li><strong>Paste Node:</strong> Pastes a previously copied node (if available)</li>
+                <li><strong>Paste Image:</strong> Available when an image is in clipboard</li>
             </ul>
 
             <h4>Node Context Menu</h4>
             <ul>
-                <li><strong>Edit Properties:</strong> Opens the properties panel</li>
+                <li><strong>Edit Properties:</strong> Opens the properties panel for detailed editing</li>
                 <li><strong>Pin/Unpin:</strong> Fixes the node position or allows it to move with simulation</li>
                 <li><strong>Copy Node:</strong> Copies the node for pasting elsewhere</li>
                 <li><strong>Connect to Another Node:</strong> Starts connection mode
                     <ol>
                         <li>Right-click a node and select "Connect to Another Node"</li>
-                        <li>Click on the target node to connect</li>
-                        <li>Enter relationship details in the dialog</li>
+                        <li>Click on the target node to create a connection</li>
+                        <li>Edit the edge properties in the properties panel</li>
+                        <li>Press Escape to cancel connection mode</li>
                     </ol>
                 </li>
                 <li><strong>Delete Node:</strong> Removes the node and all its connections</li>
@@ -486,63 +562,86 @@
 
             <h4>Edge Context Menu</h4>
             <ul>
-                <li><strong>Edit Edge:</strong> Opens edge properties</li>
-                <li><strong>Reverse Direction:</strong> Swaps source and target nodes</li>
-                <li><strong>Toggle Direction:</strong> Changes between directed (→) and undirected (—)</li>
-                <li><strong>Delete Edge:</strong> Removes the connection</li>
+                <li><strong>Edit Properties:</strong> Opens the edge properties panel</li>
+                <li><strong>Delete Edge:</strong> Removes the connection between nodes</li>
             </ul>
 
             <h3>Properties Panel</h3>
-            <p>Click on any node or edge to open the properties panel on the right side.</p>
+            <p>The properties panel appears on the right side when you select a node or edge. It provides comprehensive editing capabilities:</p>
 
             <h4>Node Properties</h4>
             <ul>
-                <li><strong>Name:</strong> The primary identifier</li>
-                <li><strong>Description:</strong> Detailed information about the node</li>
-                <li><strong>Color:</strong> Visual appearance (click swatch to change)</li>
-                <li><strong>Size:</strong> Node radius (5-50 pixels)</li>
-                <li><strong>Type:</strong> Category or classification</li>
-                <li><strong>Custom Properties:</strong> Add unlimited key-value pairs</li>
+                <li><strong>Name:</strong> The display name of the node (max 500 characters)</li>
+                <li><strong>Description:</strong> Detailed information about the node (multi-line text area)</li>
+                <li><strong>Color:</strong> Choose from preset palette or enter custom hex color</li>
+                <li><strong>Icon:</strong> Select emoji icons from various categories:
+                    <ul>
+                        <li>Objects, Symbols, Nature, Travel, Activities</li>
+                        <li>Click palette swatches for quick selection</li>
+                        <li>Or type any emoji directly</li>
+                        <li>Click "More icons..." for expanded picker</li>
+                    </ul>
+                </li>
+                <li><strong>Size:</strong> Node diameter (5-30 pixels)</li>
+                <li><strong>Category:</strong> Primary classification with autocomplete suggestions</li>
+                <li><strong>Sub-Category:</strong> Secondary classification</li>
+                <li><strong>Priority:</strong> Low, Medium, High, or Critical (useful for project management)</li>
+                <li><strong>Deadline:</strong> Date picker for deadlines</li>
+                <li><strong>User Date:</strong> Custom date field</li>
+                <li><strong>Links (1-4):</strong> URLs for reference materials, documentation, etc.</li>
+                <li><strong>Position (x, y):</strong> Exact coordinates on the canvas</li>
+                <li><strong>Pin Position (fx, fy):</strong> Fixed position when pinned</li>
+            </ul>
+
+            <h4>Custom Properties</h4>
+            <p>Add unlimited custom key-value pairs to any node or edge:</p>
+            <ul>
+                <li>Click "+ Add Custom Property" button</li>
+                <li>Enter property name (key)</li>
+                <li>Enter property value</li>
+                <li>Custom properties are preserved in JSON files</li>
+                <li>Useful for domain-specific metadata</li>
             </ul>
 
             <h4>Edge Properties</h4>
             <ul>
-                <li><strong>Name:</strong> Edge identifier</li>
-                <li><strong>Relationship:</strong> The type of connection</li>
-                <li><strong>Source:</strong> Starting node</li>
-                <li><strong>Target:</strong> Ending node</li>
-                <li><strong>Directed:</strong> Whether the edge has direction (arrow)</li>
-                <li><strong>Color:</strong> Edge color</li>
-                <li><strong>Weight:</strong> Relationship strength or importance</li>
+                <li><strong>Name:</strong> Edge identifier (optional)</li>
+                <li><strong>Description:</strong> Details about the relationship</li>
+                <li><strong>Relationship:</strong> Type of connection (e.g., "connects to", "parent-child", "depends on")</li>
+                <li><strong>Color:</strong> Visual style of the edge</li>
+                <li><strong>Weight:</strong> Thickness or importance (1-5)</li>
+                <li><strong>Directed:</strong> Toggle whether edge has direction (shows arrow)</li>
+                <li><strong>Custom Properties:</strong> Same as nodes, add any additional metadata</li>
             </ul>
 
             <h4>Inline Edge Editing</h4>
-            <p>When viewing a node's properties, you can see all connected edges and:</p>
+            <p>In the connections list of a node's properties panel:</p>
             <ul>
-                <li>Click <strong>✎</strong> to edit edge inline without switching context</li>
-                <li>Click <strong>👁</strong> to view full edge details</li>
-                <li>Click <strong>🗑</strong> to delete the connection</li>
+                <li>Click "✏️ Edit" button next to any connection</li>
+                <li>Modify relationship type directly inline</li>
+                <li>Changes are saved automatically</li>
+                <li>Click "View Details" to open full edge properties</li>
             </ul>
 
-            <h3>Bulk Operations</h3>
-
-            <h4>Adding Custom Properties</h4>
-            <ol>
-                <li>Select a node or edge</li>
-                <li>Scroll to the bottom of the properties panel</li>
-                <li>Click <strong>Add Property</strong></li>
-                <li>Enter key and value</li>
-            </ol>
-
-            <h4>Deleting Elements</h4>
+            <h3>Keyboard Selection & Deletion</h3>
             <ul>
-                <li>Select node/edge and press <span class="kbd">Delete</span></li>
-                <li>Or use the context menu</li>
-                <li>Or click <strong>Delete Selected</strong> in properties panel</li>
+                <li><strong>Click Node/Edge:</strong> Select it (properties panel opens)</li>
+                <li><strong>Delete Key:</strong> Delete selected node or edge (only works when not typing in inputs)</li>
+                <li><strong>Escape:</strong> Clear selection and close properties panel</li>
+            </ul>
+
+            <h3>Image Nodes</h3>
+            <p>Create nodes from images:</p>
+            <ul>
+                <li><strong>Paste:</strong> Copy an image, right-click canvas → "Paste Image"</li>
+                <li><strong>Or use Ctrl+V:</strong> Paste image directly when not in an input field</li>
+                <li>Image is converted to a visual node</li>
+                <li>All regular node properties still apply</li>
+                <li>Images are embedded as base64 in the JSON</li>
             </ul>
 
             <div class="warning">
-                <strong>⚠️ Warning:</strong> Deleting a node removes all its connected edges. This action can be undone with Ctrl+Z.
+                <strong>⚠️ Note:</strong> Large images increase file size significantly. Consider resizing images before pasting for optimal performance.
             </div>
         </section>
 
@@ -554,39 +653,192 @@
             <ul>
                 <li><strong>Mouse Wheel:</strong> Scroll to zoom in/out</li>
                 <li><strong>Pinch Gesture:</strong> On touchpads, use pinch to zoom</li>
+                <li><strong>Touch Devices:</strong> Pinch-to-zoom gesture supported</li>
                 <li>Current zoom level is shown in the status bar</li>
+                <li>Zoom range: 10% to 500%</li>
             </ul>
 
             <h3>Panning</h3>
             <ul>
                 <li><strong>Drag Background:</strong> Click and drag on empty canvas space</li>
-                <li><strong>Space + Drag:</strong> Hold spacebar and drag anywhere</li>
-                <li><strong>Pan Tool:</strong> Activate pan tool from Tools tab</li>
+                <li><strong>Space + Drag:</strong> Hold spacebar and drag anywhere on the canvas</li>
+                <li><strong>Pan Tool:</strong> Activate pan tool from Tools tab for dedicated panning mode</li>
+                <li><strong>Touch Devices:</strong> Single-finger drag on empty space</li>
             </ul>
 
             <h3>Minimap</h3>
             <p>The minimap (bottom-right corner) provides:</p>
             <ul>
-                <li>Overview of the entire graph</li>
-                <li>Viewport indicator showing current visible area</li>
-                <li>Click and drag viewport to navigate</li>
-                <li>Automatically hides when graph is empty</li>
+                <li><strong>Bird's Eye View:</strong> Overview of the entire graph</li>
+                <li><strong>Viewport Indicator:</strong> Blue rectangle showing current visible area</li>
+                <li><strong>Quick Navigation:</strong> Click or drag viewport to jump to different areas</li>
+                <li><strong>Auto-hide:</strong> Minimap hides when graph is empty</li>
+                <li><strong>Performance:</strong> Simplified rendering for large graphs</li>
             </ul>
 
             <h3>Node Manipulation</h3>
             <ul>
-                <li><strong>Drag Node:</strong> Click and drag to reposition</li>
-                <li><strong>Pin Node:</strong> Right-click → Pin to fix position</li>
-                <li><strong>Unpin Node:</strong> Right-click → Unpin to allow free movement</li>
+                <li><strong>Drag Node:</strong> Click and drag to reposition (saves on release)</li>
+                <li><strong>Pin Node:</strong> Right-click → Pin to fix position (prevents physics simulation movement)</li>
+                <li><strong>Unpin Node:</strong> Right-click → Unpin to allow free movement with physics</li>
+                <li><strong>Double-Click:</strong> Quick-edit node name inline</li>
             </ul>
 
             <h3>Selection</h3>
             <ul>
-                <li><strong>Click:</strong> Select node or edge</li>
-                <li><strong>Escape:</strong> Clear selection</li>
-                <li>Selected items are shown in the status bar</li>
+                <li><strong>Click:</strong> Select node or edge (highlights it and opens properties)</li>
+                <li><strong>Escape:</strong> Clear selection and close properties panel</li>
+                <li>Selected items are highlighted and shown in the status bar</li>
                 <li>Properties panel opens automatically on selection</li>
             </ul>
+
+            <h3>Status Bar</h3>
+            <p>Located at the bottom of the screen, displays:</p>
+            <ul>
+                <li><strong>Node/Edge Count:</strong> Total number of nodes and edges</li>
+                <li><strong>Selected Item:</strong> Name of currently selected node/edge</li>
+                <li><strong>Zoom Level:</strong> Current zoom percentage</li>
+                <li><strong>Status Messages:</strong> Action confirmations and feedback</li>
+                <li><strong>Privacy Indicator:</strong> 🔒 Private & Local button</li>
+            </ul>
+        </section>
+
+        <!-- DATA FORMAT -->
+        <section id="data-format">
+            <h2>JSON Data Format</h2>
+
+            <h3>Standard Structure</h3>
+            <p>NodeBook uses a specific JSON format for storing graphs. The format is designed to be both human-readable and machine-parseable. Here's the complete structure:</p>
+
+            <pre><code>{
+  "graph": {
+    "metadata": {
+      "name": "Graph Name",
+      "title": "Graph Title",
+      "description": "Graph description",
+      "created": "2025-01-01T00:00:00.000Z",
+      "modified": "2025-01-01T00:00:00.000Z"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "unique_node_id_hash",
+        "name": "Node Name",
+        "description": "Node description",
+        "color": "#3498db",
+        "size": 15,
+        "icon": "🎯",
+        "category": "Category",
+        "subCat": "Sub-Category",
+        "priority": "High",
+        "deadline": "2025-12-31",
+        "userDate": "2025-01-15",
+        "link1": "https://example.com",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "x": 400,
+        "y": 300,
+        "fx": 400,
+        "fy": 300,
+        "createdDate": "2025-01-01T00:00:00.000Z",
+        "modifiedDate": "2025-01-01T00:00:00.000Z"
+      }
+    ],
+    "edges": [
+      {
+        "id": "unique_edge_id_hash",
+        "name": "Edge Name",
+        "source": "source_node_id",
+        "target": "target_node_id",
+        "description": "Edge description",
+        "relationship": "connects to",
+        "directed": true,
+        "color": "#95a5a6",
+        "weight": 1
+      }
+    ]
+  }
+}</code></pre>
+
+            <h3>Field Descriptions</h3>
+            
+            <h4>Metadata Section</h4>
+            <ul>
+                <li><strong>name:</strong> Internal graph name (max 200 chars)</li>
+                <li><strong>title:</strong> Display title (max 500 chars)</li>
+                <li><strong>description:</strong> Detailed description</li>
+                <li><strong>created:</strong> ISO 8601 timestamp of creation</li>
+                <li><strong>modified:</strong> ISO 8601 timestamp of last modification</li>
+            </ul>
+
+            <h4>Settings Section</h4>
+            <ul>
+                <li><strong>nodeLabelSize:</strong> Font size for node labels (8-24)</li>
+                <li><strong>edgeLabelSize:</strong> Font size for edge labels (6-20)</li>
+                <li><strong>worldBoundary:</strong> Optional canvas boundaries for constraining physics</li>
+            </ul>
+
+            <h4>Node Fields</h4>
+            <ul>
+                <li><strong>id:</strong> Unique identifier (SHA-256 hash, max 500 chars)</li>
+                <li><strong>name:</strong> Display name (max 500 chars)</li>
+                <li><strong>color:</strong> Hex color code (#RRGGBB)</li>
+                <li><strong>size:</strong> Visual size (5-30 pixels)</li>
+                <li><strong>icon:</strong> Emoji or symbol (max 10 chars)</li>
+                <li><strong>x, y:</strong> Canvas coordinates</li>
+                <li><strong>fx, fy:</strong> Fixed coordinates when pinned (null when unpinned)</li>
+            </ul>
+
+            <h4>Edge Fields</h4>
+            <ul>
+                <li><strong>id:</strong> Unique identifier</li>
+                <li><strong>source:</strong> ID of source node</li>
+                <li><strong>target:</strong> ID of target node</li>
+                <li><strong>relationship:</strong> Type of connection</li>
+                <li><strong>directed:</strong> Boolean for directional arrows</li>
+                <li><strong>weight:</strong> Visual thickness (1-5)</li>
+            </ul>
+
+            <h3>Custom Properties</h3>
+            <p>You can add any custom properties to nodes and edges beyond the standard fields. They will be:</p>
+            <ul>
+                <li>Preserved when saving and loading</li>
+                <li>Displayed in the properties panel</li>
+                <li>Editable through the custom properties section</li>
+                <li>Included in Excel exports</li>
+                <li>Maintained during graph operations</li>
+            </ul>
+
+            <h3>Validation Limits</h3>
+            <div class="warning">
+                <strong>⚠️ Security Limits:</strong> NodeBook enforces the following limits to prevent abuse:
+                <ul>
+                    <li>Maximum nodes per graph: 10,000</li>
+                    <li>Maximum edges per graph: 50,000</li>
+                    <li>Maximum string length: 10,000 characters</li>
+                    <li>Maximum custom properties per item: 100</li>
+                </ul>
+            </div>
+
+            <div class="tip">
+                <strong>💡 Tip:</strong> Check the <code>JSON Samples</code> folder for complete working examples:
+                <ul>
+                    <li><code>sample_graph.json</code> - Basic example with AI/ML concepts</li>
+                    <li><code>as9100_simple_sample_exploded.json</code> - Complex exploded graph</li>
+                    <li><code>AS9100D_Complete_Audit_System.json</code> - Large real-world example</li>
+                </ul>
+            </div>
         </section>
 
         <!-- KEYBOARD SHORTCUTS -->
@@ -598,58 +850,85 @@
                     <tr>
                         <th>Shortcut</th>
                         <th>Action</th>
+                        <th>Context</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><span class="kbd">Ctrl+N</span></td>
                         <td>New Graph</td>
+                        <td>Global</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Ctrl+O</span></td>
                         <td>Open Graph</td>
+                        <td>Global</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Ctrl+S</span></td>
                         <td>Save Graph</td>
+                        <td>Global</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Ctrl+Z</span></td>
                         <td>Undo</td>
+                        <td>Global (up to 50 levels)</td>
                     </tr>
                     <tr>
-                        <td><span class="kbd">Ctrl+Shift+Z</span> or <span class="kbd">Ctrl+Y</span></td>
+                        <td><span class="kbd">Ctrl+Shift+Z</span><br><span class="kbd">Ctrl+Y</span></td>
                         <td>Redo</td>
+                        <td>Global</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Ctrl+F</span></td>
-                        <td>Focus Search</td>
+                        <td>Focus Search Box</td>
+                        <td>Global</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">F</span></td>
                         <td>Toggle Freeze Simulation</td>
+                        <td>When not typing in input</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Delete</span></td>
                         <td>Delete Selected Node/Edge</td>
+                        <td>When not typing in input</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Escape</span></td>
-                        <td>Clear Selection / Cancel Current Action</td>
+                        <td>Clear Selection / Cancel Action</td>
+                        <td>Closes properties panel, cancels connection mode</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Space</span> + Drag</td>
                         <td>Pan Canvas</td>
+                        <td>Hold space and drag mouse</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Mouse Wheel</span></td>
                         <td>Zoom In/Out</td>
+                        <td>Scroll over canvas</td>
                     </tr>
                     <tr>
                         <td><span class="kbd">Right-Click</span></td>
                         <td>Open Context Menu</td>
+                        <td>On canvas, node, or edge</td>
                     </tr>
-					
+                    <tr>
+                        <td><span class="kbd">Ctrl+V</span></td>
+                        <td>Paste Image</td>
+                        <td>When image is in clipboard</td>
+                    </tr>
+                    <tr>
+                        <td><span class="kbd">Click + Drag</span></td>
+                        <td>Move Node</td>
+                        <td>On node</td>
+                    </tr>
+                    <tr>
+                        <td><span class="kbd">Double-Click</span></td>
+                        <td>Quick-Edit Node Name</td>
+                        <td>On node label</td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -658,191 +937,232 @@
             </div>
         </section>
 
+        <!-- TIPS & BEST PRACTICES -->
+        <section id="tips">
+            <h2>Tips & Best Practices</h2>
+
+            <h3>Performance Optimization</h3>
+            <ul>
+                <li><strong>Freeze for Large Graphs:</strong> Graphs with 100+ nodes benefit from freezing the simulation (press F). This stops physics calculations and improves responsiveness.</li>
+                <li><strong>Use Filter:</strong> Hide unnecessary nodes to improve rendering performance and focus on relevant data.</li>
+                <li><strong>Pin Important Nodes:</strong> Pin key nodes to prevent them from moving and reduce physics calculations.</li>
+                <li><strong>Close Properties Panel:</strong> When not editing, close the properties panel to maximize canvas space.</li>
+                <li><strong>Optimize Images:</strong> Resize images before pasting to reduce file size and improve loading times.</li>
+            </ul>
+
+            <h3>Organization & Structure</h3>
+            <ul>
+                <li><strong>Consistent Color Coding:</strong> Assign consistent colors to node types/categories for easy visual identification (e.g., blue for concepts, green for implementations).</li>
+                <li><strong>Meaningful Names:</strong> Use descriptive, consistent names for nodes and relationships. Avoid abbreviations unless they're widely understood.</li>
+                <li><strong>Use Categories:</strong> Take advantage of the Category and Sub-Category fields to organize nodes hierarchically.</li>
+                <li><strong>Add Descriptions:</strong> Include detailed descriptions for complex nodes - future you will thank present you!</li>
+                <li><strong>Leverage Icons:</strong> Use emoji icons to add visual cues and improve scanability of your graphs.</li>
+                <li><strong>Link to Resources:</strong> Use the 4 link fields to reference external documentation, sources, or related materials.</li>
+            </ul>
+
+            <h3>Workflow Best Practices</h3>
+            <ul>
+                <li><strong>Save Frequently:</strong> Use Ctrl+S often to avoid losing work. There's no auto-save!</li>
+                <li><strong>Use Versions:</strong> Use "Save As" to create different versions of your graph as it evolves.</li>
+                <li><strong>Start Small:</strong> Build complex graphs incrementally. Start with core concepts and expand outward.</li>
+                <li><strong>Use Templates:</strong> Create template graphs with common structures and save them as starting points.</li>
+                <li><strong>Test Excel Import:</strong> When using Excel import, test with a small sample first before importing large datasets.</li>
+                <li><strong>Backup Important Graphs:</strong> Keep multiple copies of critical graphs in different locations.</li>
+            </ul>
+
+            <h3>Collaboration & Sharing</h3>
+            <ul>
+                <li><strong>Export for Presentations:</strong> Use PNG export for including graphs in presentations and documents.</li>
+                <li><strong>Share JSON Files:</strong> JSON files are small and easy to share via email, cloud storage, or version control.</li>
+                <li><strong>Use SVG for Print:</strong> SVG exports maintain quality when printed or used in high-resolution contexts.</li>
+                <li><strong>Document Your Graphs:</strong> Use the metadata fields (title, description) to explain the graph's purpose and context.</li>
+                <li><strong>Excel Collaboration:</strong> Use Excel Converter for team members who prefer spreadsheets for data entry.</li>
+            </ul>
+
+            <h3>Advanced Techniques</h3>
+            <ul>
+                <li><strong>Custom Properties for Metadata:</strong> Use custom properties to add domain-specific fields without modifying the core structure.</li>
+                <li><strong>Color Gradients:</strong> Use color gradients within categories to show progression or intensity (e.g., light blue → dark blue for priority).</li>
+                <li><strong>Edge Weights:</strong> Use edge weight to visually indicate strength or importance of relationships.</li>
+                <li><strong>Explode for Analysis:</strong> Use the Explode function to break down complex nodes and discover hidden patterns in your data.</li>
+                <li><strong>Shortest Path Analysis:</strong> Use shortest path to validate that your graph connections make logical sense and to find unexpected relationships.</li>
+                <li><strong>Focus Mode for Presentations:</strong> Use Focus Mode when presenting to highlight specific areas without overwhelming your audience.</li>
+            </ul>
+
+            <h3>Common Pitfalls to Avoid</h3>
+            <ul>
+                <li><strong>Too Many Connections:</strong> If a node has 20+ connections, consider breaking it into sub-nodes or using intermediate nodes.</li>
+                <li><strong>Unclear Relationships:</strong> Always specify the relationship type on edges - "connects to" is vague, "depends on" or "is-a" is better.</li>
+                <li><strong>Forgetting to Unfreeze:</strong> If nodes won't move after adding them, check if the simulation is frozen (press F).</li>
+                <li><strong>Not Testing Before Bulk Import:</strong> Always test Excel imports with sample data before importing hundreds of rows.</li>
+                <li><strong>Ignoring the Minimap:</strong> Use the minimap for navigation in large graphs - it's faster than panning.</li>
+            </ul>
+        </section>
+
         <!-- PRIVACY -->
         <section id="privacy">
             <h2>Privacy & Data Security</h2>
             
             <h3>🔒 Your Data Stays Private</h3>
-            <p>NodeBook is designed with privacy as a core principle:</p>
+            <p>NodeBook is designed with privacy as a core principle. Your data security is our top priority.</p>
             
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h4>100% Client-Side</h4>
-                    <p>All processing happens in your browser. No server communication required for core functionality.</p>
+                    <h4>100% Client-Side Processing</h4>
+                    <p>All graph processing, rendering, and computations happen entirely in your browser. No server communication is required for any core functionality.</p>
                 </div>
                 <div class="feature-card">
                     <h4>No Data Collection</h4>
-                    <p>We don't collect, store, or transmit any of your graph data, files, or personal information.</p>
+                    <p>We don't collect, store, or transmit any of your graph data, files, or personal information. What you create stays on your device.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>No Analytics or Tracking</h4>
+                    <p>NodeBook doesn't use analytics, tracking pixels, or any third-party services that could monitor your usage.</p>
                 </div>
                 <div class="feature-card">
                     <h4>Local Storage Only</h4>
-                    <p>Your preferences and settings are stored locally in your browser using localStorage.</p>
+                    <p>Only minimal preferences (like privacy banner dismissal) are stored locally in your browser using localStorage. No graph data is stored automatically.</p>
                 </div>
                 <div class="feature-card">
-                    <h4>Open Source</h4>
-                    <p>Our code is transparent and can be audited by anyone.</p>
+                    <h4>Open Source & Transparent</h4>
+                    <p>Our code is open source and can be audited by anyone. You can verify exactly what the application does.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Offline Capable</h4>
+                    <p>Once loaded, NodeBook works completely offline. You can disconnect from the internet and continue working.</p>
                 </div>
             </div>
 
             <h3>Privacy Banner</h3>
-            <p>On first visit, you'll see a privacy banner at the top of the page explaining that NodeBook runs entirely in your browser. You can:</p>
+            <p>On your first visit, you'll see a privacy banner at the top of the page explaining that NodeBook runs entirely in your browser. You can:</p>
             <ul>
-                <li>Click "Got it" to dismiss the banner - your choice is remembered</li>
-                <li>Click the privacy icon (🔒 Private & Local) in the status bar to view privacy details anytime</li>
+                <li>Click "Got it" to dismiss the banner - your choice is remembered using localStorage</li>
+                <li>Click the privacy icon (🔒 Private & Local) in the status bar anytime to view privacy details</li>
             </ul>
 
             <h3>What Gets Stored Locally?</h3>
-            <p>Only these preferences are saved in your browser's localStorage:</p>
+            <p>Only these minimal preferences are saved in your browser's localStorage:</p>
             <ul>
-                <li>Privacy banner dismissal status</li>
-                <li>No graph data or file content is ever stored automatically</li>
+                <li><strong>Privacy banner dismissal status:</strong> Remembers if you've dismissed the welcome banner</li>
+                <li><strong>UI preferences:</strong> Any interface settings you configure</li>
             </ul>
+            <p><strong>What's NOT stored:</strong></p>
+            <ul>
+                <li>Your graph data or files</li>
+                <li>Node or edge content</li>
+                <li>Custom properties</li>
+                <li>Any personal information</li>
+            </ul>
+
+            <h3>How Your Files Are Handled</h3>
+            <ul>
+                <li><strong>File Opening:</strong> Files are read directly from your device into browser memory</li>
+                <li><strong>File Saving:</strong> Files are generated in browser memory and downloaded to your device</li>
+                <li><strong>No Cloud Storage:</strong> Files are never uploaded to any server or cloud storage</li>
+                <li><strong>You Control Everything:</strong> You decide where to save files and who to share them with</li>
+            </ul>
+
+            <h3>Image Handling</h3>
+            <p>When you paste images into NodeBook:</p>
+            <ul>
+                <li>Images are converted to base64 and embedded directly in the JSON</li>
+                <li>No images are uploaded to servers</li>
+                <li>Images remain embedded in your saved JSON files</li>
+                <li>Consider image file sizes as they increase your JSON file size</li>
+            </ul>
+
+            <h3>Clearing Your Data</h3>
+            <p>To completely clear all locally stored data:</p>
+            <ol>
+                <li>Open your browser's developer tools (F12)</li>
+                <li>Go to Application → Local Storage</li>
+                <li>Select the NodeBook domain</li>
+                <li>Click "Clear All" or delete specific items</li>
+            </ol>
 
             <div class="note">
-                <strong>💡 Important:</strong> You are responsible for saving your work. Use File → Save to download your graphs as JSON files on your device.
+                <strong>💡 Important:</strong> You are responsible for saving your work. NodeBook doesn't auto-save or maintain backups. Use File → Save (Ctrl+S) to download your graphs as JSON files to your device.
             </div>
-        </section>
-
-        <!-- DATA FORMAT -->
-        <section id="data-format">
-            <h2>JSON Data Format</h2>
-
-            <h3>Standard Structure</h3>
-            <p>NodeBook uses a specific JSON format for storing graphs. Here's the basic structure:</p>
-
-            <code style="display: block; white-space: pre; padding: 1rem; overflow-x: auto;">
-{
-  "metadata": {
-    "title": "Graph Title",
-    "description": "Graph description",
-    "version": "1.0",
-    "createdDate": "2025-01-01T00:00:00.000Z",
-    "modifiedDate": "2025-01-01T00:00:00.000Z"
-  },
-  "graph": {
-    "nodes": [
-      {
-        "id": "node1",
-        "name": "Node Name",
-        "description": "Description",
-        "color": "#3498db",
-        "size": 20,
-        "type": "Type"
-      }
-    ],
-    "edges": [
-      {
-        "id": "edge1",
-        "name": "Edge Name",
-        "source": "node1",
-        "target": "node2",
-        "relationship": "connects to",
-        "directed": true,
-        "color": "#95a5a6",
-        "weight": 1
-      }
-    ]
-  }
-}
-            </code>
-
-            <h3>Custom Properties</h3>
-            <p>You can add any custom properties to nodes and edges. They will be preserved and displayed in the properties panel.</p>
 
             <div class="tip">
-                <strong>💡 Tip:</strong> Check the <code>sample_graph.json</code> file for a complete working example.
+                <strong>🔒 For Maximum Privacy:</strong>
+                <ul>
+                    <li>Use NodeBook in a private/incognito browser window</li>
+                    <li>Clear browser cache after use if on a shared computer</li>
+                    <li>Save sensitive graphs to encrypted storage</li>
+                    <li>Don't share your JSON files unless you trust the recipient</li>
+                </ul>
             </div>
         </section>
 
-        <!-- TIPS & TRICKS -->
-        <section id="tips">
-            <h2>Tips & Best Practices</h2>
+        <!-- GETTING HELP -->
+        <section id="getting-help">
+            <h2>Getting Help & Support</h2>
 
-            <h3>Performance</h3>
-            <ul>
-                <li><strong>Freeze for Large Graphs:</strong> Graphs with 100+ nodes benefit from freezing the simulation</li>
-                <li><strong>Use Filter:</strong> Hide unnecessary nodes to improve performance</li>
-                <li><strong>Adjust Force Strength:</strong> Lower force strength for better performance with large graphs</li>
-            </ul>
-
-            <h3>Organization</h3>
-            <ul>
-                <li><strong>Use Colors:</strong> Assign consistent colors to node types for easy identification</li>
-                <li><strong>Meaningful Names:</strong> Use descriptive names for nodes and relationships</li>
-                <li><strong>Add Descriptions:</strong> Include detailed descriptions for complex nodes</li>
-                <li><strong>Pin Important Nodes:</strong> Pin key nodes to keep them in specific positions</li>
-            </ul>
-
-            <h3>Workflow</h3>
-            <ul>
-                <li><strong>Save Frequently:</strong> Use Ctrl+S often to avoid losing work</li>
-                <li><strong>Use Versions:</strong> Save As to create different versions of your graph</li>
-                <li><strong>Export Backups:</strong> Export JSON regularly as backup</li>
-                <li><strong>Test with Samples:</strong> Practice with sample graphs before creating complex graphs</li>
-            </ul>
-
-            <h3>Advanced Techniques</h3>
-            <ul>
-                <li><strong>Explode for Analysis:</strong> Use the Explode feature to break down complex structures</li>
-                <li><strong>Excel Integration:</strong> Use Excel converter for bulk data import</li>
-                <li><strong>Path Analysis:</strong> Use "All Paths" to discover hidden connections</li>
-                <li><strong>Custom Properties:</strong> Add metadata for advanced filtering and analysis</li>
-            </ul>
-        </section>
-
-        <!-- TROUBLESHOOTING -->
-        <section id="troubleshooting">
-            <h2>Troubleshooting</h2>
-
-            <h3>Common Issues</h3>
-
+            <h3>Troubleshooting</h3>
+            
             <h4>Graph Won't Load</h4>
             <ul>
-                <li>Verify JSON format is correct</li>
-                <li>Check for syntax errors in the JSON file</li>
-                <li>Ensure file size is reasonable (under 10MB recommended)</li>
-                <li>Try opening the file in a text editor to verify it's valid JSON</li>
+                <li>Check that your JSON file follows the standard format (see Data Format section)</li>
+                <li>Validate your JSON syntax using an online validator</li>
+                <li>Ensure node IDs are unique</li>
+                <li>Check that edge source/target IDs reference existing nodes</li>
             </ul>
 
             <h4>Performance Issues</h4>
             <ul>
-                <li>Freeze the simulation (press F)</li>
-                <li>Use the Filter function to hide unnecessary nodes</li>
-                <li>Reduce force strength</li>
-                <li>Close other browser tabs</li>
-                <li>Try a different browser (Chrome recommended)</li>
+                <li>Press F to freeze the simulation</li>
+                <li>Use the Filter to hide non-essential nodes</li>
+                <li>Close the properties panel when not editing</li>
+                <li>Consider breaking very large graphs (1000+ nodes) into smaller sub-graphs</li>
             </ul>
 
-            <h4>Can't Find a Node</h4>
+            <h4>Nodes Won't Move</h4>
             <ul>
-                <li>Use Search (Ctrl+F) to locate nodes by name</li>
-                <li>Check if filters are active</li>
-                <li>Try shuffling the layout</li>
-                <li>Zoom out to see the entire graph</li>
+                <li>Check if simulation is frozen (press F to toggle)</li>
+                <li>Check if node is pinned (right-click → Unpin)</li>
+                <li>Try Shuffle to restart the physics simulation</li>
             </ul>
 
-            <h4>Changes Not Saving</h4>
+            <h4>Can't See All Nodes</h4>
             <ul>
-                <li>Click Save (Ctrl+S) after making changes</li>
-                <li>Check browser permissions for file downloads</li>
-                <li>Verify you have write permissions to the save location</li>
+                <li>Zoom out using mouse wheel</li>
+                <li>Use the minimap to navigate to different areas</li>
+                <li>Clear any active filters or search terms</li>
+                <li>Try Shuffle to reorganize the layout</li>
             </ul>
 
-            <h4>Accidental Deletion</h4>
+            <h3>Feature Requests & Bug Reports</h3>
+            <p>To report bugs or request features:</p>
             <ul>
-                <li>Immediately press Ctrl+Z to undo</li>
-                <li>Check if you have a recent save to restore from</li>
+                <li>Visit the GitHub repository (click ⚙️ button in header)</li>
+                <li>Check existing issues to see if it's already reported</li>
+                <li>Create a new issue with detailed description</li>
+                <li>Include your browser version and steps to reproduce</li>
             </ul>
 
-            <div class="warning">
-                <strong>⚠️ Browser Compatibility:</strong> If you experience issues, try using the latest version of Chrome or Edge for best results.
-            </div>
+            <h3>Contributing</h3>
+            <p>NodeBook is open source! Contributions are welcome:</p>
+            <ul>
+                <li>Fork the repository on GitHub</li>
+                <li>Make your improvements or fixes</li>
+                <li>Submit a pull request with clear description</li>
+                <li>Follow the project's coding standards</li>
+            </ul>
+
+            <h3>Community</h3>
+            <p>Connect with other NodeBook users:</p>
+            <ul>
+                <li>GitHub Discussions for questions and ideas</li>
+                <li>Issue tracker for bug reports</li>
+                <li>Star the project if you find it useful!</li>
+            </ul>
         </section>
     </div>
 
     <footer>
         <p><strong>NodeBook</strong> - Interactive Knowledge Graph Editor</p>
-        <p>All operations are performed locally in your browser. Your privacy is protected.</p>
+        <p>100% Client-Side • Privacy-First • Open Source</p>
         <p>© 2025 NodeBook Project</p>
     </footer>
 </body>
