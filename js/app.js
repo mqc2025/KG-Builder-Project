@@ -29,6 +29,9 @@ class KnowledgeGraphApp {
 
 		
         this.contextMenuManager = new ContextMenuManager(this);
+		// Initialize workflow manager
+		this.workflowManager = new WorkflowManager(this);
+		
         this.excelConverter = new ExcelConverter(this.graph, this.renderer);
         
         // Current tool
@@ -163,6 +166,15 @@ class KnowledgeGraphApp {
         document.getElementById('btn-freeze')?.addEventListener('click', () => this.toggleFreeze());
         document.getElementById('btn-layout')?.addEventListener('click', () => this.resimulate());
         document.getElementById('btn-shortest-path')?.addEventListener('click', () => this.startShortestPath());
+		// Workflow button
+		document.getElementById('btn-workflow')?.addEventListener('click', () => {
+			if (this.renderer.selectedNodes.length === 1) {
+				const nodeId = this.renderer.selectedNodes[0];
+				this.workflowManager.openWorkflowNavigator(nodeId);
+			} else {
+				this.updateStatus('Please select a single node first');
+			}
+		});
 		document.getElementById('btn-add-graph')?.addEventListener('click', () => this.addGraphFromFile());
 
 		// Add graph file input handler
