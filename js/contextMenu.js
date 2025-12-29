@@ -55,12 +55,20 @@ class ContextMenuManager {
                 label: 'Connect To...',
                 action: () => this.startConnectFrom(node)
             },
+			{
+				icon: '🔄',
+				label: 'Workflow',
+				action: () => this.app.workflowManager.openWorkflowNavigator(node.id)
+			},
+			
+			{ separator: true },
             {
                 icon: '→',
                 label: 'Connect by Click',
                 action: () => this.startConnectByClick(node)
             },
             { separator: true },
+			
             {
                 icon: '🗑️',
                 label: 'Delete Node',
