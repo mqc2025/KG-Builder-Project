@@ -2,11 +2,12 @@
  * WorkflowManager - Handles workflow navigation and validation
  * 
  * Workflow Requirements:
- * - Start node: name="start" (case-insensitive), category="start-end", ONE outgoing "next" edge
- * - End node: name="end" (case-insensitive), category="start-end", ONE incoming "next" edge
- * - Task nodes: category="task", ONE incoming + ONE outgoing "next" edge
- * - Decision nodes: category="decision", ONE incoming + MULTIPLE outgoing "next" edges
- * - "next" edges: label="next" or relationship="next" (case-insensitive), directed=true
+ * - Start node: name="start" (case-insensitive), category="start-end", ZERO incoming, ONE outgoing "next" edge
+ * - End node: name="end" (case-insensitive), category="start-end", ONE incoming, ZERO outgoing "next" edge
+ * - Task nodes: category="task", AT LEAST ONE incoming (multiple allowed for merge points), EXACTLY ONE outgoing "next" edge
+ * - Decision nodes: category="decision", AT LEAST ONE incoming (multiple allowed for merge points), AT LEAST TWO outgoing "next" edges (for branching)
+ * - Unknown category nodes: MULTIPLE incoming allowed, warning if more than ONE outgoing
+ * - "next" edges: label="next" or relationship="next" or name="next" (case-insensitive), directed=true
  */
 
 class WorkflowManager {
@@ -310,29 +311,32 @@ class WorkflowManager {
                 result.isValid = false;
             }
         } else if (category === 'task') {
-            // Task node: ONE incoming + ONE outgoing
-            if (incomingNext.length !== 1) {
-                result.errors.push(`❌ Task node "${node.name || node.id}" must have exactly ONE incoming "next" edge (found ${incomingNext.length})`);
-                result.isValid = false;
-            }
-            if (outgoingNext.length !== 1) {
-                result.errors.push(`❌ Task node "${node.name || node.id}" must have exactly ONE outgoing "next" edge (found ${outgoingNext.length})`);
-                result.isValid = false;
-            }
-        } else if (category === 'decision') {
-            // Decision node: ONE incoming + MULTIPLE outgoing (at least 1)
-            if (incomingNext.length !== 1) {
-                result.errors.push(`❌ Decision node "${node.name || node.id}" must have exactly ONE incoming "next" edge (found ${incomingNext.length})`);
-                result.isValid = false;
-            }
-            if (outgoingNext.length < 1) {
-                result.errors.push(`❌ Decision node "${node.name || node.id}" must have at least ONE outgoing "next" edge (found ${outgoingNext.length})`);
-                result.isValid = false;
-            }
-        } else {
-            // Unknown category - warning
-            result.warnings.push(`⚠️ Node "${node.name || node.id}" has category="${node.category}" which is not a recognized workflow type (start-end, task, decision)`);
-        }
+			// Task node: MULTIPLE incoming + ONE outgoing (allows merge points)
+			if (incomingNext.length < 1) {
+				result.errors.push(`❌ Task node "${node.name || node.id}" must have at least ONE incoming "next" edge (found ${incomingNext.length})`);
+				result.isValid = false;
+			}
+			if (outgoingNext.length !== 1) {
+				result.errors.push(`❌ Task node "${node.name || node.id}" must have exactly ONE outgoing "next" edge (found ${outgoingNext.length})`);
+				result.isValid = false;
+			}
+		} else if (category === 'decision') {
+			// Decision node: MULTIPLE incoming + MULTIPLE outgoing (allows merge and branch)
+			if (incomingNext.length < 1) {
+				result.errors.push(`❌ Decision node "${node.name || node.id}" must have at least ONE incoming "next" edge (found ${incomingNext.length})`);
+				result.isValid = false;
+			}
+			if (outgoingNext.length < 2) {
+				result.errors.push(`❌ Decision node "${node.name || node.id}" must have at least TWO outgoing "next" edges for branching (found ${outgoingNext.length})`);
+				result.isValid = false;
+			}
+		} else {
+		// Unknown category - apply general rules: MULTIPLE incoming + ONE outgoing
+		if (outgoingNext.length > 1) {
+			result.warnings.push(`⚠️ Node "${node.name || node.id}" has multiple outgoing "next" edges (${outgoingNext.length}). Only decision nodes should branch.`);
+		}
+		// Note: We allow any number of incoming edges for unknown categories
+	}
         
         return result;
     }

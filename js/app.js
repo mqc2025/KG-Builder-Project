@@ -168,8 +168,8 @@ class KnowledgeGraphApp {
         document.getElementById('btn-shortest-path')?.addEventListener('click', () => this.startShortestPath());
 		// Workflow button
 		document.getElementById('btn-workflow')?.addEventListener('click', () => {
-			if (this.renderer.selectedNodes.length === 1) {
-				const nodeId = this.renderer.selectedNodes[0];
+			if (this.renderer.selectedNodes.size === 1) {
+				const nodeId = Array.from(this.renderer.selectedNodes)[0];
 				this.workflowManager.openWorkflowNavigator(nodeId);
 			} else {
 				this.updateStatus('Please select a single node first');
