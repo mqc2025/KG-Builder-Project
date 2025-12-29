@@ -508,7 +508,76 @@
         </div>
     </div>
 
-    <!-- SheetJS Library for Excel Processing -->
+    
+	<!-- Workflow Navigator Modal -->
+	<div id="workflow-modal" class="modal hidden">
+		<div class="modal-content workflow-modal-content">
+			<div class="modal-header">
+				<h2>Workflow Navigator</h2>
+				<button class="modal-close" id="workflow-close">&times;</button>
+			</div>
+			
+			<!-- Validation Summary Section -->
+			<div id="workflow-validation-summary" class="workflow-validation">
+				<!-- Status, warnings, errors will be inserted here dynamically -->
+			</div>
+			
+			<div class="modal-body">
+				<!-- Current Node Display -->
+				<div class="workflow-current-node">
+					<h3 id="workflow-node-name">Node Name</h3>
+					<p id="workflow-node-category" class="workflow-category-badge"></p>
+					<p id="workflow-node-description"></p>
+				</div>
+				
+				<!-- Position Indicator -->
+				<div id="workflow-position" class="workflow-position">
+					<!-- e.g., "Node 3 of 8 in workflow chain" -->
+				</div>
+				
+				<!-- Inputs/Outputs -->
+				<div class="workflow-connections">
+					<div class="workflow-inputs">
+						<h4>Inputs</h4>
+						<ul id="workflow-inputs-list"></ul>
+					</div>
+					<div class="workflow-outputs">
+						<h4>Outputs</h4>
+						<ul id="workflow-outputs-list"></ul>
+					</div>
+				</div>
+			</div>
+			
+			<div class="modal-footer workflow-navigation">
+				<!-- Previous buttons (dynamically generated) -->
+				<div id="workflow-prev-buttons" class="workflow-nav-group"></div>
+				
+				<!-- Next buttons (dynamically generated) -->
+				<div id="workflow-next-buttons" class="workflow-nav-group"></div>
+				
+				<button class="btn btn-secondary" id="workflow-close-btn">Close</button>
+				<button class="btn btn-secondary" id="workflow-validation-details">Validation Details</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Validation Details Modal -->
+	<div id="workflow-validation-modal" class="modal hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2>Workflow Validation Report</h2>
+				<button class="modal-close" id="validation-close">&times;</button>
+			</div>
+			<div class="modal-body" id="validation-details-body">
+				<!-- Detailed validation report inserted dynamically -->
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" id="validation-close-btn">Close</button>
+			</div>
+		</div>
+	</div>
+	
+	
 
     <!-- SheetJS Library for Excel Processing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
