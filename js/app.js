@@ -1457,7 +1457,20 @@ class KnowledgeGraphApp {
 						font-weight: 500;
 						transition: all 0.2s;
 					">
-						Empty Graph
+						Start Fresh!
+					</button>
+					<button id="btn-welcome-open" style="
+						padding: 0.75rem 1.5rem;
+						background: #16a085;
+						color: white;
+						border: none;
+						border-radius: 6px;
+						cursor: pointer;
+						font-size: 0.95rem;
+						font-weight: 500;
+						transition: all 0.2s;
+					">
+						Open A File 📁
 					</button>
 					<button id="btn-welcome-guided" style="
 						padding: 0.75rem 1.5rem;
@@ -1470,7 +1483,7 @@ class KnowledgeGraphApp {
 						font-weight: 500;
 						transition: all 0.2s;
 					">
-						Show Welcome Graph 🎉
+						Welcome Graph 🎉
 					</button>
 				</div>
 			</div>
@@ -1478,8 +1491,9 @@ class KnowledgeGraphApp {
 		
 		document.body.appendChild(modal);
 		
-		// Add hover effects
+		// hover effects
 		const emptyBtn = modal.querySelector('#btn-welcome-empty');
+		const openBtn = modal.querySelector('#btn-welcome-open');
 		const guidedBtn = modal.querySelector('#btn-welcome-guided');
 		
 		emptyBtn.addEventListener('mouseenter', () => {
@@ -1489,6 +1503,14 @@ class KnowledgeGraphApp {
 		emptyBtn.addEventListener('mouseleave', () => {
 			emptyBtn.style.background = '#34495e';
 			emptyBtn.style.borderColor = '#7f8c8d';
+		});
+		
+		//  listeners for the Open button
+		openBtn.addEventListener('mouseenter', () => {
+			openBtn.style.background = '#138d75';
+		});
+		openBtn.addEventListener('mouseleave', () => {
+			openBtn.style.background = '#16a085';
 		});
 		
 		guidedBtn.addEventListener('mouseenter', () => {
@@ -1502,6 +1524,11 @@ class KnowledgeGraphApp {
 		emptyBtn.addEventListener('click', () => {
 			modal.remove();
 			this.updateStatus('Empty graph ready. Right-click to start building!');
+		});
+		
+		openBtn.addEventListener('click', () => {
+			modal.remove();
+			this.openGraph();
 		});
 		
 		guidedBtn.addEventListener('click', async () => {
