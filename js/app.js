@@ -161,6 +161,8 @@ class KnowledgeGraphApp {
         document.getElementById('btn-undo')?.addEventListener('click', () => this.undo());
         document.getElementById('btn-redo')?.addEventListener('click', () => this.redo());
         document.getElementById('btn-filter')?.addEventListener('click', () => this.filterManager.showFilterModal());
+		// Node button
+		document.getElementById('btn-add-node')?.addEventListener('click', () => this.addNodeAtCenter());
         
         // Tool buttons
         document.getElementById('btn-freeze')?.addEventListener('click', () => this.toggleFreeze());
@@ -1742,6 +1744,21 @@ class KnowledgeGraphApp {
         this.saveState();
         this.updateStatus(`Added node: ${name}`);
     }
+	
+	/**
+	 * Add node at center of current view
+	 */
+	addNodeAtCenter() {
+		const svgElement = document.getElementById('graph-canvas');
+		const rect = svgElement.getBoundingClientRect();
+		
+		// Calculate center of viewport in SVG coordinates
+		const transform = this.renderer.currentTransform;
+		const centerX = (rect.width / 2 - transform.x) / transform.k;
+		const centerY = (rect.height / 2 - transform.y) / transform.k;
+		
+		this.addNode(centerX, centerY);
+	}
 	
 	/**
      * Handle paste image event
