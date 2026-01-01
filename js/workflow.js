@@ -811,7 +811,7 @@ class WorkflowManager {
             const prev = previousNodes[i];
             const btn = document.createElement('button');
             btn.className = 'btn btn-primary workflow-nav-btn';
-            btn.textContent = `← ${prev.node.name || prev.node.id}`;
+			btn.textContent = `${prev.node.name || prev.node.id} ←`;
             btn.title = `Go to: ${prev.node.name || prev.node.id}`;
             btn.addEventListener('click', () => this.navigateToNode(prev.node.id));
             container.appendChild(btn);
@@ -879,11 +879,11 @@ class WorkflowManager {
             btn.className = 'btn btn-primary workflow-nav-btn';
             
             // If multiple next nodes, show the edge label
-            if (nextNodes.length > 1) {
-                btn.textContent = `${next.label} → ${next.node.name || next.node.id}`;
-            } else {
-                btn.textContent = `${next.node.name || next.node.id} →`;
-            }
+			if (nextNodes.length > 1) {
+				btn.textContent = `${next.label} → ${next.node.name || next.node.id}`;
+			} else {
+				btn.textContent = `→ ${next.node.name || next.node.id}`;
+			}
             
             btn.title = `Go to: ${next.node.name || next.node.id}`;
             btn.addEventListener('click', () => this.navigateToNode(next.node.id));
