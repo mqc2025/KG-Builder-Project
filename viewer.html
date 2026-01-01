@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Viewer</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toolbar.css">
+    <link rel="stylesheet" href="styles/properties.css">
+    <link rel="stylesheet" href="styles/minimap.css">
+    <link rel="stylesheet" href="styles/contextMenu.css">
+    <link rel="stylesheet" href="styles/filter.css">
+    <link rel="stylesheet" href="styles/mobile.css">
+    <link rel="stylesheet" href="styles/workflow.css">
+    
+    <style>
+        /* Hide editing controls for viewer mode */
+        .viewer-mode .left-sidebar,
+        .viewer-mode .right-sidebar,
+        .viewer-mode .toolbar,
+        .viewer-mode .status-bar,
+        .viewer-mode #context-menu {
+            display: none !important;
+        }
+        
+        .viewer-mode .canvas-container {
+            left: 0 !important;
+            right: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+        }
+        
+        /* Show a simple title bar */
+        .viewer-title {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            z-index: 1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="viewer-mode">
+    <!-- Title overlay -->
+    <div class="viewer-title" id="graph-title">Loading Graph...</div>
+
+    <!-- Canvas Container -->
+    <div class="canvas-container" id="canvas-container">
+        <svg id="canvas"></svg>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimap" class="minimap hidden">
+        <div class="minimap-header">
+            <span>Minimap</span>
+            <button class="minimap-close">✕</button>
+        </div>
+        <svg id="minimap-svg"></svg>
+        <div class="minimap-viewport"></div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Embedded JSON Data - REPLACE THIS WITH YOUR ACTUAL JSON -->
+    <script id="embedded-graph-data" type="application/json">
+{
+  "graph": {
+    "metadata": {
+      "name": "workflow_showcase",
+      "title": "Complete Software Development Lifecycle Workflow",
+      "description": "A comprehensive workflow demonstrating start/end nodes, tasks, decisions, branching, loops, and merge points. Includes a disconnected chain to showcase validation warnings.",
+      "created": "2025-01-29",
+      "modified": "2025-12-29"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "start_node",
+        "name": "Start",
+        "color": "#3498db",
+        "size": 20,
+        "description": "Starting point of the software development workflow",
+        "category": "start-end",
+        "x": 100,
+        "y": 300,
+        "fx": 100,
+        "fy": 300,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.770Z",
+        "modifiedDate": "2025-12-29T17:08:13.770Z"
+      },
+      {
+        "id": "task_requirements",
+        "name": "Gather Requirements",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Collect and document project requirements from stakeholders",
+        "category": "task",
+        "x": 300,
+        "y": 300,
+        "fx": 300,
+        "fy": 300,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_design",
+        "name": "Create Design",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Design system architecture and user interface",
+        "category": "task",
+        "x": 500,
+        "y": 300,
+        "fx": 500,
+        "fy": 300,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "decision_design_approved",
+        "name": "Design Approved?",
+        "color": "#f39c12",
+        "size": 18,
+        "description": "Decision point: Is the design approved by stakeholders?",
+        "category": "decision",
+        "x": 700,
+        "y": 301.3375244140625,
+        "fx": 700,
+        "fy": 301.3375244140625,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_implement",
+        "name": "Implement Code",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Write code according to approved design specifications",
+        "category": "task",
+        "x": 900,
+        "y": 200,
+        "fx": 900,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_revise_design",
+        "name": "Revise Design",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Modify design based on feedback and return to review",
+        "category": "task",
+        "x": 900,
+        "y": 400,
+        "fx": 900,
+        "fy": 400,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_testing",
+        "name": "Run Tests",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Execute unit tests, integration tests, and system tests",
+        "category": "task",
+        "x": 1100,
+        "y": 200,
+        "fx": 1100,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "decision_tests_passed",
+        "name": "Tests Passed?",
+        "color": "#f39c12",
+        "size": 18,
+        "description": "Decision point: Did all tests pass successfully?",
+        "category": "decision",
+        "x": 1300,
+        "y": 200,
+        "fx": 1300,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_fix_bugs",
+        "name": "Fix Bugs",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Debug and fix issues found during testing",
+        "category": "task",
+        "x": 1300,
+        "y": 350,
+        "fx": 1300,
+        "fy": 350,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_deploy",
+        "name": "Deploy to Production",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Deploy the application to production environment",
+        "category": "task",
+        "x": 1500,
+        "y": 200,
+        "fx": 1500,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "task_monitor",
+        "name": "Monitor System",
+        "color": "#2ecc71",
+        "size": 15,
+        "description": "Monitor system performance and user feedback",
+        "category": "task",
+        "x": 1700,
+        "y": 200,
+        "fx": 1700,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "end_node",
+        "name": "End",
+        "color": "#e74c3c",
+        "size": 20,
+        "description": "Workflow complete - software delivered and monitored",
+        "category": "start-end",
+        "x": 1900,
+        "y": 200,
+        "fx": 1900,
+        "fy": 200,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.771Z",
+        "modifiedDate": "2025-12-29T17:08:13.771Z"
+      },
+      {
+        "id": "disconnected_start",
+        "name": "Start",
+        "color": "#95a5a6",
+        "size": 16,
+        "description": "This is a disconnected workflow chain (for testing validation warnings)",
+        "category": "start-end",
+        "x": 1000,
+        "y": 600,
+        "fx": 1000,
+        "fy": 600,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.772Z",
+        "modifiedDate": "2025-12-29T17:08:13.772Z"
+      },
+      {
+        "id": "disconnected_task1",
+        "name": "Incomplete Task",
+        "color": "#95a5a6",
+        "size": 14,
+        "description": "This chain is disconnected and missing an end node",
+        "category": "task",
+        "x": 1200,
+        "y": 600,
+        "fx": 1200,
+        "fy": 600,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.772Z",
+        "modifiedDate": "2025-12-29T17:08:13.772Z"
+      },
+      {
+        "id": "disconnected_task2",
+        "name": "Another Task",
+        "color": "#95a5a6",
+        "size": 14,
+        "description": "Part of disconnected chain",
+        "category": "task",
+        "x": 1400,
+        "y": 600,
+        "fx": 1400,
+        "fy": 600,
+        "icon": "",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": "",
+        "createdDate": "2025-12-29T17:08:13.772Z",
+        "modifiedDate": "2025-12-29T17:08:13.772Z"
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_start_to_req",
+        "name": "begin",
+        "source": "start_node",
+        "target": "task_requirements",
+        "description": "Start the workflow",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_req_to_design",
+        "name": "proceed",
+        "source": "task_requirements",
+        "target": "task_design",
+        "description": "Move to design phase",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_design_to_decision",
+        "name": "review",
+        "source": "task_design",
+        "target": "decision_design_approved",
+        "description": "Submit design for approval",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_decision_approved_yes",
+        "name": "yes - approved",
+        "source": "decision_design_approved",
+        "target": "task_implement",
+        "description": "Design approved, proceed to implementation",
+        "relationship": "next",
+        "color": "#2ecc71",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_decision_approved_no",
+        "name": "no - needs revision",
+        "source": "decision_design_approved",
+        "target": "task_revise_design",
+        "description": "Design needs revision",
+        "relationship": "next",
+        "color": "#e74c3c",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_revise_to_design",
+        "name": "resubmit",
+        "source": "task_revise_design",
+        "target": "task_design",
+        "description": "Loop back to design after revisions (this is allowed)",
+        "relationship": "next",
+        "color": "#f39c12",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_implement_to_testing",
+        "name": "complete",
+        "source": "task_implement",
+        "target": "task_testing",
+        "description": "Implementation complete, run tests",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_testing_to_decision",
+        "name": "evaluate",
+        "source": "task_testing",
+        "target": "decision_tests_passed",
+        "description": "Evaluate test results",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_tests_passed_yes",
+        "name": "yes - all passed",
+        "source": "decision_tests_passed",
+        "target": "task_deploy",
+        "description": "All tests passed, ready to deploy",
+        "relationship": "next",
+        "color": "#2ecc71",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_tests_passed_no",
+        "name": "no - bugs found",
+        "source": "decision_tests_passed",
+        "target": "task_fix_bugs",
+        "description": "Tests failed, fix bugs",
+        "relationship": "next",
+        "color": "#e74c3c",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_fix_to_testing",
+        "name": "retest",
+        "source": "task_fix_bugs",
+        "target": "task_testing",
+        "description": "Loop back to testing after bug fixes",
+        "relationship": "next",
+        "color": "#f39c12",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_deploy_to_monitor",
+        "name": "deployed",
+        "source": "task_deploy",
+        "target": "task_monitor",
+        "description": "Deployment complete, begin monitoring",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_monitor_to_end",
+        "name": "complete",
+        "source": "task_monitor",
+        "target": "end_node",
+        "description": "Workflow complete",
+        "relationship": "next",
+        "color": "#3498db",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "data_req_to_design",
+        "name": "requirements doc",
+        "source": "task_requirements",
+        "target": "task_design",
+        "description": "Requirements document provided to design team",
+        "relationship": "input",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "data_design_to_implement",
+        "name": "design specs",
+        "source": "task_design",
+        "target": "task_implement",
+        "description": "Design specifications guide implementation",
+        "relationship": "input",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "data_implement_to_testing",
+        "name": "source code",
+        "source": "task_implement",
+        "target": "task_testing",
+        "description": "Source code submitted for testing",
+        "relationship": "input",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "data_testing_to_bugs",
+        "name": "bug reports",
+        "source": "task_testing",
+        "target": "task_fix_bugs",
+        "description": "Bug reports from testing",
+        "relationship": "input",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "data_deploy_to_monitor",
+        "name": "deployment logs",
+        "source": "task_deploy",
+        "target": "task_monitor",
+        "description": "Deployment logs and metrics",
+        "relationship": "input",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_disconnected_start_to_task1",
+        "name": "begin",
+        "source": "disconnected_start",
+        "target": "disconnected_task1",
+        "description": "Start of disconnected chain",
+        "relationship": "next",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_disconnected_task1_to_task2",
+        "name": "continue",
+        "source": "disconnected_task1",
+        "target": "disconnected_task2",
+        "description": "Continue in disconnected chain (missing end node)",
+        "relationship": "next",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      }
+    ]
+  }
+}
+    </script>
+
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/minimap.js"></script>
+
+    <!-- Viewer Initialization Script -->
+    <script>
+        // Viewer mode initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Get embedded JSON data
+                const jsonScript = document.getElementById('embedded-graph-data');
+                const graphData = JSON.parse(jsonScript.textContent);
+                
+                // Update title
+                const titleEl = document.getElementById('graph-title');
+                if (graphData.graph.metadata && graphData.graph.metadata.title) {
+                    titleEl.textContent = graphData.graph.metadata.title;
+                } else if (graphData.graph.metadata && graphData.graph.metadata.name) {
+                    titleEl.textContent = graphData.graph.metadata.name;
+                }
+                
+                // Initialize graph
+                const graph = new Graph();
+                graph.fromJSON(graphData);
+                
+                // Initialize renderer (viewer mode)
+                const renderer = new Renderer(graph, null); // null = no app object needed for viewer
+                
+                // Initialize minimap
+                const minimap = new Minimap(renderer);
+                
+                // Auto-fit to view after a short delay
+                setTimeout(() => {
+                    renderer.fitToView();
+                    // Hide title after a few seconds
+                    setTimeout(() => {
+                        titleEl.style.opacity = '0';
+                        titleEl.style.transition = 'opacity 1s';
+                    }, 3000);
+                }, 500);
+                
+                // Enable zoom and pan only (no editing)
+                console.log('Graph viewer loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading graph:', error);
+                document.getElementById('graph-title').textContent = 'Error loading graph';
+                document.getElementById('graph-title').style.backgroundColor = '#e74c3c';
+            }
+        });
+    </script>
+</body>
+</html>
