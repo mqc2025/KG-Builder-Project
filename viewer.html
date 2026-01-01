@@ -16,6 +16,30 @@
     <link rel="stylesheet" href="styles/workflow.css">
     
     <style>
+		/* Ensure full viewport */
+		html, body {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		.viewer-mode .canvas-container {
+			position: fixed !important;
+			left: 0 !important;
+			right: 0 !important;
+			top: 0 !important;
+			bottom: 0 !important;
+			width: 100% !important;
+			height: 100% !important;
+		}
+
+		.viewer-mode #canvas {
+			width: 100% !important;
+			height: 100% !important;
+			display: block;
+		}
         /* Hide editing controls for viewer mode */
         .viewer-mode .left-sidebar,
         .viewer-mode .right-sidebar,
@@ -680,6 +704,9 @@
 
     <!-- Viewer Initialization Script -->
     <script>
+        // Set viewer mode flag globally
+        window.VIEWER_MODE = true;
+        
         // Viewer mode initialization
         document.addEventListener('DOMContentLoaded', function() {
             try {
@@ -700,10 +727,18 @@
                 graph.fromJSON(graphData);
                 
                 // Initialize renderer (viewer mode)
-                const renderer = new Renderer(graph, null); // null = no app object needed for viewer
+                const canvas = document.getElementById('canvas');
+                const renderer = new Renderer(canvas, graph);
+                
+                // Disable editing in renderer
+                renderer.isViewerMode = true;
                 
                 // Initialize minimap
-                const minimap = new Minimap(renderer);
+                const minimapElement = document.getElementById('minimap');
+                const minimap = new Minimap(minimapElement, renderer);
+                
+                // Render the graph
+                renderer.render();
                 
                 // Auto-fit to view after a short delay
                 setTimeout(() => {
@@ -717,6 +752,7 @@
                 
                 // Enable zoom and pan only (no editing)
                 console.log('Graph viewer loaded successfully');
+                console.log('Nodes:', graph.nodes.length, 'Edges:', graph.edges.length);
                 
             } catch (error) {
                 console.error('Error loading graph:', error);
