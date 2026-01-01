@@ -320,6 +320,12 @@ class KnowledgeGraphApp {
 	 * Handle node click
 	 */
 	handleNodeClick(node) {
+		// Check if workflow navigator is open
+		if (this.workflowManager && this.workflowManager.isOpen()) {
+			this.workflowManager.navigateToNodeIfInWorkflow(node.id);
+			return;
+		}
+		
 		// Check if in connect by click mode
 		if (this.connectByClickActive) {
 			this.completeConnectByClick(node);

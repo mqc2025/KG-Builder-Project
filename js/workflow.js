@@ -19,7 +19,59 @@ class WorkflowManager {
         this.navigationHistory = [];
         
         this.setupEventListeners();
+		this.setupEventListeners();
+		this.isDragging = false;
+		this.dragOffset = { x: 0, y: 0 };
+		this.setupDraggable();
     }
+	/**
+	 * Setup draggable functionality for the workflow modal
+	 */
+	setupDraggable() {
+		const modal = document.getElementById('workflow-modal');
+		const modalContent = modal?.querySelector('.workflow-modal-content');
+		const header = modalContent?.querySelector('.modal-header');
+		
+		if (!header || !modalContent) return;
+		
+		const self = this;
+		
+		header.style.cursor = 'move';
+		
+		const onMouseDown = (e) => {
+			// Only start drag if clicking on header (not the close button)
+			if (e.target.classList.contains('modal-close')) return;
+			
+			self.isDragging = true;
+			const rect = modalContent.getBoundingClientRect();
+			self.dragOffset.x = e.clientX - rect.left;
+			self.dragOffset.y = e.clientY - rect.top;
+			
+			e.preventDefault();
+		};
+		
+		const onMouseMove = (e) => {
+			if (!self.isDragging) return;
+			
+			const x = e.clientX - self.dragOffset.x;
+			const y = e.clientY - self.dragOffset.y;
+			
+			modalContent.style.position = 'fixed';
+			modalContent.style.left = x + 'px';
+			modalContent.style.top = y + 'px';
+			modalContent.style.margin = '0';
+			
+			e.preventDefault();
+		};
+		
+		const onMouseUp = () => {
+			self.isDragging = false;
+		};
+		
+		header.addEventListener('mousedown', onMouseDown);
+		document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('mouseup', onMouseUp);
+	}
 
     /**
      * Setup event listeners for workflow modals
@@ -110,6 +162,37 @@ class WorkflowManager {
         
         this.app.updateStatus(`Workflow navigator opened for: ${node.name || node.id}`);
     }
+	
+	/**
+	 * Navigate to a specific node (called when clicking nodes while navigator is open)
+	 * @param {string} nodeId - The node ID to navigate to
+	 */
+	navigateToNodeIfInWorkflow(nodeId) {
+		if (!this.workflowChain) return false;
+		
+		// Check if node is in the current workflow chain
+		const nodeInWorkflow = this.workflowChain.find(n => n.id === nodeId);
+		
+		if (nodeInWorkflow) {
+			// Node is in workflow - navigate to it
+			this.navigateToNode(nodeId);
+			return true;
+		} else {
+			// Node is outside workflow - show message
+			const node = this.app.graph.getNode(nodeId);
+			const nodeName = node ? (node.name || node.id) : nodeId;
+			alert(`Node "${nodeName}" is outside the current workflow chain.`);
+			return false;
+		}
+	}
+
+	/**
+	 * Check if workflow navigator is currently open
+	 */
+	isOpen() {
+		const modal = document.getElementById('workflow-modal');
+		return modal && !modal.classList.contains('hidden');
+	}
 
     /**
      * Find all nodes in the workflow chain containing the specified node
@@ -807,11 +890,20 @@ class WorkflowManager {
      * Show the workflow navigator modal
      */
     showModal() {
-        const modal = document.getElementById('workflow-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-        }
-    }
+		const modal = document.getElementById('workflow-modal');
+		if (modal) {
+			modal.classList.remove('hidden');
+			
+			// Reset modal position to center
+			const modalContent = modal.querySelector('.workflow-modal-content');
+			if (modalContent) {
+				modalContent.style.position = '';
+				modalContent.style.left = '';
+				modalContent.style.top = '';
+				modalContent.style.margin = '';
+			}
+		}
+	}
 
     /**
      * Close the workflow navigator
