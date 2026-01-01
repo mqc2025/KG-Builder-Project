@@ -172,16 +172,17 @@
    ======================================== */
 
 .workflow-position {
-    background: linear-gradient(135deg, #e8f4f8 0%, #d6eaf8 100%);
-    border: 2px solid #3498db;
-    border-radius: 8px;
-    padding: 12px 18px;
+    background-color: #f8f9fa;
+    padding: 15px 20px;
     text-align: center;
     font-size: 14px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
+    font-weight: 500;
+    color: #555;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ========================================
@@ -453,9 +454,14 @@
     }
     
     .workflow-navigation {
-        flex-direction: column;
-        align-items: stretch;
-    }
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 15px;
+		background-color: #f8f9fa;
+		padding: 15px 20px;
+		border-top: 1px solid #e0e0e0;
+	}
     
     .workflow-nav-group {
         width: 100%;

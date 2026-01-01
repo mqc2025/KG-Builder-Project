@@ -539,11 +539,6 @@
 					<p id="workflow-node-description"></p>
 				</div>
 				
-				<!-- Position Indicator -->
-				<div id="workflow-position" class="workflow-position">
-					<!-- e.g., "Node 3 of 8 in workflow chain" -->
-				</div>
-				
 				<!-- Inputs/Outputs -->
 				<div class="workflow-connections">
 					<div class="workflow-inputs">
@@ -556,16 +551,19 @@
 					</div>
 				</div>
 			</div>
-			
+
+			<!-- Position Indicator -->
+			<div id="workflow-position" class="workflow-position">
+				<!-- e.g., "Node 3 of 8 in workflow chain" -->
+				<!-- Validation Details button will be added here dynamically -->
+			</div>
+
 			<div class="modal-footer workflow-navigation">
 				<!-- Previous buttons (dynamically generated) -->
 				<div id="workflow-prev-buttons" class="workflow-nav-group"></div>
 				
 				<!-- Next buttons (dynamically generated) -->
 				<div id="workflow-next-buttons" class="workflow-nav-group"></div>
-				
-				<button class="btn btn-secondary" id="workflow-close-btn">Close</button>
-				<button class="btn btn-secondary" id="workflow-validation-details">Validation Details</button>
 			</div>
 		</div>
 	</div>

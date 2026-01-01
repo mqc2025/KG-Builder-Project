@@ -79,12 +79,8 @@ class WorkflowManager {
     setupEventListeners() {
         // Main modal close buttons
         document.getElementById('workflow-close')?.addEventListener('click', () => this.close());
-        document.getElementById('workflow-close-btn')?.addEventListener('click', () => this.close());
         
-        // Validation details button
-        document.getElementById('workflow-validation-details')?.addEventListener('click', () => {
-            this.showValidationDetails();
-        });
+        
         
         // Validation modal close buttons
         document.getElementById('validation-close')?.addEventListener('click', () => {
@@ -655,21 +651,30 @@ class WorkflowManager {
     }
 
     /**
-     * Update position indicator (e.g., "Step 3 of 8")
-     */
-    updatePositionIndicator() {
-        const positionElement = document.getElementById('workflow-position');
-        if (!positionElement || !this.workflowChain) return;
-        
-        const currentIndex = this.workflowChain.findIndex(n => n.id === this.currentNodeId);
-        const total = this.workflowChain.length;
-        
-        if (currentIndex >= 0) {
-            positionElement.textContent = `Node ${currentIndex + 1} of ${total} in workflow chain`;
-        } else {
-            positionElement.textContent = 'Position unknown';
-        }
-    }
+	 * Update position indicator (e.g., "Step 3 of 8")
+	 */
+	updatePositionIndicator() {
+		const positionElement = document.getElementById('workflow-position');
+		if (positionElement) {
+			const currentIndex = this.workflowChain.findIndex(n => n.id === this.currentNodeId);
+			
+			// Clear existing content
+			positionElement.innerHTML = '';
+			
+			// Add position text
+			const positionText = document.createTextNode(`Node ${currentIndex + 1} of ${this.workflowChain.length} in workflow chain`);
+			positionElement.appendChild(positionText);
+			
+			// Add Validation Details button
+			const validationBtn = document.createElement('button');
+			validationBtn.className = 'btn btn-secondary btn-sm';
+			validationBtn.id = 'workflow-validation-details';
+			validationBtn.textContent = 'Validation Details';
+			validationBtn.style.marginLeft = '15px';
+			validationBtn.addEventListener('click', () => this.showValidationDetails());
+			positionElement.appendChild(validationBtn);
+		}
+	}
 
     /**
      * Update inputs/outputs display
@@ -791,13 +796,13 @@ class WorkflowManager {
         container.innerHTML = '';
         
         if (previousNodes.length === 0) {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-secondary';
-            btn.disabled = true;
-            btn.textContent = 'Previous';
-            container.appendChild(btn);
-            return;
-        }
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-secondary';
+			btn.disabled = true;
+			btn.textContent = 'Previous Step';
+			container.appendChild(btn);
+			return;
+		}
         
         // Show first 3, then expandable list
         const visibleCount = Math.min(3, previousNodes.length);
@@ -860,13 +865,13 @@ class WorkflowManager {
         container.innerHTML = '';
         
         if (nextNodes.length === 0) {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-secondary';
-            btn.disabled = true;
-            btn.textContent = 'Next';
-            container.appendChild(btn);
-            return;
-        }
+			const btn = document.createElement('button');
+			btn.className = 'btn btn-secondary';
+			btn.disabled = true;
+			btn.textContent = 'Next Step';
+			container.appendChild(btn);
+			return;
+		}
         
         // Show all next nodes (for decision branching)
         for (const next of nextNodes) {
