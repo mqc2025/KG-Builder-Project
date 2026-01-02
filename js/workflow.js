@@ -215,7 +215,8 @@ class WorkflowManager {
             const edges = this.app.graph.edges;
             
             for (const edge of edges) {
-                if (!this.isNextEdge(edge)) continue;
+                const isWorkflowEdge = this.isNextEdge(edge) || this.isInputEdge(edge);
+				if (!isWorkflowEdge) continue;
                 
                 // Check if this edge connects to our current node
                 if (edge.source === nodeId || (typeof edge.source === 'object' && edge.source.id === nodeId)) {
@@ -460,6 +461,16 @@ class WorkflowManager {
         
         return label === 'next' || relationship === 'next' || name === 'next';
     }
+	
+	isInputEdge(edge) {
+		if (!edge.directed) return false;
+		
+		const label = (edge.label || '').toLowerCase();
+		const relationship = (edge.relationship || '').toLowerCase();
+		const name = (edge.name || '').toLowerCase();
+		
+		return label === 'input' || relationship === 'input' || name === 'input';
+	}
 
     /**
      * Find disconnected workflow chains
