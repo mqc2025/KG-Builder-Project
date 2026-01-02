@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeBook - Showcase</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toolbar.css">
+    <link rel="stylesheet" href="styles/properties.css">
+    <link rel="stylesheet" href="styles/minimap.css">
+    <link rel="stylesheet" href="styles/contextMenu.css">
+    <link rel="stylesheet" href="styles/filter.css">
+	<link rel="stylesheet" href="styles/mobile.css">
+	<link rel="stylesheet" href="styles/workflow.css">
+</head>
+<body>
+    <!-- Header / Toolbar -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="app-title">NodeBook</h1>
+        </div>
+        <div class="toolbar">
+            <button id="btn-github" class="toolbar-btn" title="Visit GitHub Repository">
+                <span>⚙️</span>
+            </button>
+            <button id="btn-help" class="toolbar-btn" title="Help Documentation">
+                <span>❓</span>
+            </button>
+			<div class="toolbar-separator"></div>
+
+			<button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
+                <span>↶</span>
+            </button>
+            <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)" disabled>
+                <span>↷</span>
+            </button>
+			
+            <div class="toolbar-separator"></div>
+            <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
+            <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
+			<button id="btn-filter" class="toolbar-btn" title="Filter Graph">
+				<span>🎯</span> Filter
+			</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Sidebar: File & Tools Tabs -->
+        <aside class="left-sidebar">
+            
+			<!-- Mobile toggle button for left sidebar -->
+			<button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle">
+				<span>☰</span>
+				<span class="toggle-icon">▼</span>
+			</button>
+			
+			<!-- Tab Headers -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="file">File</button>
+                <button class="sidebar-tab" data-tab="tools">Tools</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="sidebar-tab-content">
+                <!-- File Tab Content -->
+                <div id="file-tab" class="tab-panel active">
+                    <div class="tool-palette">
+                        <button id="btn-new" class="tool-btn" title="New Graph (Ctrl+N)">
+                            <span>📄</span>
+                            <span class="tool-label">New</span>
+                        </button>
+                        <button id="btn-open" class="tool-btn" title="Open Graph (Ctrl+O)">
+                            <span>📂</span>
+                            <span class="tool-label">Open</span>
+                        </button>
+                        <button id="btn-save" class="tool-btn" title="Save Graph (Ctrl+S)">
+                            <span>💾</span>
+                            <span class="tool-label">Save</span>
+                        </button>
+                        <button id="btn-save-as" class="tool-btn" title="Save Graph As">
+                            <span>💾</span>
+                            <span class="tool-label">Save As</span>
+                        </button>
+						<div class="tool-separator"></div>
+                        <button id="btn-open-in-tab" class="tool-btn" title="Open in New Tab">
+                            <span>🗗</span>
+                            <span class="tool-label">Open in Tab</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-export" class="tool-btn" title="Export Graph">
+                            <span>📤</span>
+                            <span class="tool-label">Export</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-excel-converter" class="tool-btn" title="Create Excel Converter">
+                            <span>📊</span>
+                            <span class="tool-label">Create Excel Converter</span>
+                        </button>
+                        <button id="btn-convert-excel" class="tool-btn" title="Convert Excel to Graph">
+                            <span>🔄</span>
+                            <span class="tool-label">Convert Excel</span>
+                        </button>
+						<div class="tool-separator"></div>
+						<button id="btn-explode" class="tool-btn" title="Explode Graph">
+							<span>💥</span>
+							<span class="tool-label">Explode</span>
+						</button>
+						
+						<!-- Hidden file inputs -->
+                        <input type="file" id="file-input" accept=".json" style="display: none;" multiple>
+						<input type="file" id="excel-input" accept=".xlsx,.xls" style="display: none;">
+						<input type="file" id="add-graph-input" accept=".json" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Tools Tab Content -->
+                <div id="tools-tab" class="tab-panel">
+                    <div class="tool-palette">
+                        <button id="btn-pan-mode" class="tool-btn" title="Pan Mode (Hold Space)">
+                            <span>✋</span>
+                            <span class="tool-label">Pan</span>
+                        </button>
+                        <button id="btn-freeze" class="tool-btn" title="Freeze/Unfreeze Physics (F)">
+                            <span>❄️</span>
+                            <span class="tool-label">Freeze</span>
+                        </button>
+						<button id="btn-center-view" class="tool-btn" title="Center View">
+							<span>🎯</span>
+							<span class="tool-label">Center View</span>
+						</button>
+                        <div class="tool-separator"></div>
+						<button id="btn-workflow" class="tool-btn" title="Workflow Navigator">
+							<span>🔄</span>
+							<span class="tool-label">Workflow</span>
+						</button>
+						<div class="tool-separator"></div>
+						
+						<div class="tool-separator"></div>
+						<button id="btn-add-graph" class="tool-btn" title="Add a Graph">
+							<span>➕</span>
+							<span class="tool-label">Add Graph</span>
+						</button>
+						<div class="tool-separator"></div>
+						
+						<!-- Force Strength Slider -->
+						<div class="force-control">
+							<label class="force-label">
+								<span>⚙️ Force Strength</span>
+								<span id="force-value" class="force-value">200</span>
+							</label>
+							<input type="range" id="force-slider" class="force-slider" 
+								   min="50" max="500" value="200" step="10">
+							<div class="force-hints">
+								<span>Weak</span>
+								<span>Strong</span>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-container" id="canvas-drop-zone">
+            <svg id="graph-canvas" class="graph-canvas"></svg>
+            
+            <!-- Minimap -->
+            <div id="minimap-container" class="minimap-container">
+                <svg id="minimap" class="minimap"></svg>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Properties Panel -->
+        <aside id="properties-panel" class="right-sidebar hidden">
+            <div class="properties-header">
+                <h3>Properties</h3>
+                <button id="btn-close-properties" class="close-btn">✕</button>
+            </div>
+            <div id="properties-content" class="properties-content">
+                <!-- Properties will be dynamically generated -->
+            </div>
+        </aside>
+    </div>
+	
+	<!-- Google AdSense Banner -->
+    <div class="ad-banner-container">
+        <div class="ad-banner">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4178446730844042"
+                 crossorigin="anonymous"></script>
+            <!-- NodeBookFirstAd -->
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:728px;height:90px"
+                 data-ad-client="ca-pub-4178446730844042"
+                 data-ad-slot="2807042026"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <footer class="status-bar">
+        <!-- Line 1: Selection details -->
+        <div class="status-line status-line-top">
+            <span id="status-selection">No Selection</span>
+        </div>
+
+        <!-- Line 2: Stats and info -->
+        <div class="status-line status-line-bottom">
+            <span id="status-info">Ready</span>
+            <span class="status-separator">|</span>
+            <span id="status-stats">Nodes: 0 | Edges: 0</span>
+            <span class="status-separator">|</span>
+            <span id="status-privacy" class="status-privacy" title="Click for Privacy Information">🔒 Private & Local</span>
+        </div>
+    </footer>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Graph</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div class="export-options">
+                    <button id="btn-export-png" class="export-btn">
+                        <span>🖼️</span>
+                        <span>PNG Image</span>
+                    </button>
+                    <button id="btn-export-svg" class="export-btn">
+                        <span>📐</span>
+                        <span>SVG Vector</span>
+                    </button>
+                    <button id="btn-export-json" class="export-btn">
+                        <span>📄</span>
+                        <span>JSON Data</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Filter Graph</h2>
+                <button class="modal-close" id="filter-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-options">
+                    <div class="filter-group">
+                        <h3>Filter Nodes By:</h3>
+                        <div class="filter-controls">
+                            <label class="filter-label">
+                                <input type="checkbox" id="filter-category" class="filter-checkbox">
+                                Category
+                            </label>
+                            <select id="filter-category-value" class="filter-select" disabled>
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <div class="filter-controls">
+                            <label class="filter-label">
+                                <input type="checkbox" id="filter-priority" class="filter-checkbox">
+                                Priority
+                            </label>
+                            <select id="filter-priority-value" class="filter-select" disabled>
+                                <option value="">All Priorities</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <h3>Filter Edges By:</h3>
+                        <div class="filter-controls">
+                            <label class="filter-label">
+                                <input type="checkbox" id="filter-relationship" class="filter-checkbox">
+                                Relationship
+                            </label>
+                            <select id="filter-relationship-value" class="filter-select" disabled>
+                                <option value="">All Relationships</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="btn-apply-filter" class="btn btn-primary">Apply Filter</button>
+                        <button id="btn-clear-filter" class="btn btn-secondary">Clear Filter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<!-- Workflow Navigator Modal -->
+	<div id="workflow-modal" class="modal hidden">
+		<div class="modal-content workflow-modal-content">
+			<div class="modal-header">
+				<h2>Workflow Navigator</h2>
+				<button class="modal-close" id="workflow-close">&times;</button>
+			</div>
+			
+					
+			<div class="modal-body">
+				<!-- Current Node Display -->
+				<div class="workflow-current-node">
+					<h3 id="workflow-node-name">Node Name</h3>
+					<p id="workflow-node-category" class="workflow-category-badge"></p>
+					<p id="workflow-node-description"></p>
+				</div>
+				
+				<!-- Inputs/Outputs -->
+				<div class="workflow-connections">
+					<div class="workflow-inputs">
+						<h4>Inputs</h4>
+						<ul id="workflow-inputs-list"></ul>
+					</div>
+					<div class="workflow-outputs">
+						<h4>Outputs</h4>
+						<ul id="workflow-outputs-list"></ul>
+					</div>
+				</div>
+			</div>
+
+			<!-- Position Indicator -->
+			<div id="workflow-position" class="workflow-position">
+				<!-- e.g., "Node 3 of 8 in workflow chain" -->
+				<!-- Validation Details button will be added here dynamically -->
+			</div>
+			
+			<div class="modal-footer workflow-navigation-title">
+				<div class="workflow-navigation-title">
+						<h4>Previous/Next Steps</h4>
+				</div>
+			</div>
+			
+			<div class="modal-footer workflow-navigation">
+				<!-- Previous buttons (dynamically generated) -->
+				<div id="workflow-prev-buttons" class="workflow-nav-group"></div>
+				
+				<!-- Next buttons (dynamically generated) -->
+				<div id="workflow-next-buttons" class="workflow-nav-group"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Validation Details Modal -->
+	<div id="workflow-validation-modal" class="modal hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2>Workflow Validation Report</h2>
+				<button class="modal-close" id="validation-close">&times;</button>
+			</div>
+			<div class="modal-body" id="validation-details-body">
+				<!-- Detailed validation report inserted dynamically -->
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" id="validation-close-btn">Close</button>
+			</div>
+		</div>
+	</div>
+
+    <!-- SheetJS Library for Excel Processing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/algorithms.js"></script>
+    <script src="js/renderer.js"></script>
+	<script src="js/imageManager.js"></script>
+    <script src="js/properties.js"></script>
+    <script src="js/minimap.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/contextMenu.js"></script>
+	<script src="js/workflow.js"></script>
+    <script src="js/fileManager.js"></script>
+    <script src="js/excelConverter.js"></script>
+    <script src="js/sidebarTabs.js"></script>
+    <script src="js/app.js"></script>
+	<script src="js/explodeGraph.js"></script>
+	
+	<!-- Showcase Mode Initialization -->
+<script>
+	// IMMEDIATELY clear any autosave data before anything loads
+	localStorage.removeItem('knowledge-graph-autosave');
+	localStorage.removeItem('nodebook-autosave');
+	
+	// Prevent auto-initialization from app.js
+	window.appAutoInitDisabled = true;
+</script>
+
+<!-- Load all the JS files -->
+<!-- (your existing script tags remain here) -->
+
+<!-- Manual initialization AFTER clearing storage -->
+<script>
+	window.addEventListener('load', function() {
+		// Override methods before creating App instance
+		const OriginalApp = window.App;
+		
+		window.App = class ShowcaseApp extends OriginalApp {
+			setupPrivacyNotice() {
+				// Skip privacy banner
+			}
+			
+			async promptForWelcomeGraphIfEmpty() {
+				// Load welcome graph directly
+				if (this.graph.nodes.length === 0) {
+					await this.loadWelcomeGraph();
+				}
+			}
+		};
+		
+		// Override FileManager
+		const OriginalFileManager = window.FileManager;
+		window.FileManager = class ShowcaseFileManager extends OriginalFileManager {
+			tryRecoverFromLocalStorage() {
+				// Do nothing
+			}
+			setupAutoSave() {
+				// Only save, don't recover
+				setInterval(() => {
+					this.saveToLocalStorage();
+				}, 10000);
+			}
+		};
+		
+		// Manually create the App instance
+		new App();
+	});
+</script>
+</body>
+</html>
