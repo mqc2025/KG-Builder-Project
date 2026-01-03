@@ -490,7 +490,105 @@
                 <li>Node labels and colors</li>
             </ul>
 
-            <h3>Header Toolbar</h3>
+            
+			<h4>🔄 Workflow Navigator</h4>
+            <p>A powerful tool for navigating and validating sequential workflow chains in your graph. This feature:</p>
+            <ul>
+                <li>Identifies and validates workflow structures with start and end nodes</li>
+                <li>Provides step-by-step navigation through connected processes</li>
+                <li>Validates workflow integrity and highlights structural issues</li>
+                <li>Shows inputs and outputs at each workflow step</li>
+            </ul>
+
+            <h5>How to Use Workflow Navigator</h5>
+            <ol>
+                <li>Right-click on any node that's part of a workflow chain</li>
+                <li>Select "Open Workflow Navigator" from the context menu</li>
+                <li>The Workflow Navigator modal opens showing the current node's details</li>
+                <li>Use Previous/Next buttons to navigate through the workflow</li>
+            </ol>
+
+            <h5>Workflow Structure Requirements</h5>
+            <p>For the Workflow Navigator to work properly, your graph must follow these conventions:</p>
+            <ul>
+                <li><strong>Workflow Edges:</strong> Connect nodes using edges with <code>label="next"</code> or <code>relationship="next"</code></li>
+                <li><strong>Start Node:</strong> Must have <code>name="start"</code> and <code>category="start-end"</code></li>
+                <li><strong>End Node:</strong> Must have <code>name="end"</code> and <code>category="start-end"</code></li>
+                <li><strong>Input/Output Edges:</strong> Use <code>relationship="input"</code> or <code>relationship="output"</code> to mark data flow</li>
+            </ul>
+
+            <h5>Navigator Display</h5>
+            <p>The Workflow Navigator modal shows:</p>
+            <ul>
+                <li><strong>Current Node:</strong> Name, description, category, and custom properties</li>
+                <li><strong>Position:</strong> "Node X of Y in workflow chain" indicator</li>
+                <li><strong>Validation Summary:</strong> Displays any errors or warnings in your workflow structure</li>
+                <li><strong>Inputs:</strong> All incoming connections to the current node</li>
+                <li><strong>Outputs:</strong> All outgoing connections from the current node</li>
+                <li><strong>Navigation Buttons:</strong> Previous step(s) and Next step(s) for workflow traversal</li>
+            </ul>
+
+            <h5>Validation Features</h5>
+            <p>The Workflow Navigator automatically validates your workflow and reports:</p>
+            <ul>
+                <li><strong>Errors (❌):</strong> Critical issues that prevent proper workflow execution
+                    <ul>
+                        <li>Missing start or end nodes</li>
+                        <li>Workflow chain is not connected</li>
+                    </ul>
+                </li>
+                <li><strong>Warnings (⚠️):</strong> Non-critical issues to be aware of
+                    <ul>
+                        <li>End node connects back to start (creates a loop)</li>
+                        <li>Multiple paths exist between nodes</li>
+                        <li>Disconnected workflow chains detected</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h5>Validation Details Report</h5>
+            <p>Click the "Validation Details" button to view a comprehensive report including:</p>
+            <ul>
+                <li>Overall workflow status (valid/invalid)</li>
+                <li>Total nodes in the workflow chain</li>
+                <li>Start and end node identification</li>
+                <li>Complete list of all errors and warnings</li>
+                <li>Disconnected chains with ability to highlight them on the graph</li>
+            </ul>
+
+            <h5>Navigation Behavior</h5>
+            <ul>
+                <li><strong>Single Path:</strong> Shows one "Next Step" button when there's only one way forward</li>
+                <li><strong>Decision Points:</strong> Shows multiple "Next Step" buttons when the workflow branches (e.g., different outcomes based on conditions)</li>
+                <li><strong>Multiple Previous:</strong> When more than 3 previous nodes exist, they're shown in a collapsible dropdown to save space</li>
+                <li><strong>In-Workflow Clicks:</strong> You can click on other workflow nodes in the graph to jump to them directly</li>
+                <li><strong>Outside Clicks:</strong> Clicking nodes outside the current workflow chain shows an alert</li>
+            </ul>
+
+            <div class="tip">
+                <strong>💡 Pro Tips:</strong>
+                <ul>
+                    <li>Use consistent edge labels ("next") throughout your workflow for best results</li>
+                    <li>Assign category badges to workflow nodes for visual organization (e.g., "task", "decision")</li>
+                    <li>Review the Validation Details report before finalizing complex workflows</li>
+                    <li>The navigator helps document and communicate multi-step processes clearly</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <strong>📌 Example Use Cases:</strong>
+                <ul>
+                    <li>Business process workflows (onboarding, approval chains)</li>
+                    <li>Software development pipelines (build → test → deploy)</li>
+                    <li>Decision trees and flowcharts</li>
+                    <li>Multi-stage procedures or protocols</li>
+                </ul>
+            </div>
+			
+			
+			
+			
+			<h3>Header Toolbar</h3>
 
             <h4>↶ Undo (<span class="kbd">Ctrl+Z</span>)</h4>
             <p>Reverts the last action. Supports up to 50 undo levels. Works for:</p>
