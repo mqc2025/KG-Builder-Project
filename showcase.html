@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeBook</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/toolbar.css">
+    <link rel="stylesheet" href="styles/properties.css">
+    <link rel="stylesheet" href="styles/minimap.css">
+    <link rel="stylesheet" href="styles/contextMenu.css">
+    <link rel="stylesheet" href="styles/filter.css">
+	<link rel="stylesheet" href="styles/mobile.css">
+	<link rel="stylesheet" href="styles/workflow.css">
+</head>
+<body>
+	
+
+
+    <!-- Header / Toolbar -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="app-title">NodeBook</h1>
+        </div>
+        <div class="toolbar">
+            <button id="btn-github" class="toolbar-btn" title="Visit GitHub Repository">
+                <span>⚙️</span>
+            </button>
+            <button id="btn-help" class="toolbar-btn" title="Help Documentation">
+                <span>❓</span>
+            </button>
+			<div class="toolbar-separator"></div>
+
+			<button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" disabled>
+                <span>↶</span>
+            </button>
+            <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)" disabled>
+                <span>↷</span>
+            </button>
+			
+            <div class="toolbar-separator"></div>
+            <input type="text" id="search-input" class="search-input" placeholder="Search nodes... (Ctrl+F)">
+            <button id="btn-clear-search" class="toolbar-btn-small" title="Clear Search">✕</button>
+			<button id="btn-filter" class="toolbar-btn" title="Filter Graph">
+				<span>🎯</span> Filter
+			</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Sidebar: File & Tools Tabs -->
+        <aside class="left-sidebar">
+            
+			<!-- Mobile toggle button for left sidebar -->
+			<button class="mobile-sidebar-toggle" id="mobile-sidebar-toggle">
+				<span>☰</span>
+				<span class="toggle-icon">▼</span>
+			</button>
+			
+			<!-- Tab Headers -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="file">File</button>
+                <button class="sidebar-tab" data-tab="tools">Tools</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="sidebar-tab-content">
+                <!-- File Tab Content -->
+                <div id="file-tab" class="tab-panel active">
+                    <div class="tool-palette">
+                        <button id="btn-new" class="tool-btn" title="New Graph (Ctrl+N)">
+                            <span>📄</span>
+                            <span class="tool-label">New</span>
+                        </button>
+                        <button id="btn-open" class="tool-btn" title="Open Graph (Ctrl+O)">
+                            <span>📂</span>
+                            <span class="tool-label">Open</span>
+                        </button>
+                        <button id="btn-save" class="tool-btn" title="Save Graph (Ctrl+S)">
+                            <span>💾</span>
+                            <span class="tool-label">Save</span>
+                        </button>
+                        <button id="btn-save-as" class="tool-btn" title="Save Graph As">
+                            <span>💾</span>
+                            <span class="tool-label">Save As</span>
+                        </button>
+						<button id="btn-open-in-new-tab" class="tool-btn" title="Open JSON in New Tab">
+							<span>🗗</span>
+							<span class="tool-label">Open in Tab</span>
+						</button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-export" class="tool-btn" title="Export">
+                            <span>📤</span>
+                            <span class="tool-label">Export</span>
+                        </button>
+                        <div class="tool-separator"></div>
+                        <button id="btn-create-excel-converter" class="tool-btn" title="Create Excel Converter">
+                            <span>📊</span>
+                            <span class="tool-label">Create Excel Converter</span>
+                        </button>
+                        <button id="btn-convert-excel" class="tool-btn" title="Convert Excel">
+                            <span>🔄</span>
+                            <span class="tool-label">Convert Excel</span>
+                        </button>
+						<div class="tool-separator"></div>
+						<button id="btn-explode-graph" class="tool-btn" title="Explode">
+							<span class="icon">💥</span>
+							<span>Explode</span>
+						</button>
+                    </div>
+                </div>
+
+                <!-- Tools Tab Content -->
+				<div id="tools-tab" class="tab-panel">
+					<div class="tool-palette">
+						<button id="btn-add-node" class="tool-btn" title="Add a Node">
+							<span>⊕</span>
+							<span class="tool-label">Add Node</span>
+						</button>
+						<div class="tool-separator"></div>
+						<button id="btn-freeze" class="tool-btn" title="Freeze Simulation (F)">
+							<span>❄️</span>
+							<span class="tool-label">Freeze</span>
+						</button>
+						<button id="btn-layout" class="tool-btn" title="Resimulate">
+							<span>⊞</span>
+							<span class="tool-label">Shuffle</span>
+						</button>
+						<button id="btn-shortest-path" class="tool-btn" title="Shortest Path">
+							<span>⚡</span>
+							<span class="tool-label">Path</span>
+						</button>
+						
+						<div class="tool-separator"></div>
+						<button id="btn-workflow" class="tool-btn" title="Workflow Navigator">
+							<span>🔄</span>
+							<span class="tool-label">Workflow</span>
+						</button>
+						<div class="tool-separator"></div>
+						
+						<div class="tool-separator"></div>
+						<button id="btn-add-graph" class="tool-btn" title="Add a Graph">
+							<span>➕</span>
+							<span class="tool-label">Add Graph</span>
+						</button>
+						<div class="tool-separator"></div>
+						
+						<!-- Force Strength Slider -->
+						<div class="force-control">
+							<label class="force-label">
+								<span>⚙️ Force Strength</span>
+								<span id="force-value" class="force-value">200</span>
+							</label>
+							<input type="range" id="force-slider" class="force-slider" 
+								   min="50" max="500" value="200" step="10">
+							<div class="force-hints">
+								<span>Weak</span>
+								<span>Strong</span>
+							</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="canvas-container" id="canvas-drop-zone">
+            <svg id="graph-canvas" class="graph-canvas"></svg>
+            
+            <!-- Minimap -->
+            <div id="minimap-container" class="minimap-container">
+                <svg id="minimap" class="minimap"></svg>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+            </div>
+        </main>
+		
+		
+
+        <!-- Right Sidebar: Properties Panel -->
+        <aside id="properties-panel" class="right-sidebar hidden">
+            <div class="properties-header">
+                <h3>Properties</h3>
+                <button id="btn-close-properties" class="close-btn">✕</button>
+            </div>
+            <div id="properties-content" class="properties-content">
+                <!-- Properties will be dynamically generated -->
+            </div>
+        </aside>
+    </div>
+	<!-- Google AdSense Banner -->
+        <div class="ad-banner-container">
+            <div class="ad-banner">
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4178446730844042"
+					 crossorigin="anonymous"></script>
+				<!-- NodeBookFirstAd -->
+				<ins class="adsbygoogle"
+					 style="display:inline-block;width:728px;height:90px"
+					 data-ad-client="ca-pub-4178446730844042"
+					 data-ad-slot="2807042026"></ins>
+				<script>
+					 (adsbygoogle = window.adsbygoogle || []).push({});
+				</script>
+            </div>
+        </div>
+
+    <!-- Status Bar - MODIFIED TO TWO LINES -->
+    <footer class="status-bar">
+        <!-- Line 1: Selection details -->
+        <div class="status-line status-line-selection">
+            <span id="status-selection">Selected: None</span>
+        </div>
+        
+        <!-- Line 2: Stats and info -->
+        <div class="status-line status-line-stats">
+            <span id="status-nodes">Nodes: 0</span>
+            <span class="separator">|</span>
+            <span id="status-edges">Edges: 0</span>
+            <span class="separator">|</span>
+            <span id="status-zoom">Zoom: 100%</span>
+            <span class="separator">|</span>
+            <span id="status-simulation">Simulation: Active</span>
+            <span class="separator">|</span>
+            <span id="status-privacy" class="status-privacy" title="Click for privacy information">
+                🔒 Private & Local
+            </span>
+            <span class="separator">|</span>
+            <span style="margin-left: auto; padding-right: 10px;">© 2025 MQC inc.</span>
+        </div>
+    </footer>
+
+    <!-- Hidden File Input -->
+	<input type="file" id="file-input" accept=".json" multiple hidden>
+	
+    <!-- Hidden Excel File Input for Create Converter -->
+    <input type="file" id="excel-converter-input" accept=".xlsx,.xls" style="display: none;">
+    
+    <!-- Hidden Excel File Input for Convert Excel -->
+    <input type="file" id="excel-data-input" accept=".xlsx,.xls" style="display: none;">
+    
+    <!-- Hidden Mapping JSON Input for Convert Excel -->
+    <input type="file" id="mapping-json-input" accept=".json" style="display: none;">
+	    
+	<!-- Hidden Open new File Input -->
+	<input type="file" id="file-input-new-tab" accept=".json" style="display: none;">
+	
+	<!-- Hidden Add Graph File Input -->
+	<input type="file" id="add-graph-input" accept=".json" style="display: none;">
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Graph</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <button id="export-json" class="export-option">
+                    <span>📄</span> Export as JSON
+                </button>
+                <button id="export-png" class="export-option">
+                    <span>🖼️</span> Export as PNG
+                </button>
+                <button id="export-svg" class="export-option">
+                    <span>📐</span> Export as SVG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortest Path Modal -->
+    <div id="path-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Find Shortest Path</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="property-item">
+                    <label class="property-label">Start Node</label>
+                    <select class="property-input" id="path-start-select">
+                        <option value="">-- Select Start Node --</option>
+                    </select>
+                </div>
+
+                <div class="property-item">
+                    <label class="property-label">End Node</label>
+                    <select class="property-input" id="path-end-select">
+                        <option value="">-- Select End Node --</option>
+                    </select>
+                </div>
+
+                <div class="property-item">
+                    <label class="property-label" style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="path-show-all" style="width: auto; margin: 0;">
+                        <span>Show all paths (sorted by length)</span>
+                    </label>
+                </div>
+
+                <button id="btn-calculate-path" class="modal-btn" disabled>Calculate Path</button>
+                <button id="btn-clear-path" class="modal-btn" style="background-color: var(--border-color);">Clear Path</button>
+                
+                <div id="path-results" class="path-results-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Filter Graph</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Filter Type Selector -->
+                <div class="filter-group">
+                    <label class="filter-label">Filter Type:</label>
+                    <select id="filter-type-select" class="filter-select">
+                        <option value="custom">Custom Property</option>
+                        <option value="priority">Priority</option>
+                        <option value="category">Category</option>
+                        <option value="color">Color</option>
+                        <option value="deadline">Deadline (Date Range)</option>
+                        <option value="dateRange">Date Range (Created/Modified)</option>
+                        <option value="connections">Connected to Node</option>
+                    </select>
+                </div>
+
+                <!-- Custom Property Filter (default) -->
+                <div id="filter-custom" class="filter-type-content">
+                    <div class="filter-group">
+                        <label class="filter-label">Property Name:</label>
+                        <input type="text" id="filter-property" class="filter-input" placeholder="e.g., category, priority">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Property Value:</label>
+                        <input type="text" id="filter-value" class="filter-input" placeholder="e.g., High, Field">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Match Type:</label>
+                        <select id="filter-match-type" class="filter-select">
+                            <option value="exact">Exact Match</option>
+                            <option value="contains">Contains</option>
+                            <option value="starts">Starts With</option>
+                            <option value="ends">Ends With</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Priority Filter -->
+				<div id="filter-priority" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Priority:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-priority">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-priority">Deselect All</button>
+						</div>
+						<div class="filter-checkbox-group" id="priority-checkboxes">
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="High" checked> High
+							</label>
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="Medium" checked> Medium
+							</label>
+							<label class="filter-checkbox-label">
+								<input type="checkbox" value="Low" checked> Low
+							</label>
+						</div>
+					</div>
+				</div>
+
+                <!-- Category Filter -->
+				<div id="filter-category" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Categories:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-category">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-category">Deselect All</button>
+						</div>
+						<div id="category-checkboxes" class="filter-checkbox-group">
+							<!-- Will be populated dynamically -->
+						</div>
+					</div>
+				</div>
+
+                <!-- Color Filter -->
+				<div id="filter-color" class="filter-type-content hidden">
+					<div class="filter-group">
+						<label class="filter-label">Select Colors:</label>
+						<div class="filter-select-controls">
+							<button type="button" class="filter-select-btn" data-action="select-all" data-target="filter-color">Select All</button>
+							<button type="button" class="filter-select-btn" data-action="deselect-all" data-target="filter-color">Deselect All</button>
+						</div>
+						<div id="color-checkboxes" class="filter-checkbox-group">
+							<!-- Will be populated dynamically -->
+						</div>
+					</div>
+				</div>
+
+                <!-- Deadline Filter -->
+                <div id="filter-deadline" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Deadline Range:</label>
+                        <input type="date" id="filter-deadline-start" class="filter-input">
+                        <span style="margin: 5px 0; display: block; text-align: center;">to</span>
+                        <input type="date" id="filter-deadline-end" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-checkbox-label">
+                            <input type="checkbox" id="filter-deadline-include-empty"> Include nodes without deadline
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date Range Filter (Created/Modified) -->
+                <div id="filter-dateRange" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Date Field:</label>
+                        <select id="filter-date-field" class="filter-select">
+                            <option value="createdDate">Created Date</option>
+                            <option value="modifiedDate">Modified Date</option>
+                            <option value="userDate">User Date</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Date Range:</label>
+                        <input type="date" id="filter-date-start" class="filter-input">
+                        <span style="margin: 5px 0; display: block; text-align: center;">to</span>
+                        <input type="date" id="filter-date-end" class="filter-input">
+                    </div>
+                </div>
+
+                <!-- Connections Filter -->
+                <div id="filter-connections" class="filter-type-content hidden">
+                    <div class="filter-group">
+                        <label class="filter-label">Show nodes connected to:</label>
+                        <select id="filter-connection-node" class="filter-select">
+                            <option value="">Select a node...</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Connection Type:</label>
+                        <div class="filter-checkbox-group">
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-outgoing" checked> Outgoing (this → others)
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-incoming" checked> Incoming (others → this)
+                            </label>
+                            <label class="filter-checkbox-label">
+                                <input type="checkbox" id="filter-conn-include-selected"> Include selected node
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-apply-filter" class="modal-btn">Apply Filter</button>
+                <button id="btn-clear-filter" class="modal-btn" style="background-color: var(--border-color);">Clear Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu hidden">
+        <!-- Dynamically populated -->
+    </div>
+	
+	<!-- Privacy Info Modal (add before </body>) -->
+    <div id="privacy-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔒 Privacy & Data Security</h3>
+                <button class="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="privacy-info-section">
+                    <h4>100% Local Processing</h4>
+                    <p>NodeBook runs entirely in your web browser. All computations, data processing, and file operations happen on your device.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>No Server Communication</h4>
+                    <p>Your graphs, nodes, and data are never transmitted to any server. We don't collect, store, or have access to your information.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>Local Storage Only</h4>
+                    <p>The only data storage used is your browser's localStorage for auto-save functionality. This data never leaves your device and can be cleared at any time through your browser settings.</p>
+                </div>
+                
+                <div class="privacy-info-section">
+                    <h4>Your Data, Your Control</h4>
+                    <p>You have complete control over your data. Export your graphs as JSON files, and they remain entirely under your ownership.</p>
+                </div>
+                
+                <div class="privacy-info-section privacy-info-footer">
+                    <p><strong>NodeBook is a client-side application with zero telemetry.</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+	<!-- Workflow Navigator Modal -->
+	<div id="workflow-modal" class="modal hidden">
+		<div class="modal-content workflow-modal-content">
+			<div class="modal-header">
+				<h2>Workflow Navigator</h2>
+				<button class="modal-close" id="workflow-close">&times;</button>
+			</div>
+			
+					
+			<div class="modal-body">
+				<!-- Current Node Display -->
+				<div class="workflow-current-node">
+					<h3 id="workflow-node-name">Node Name</h3>
+					<p id="workflow-node-category" class="workflow-category-badge"></p>
+					<p id="workflow-node-description"></p>
+				</div>
+				
+				<!-- Inputs/Outputs -->
+				<div class="workflow-connections">
+					<div class="workflow-inputs">
+						<h4>Inputs</h4>
+						<ul id="workflow-inputs-list"></ul>
+					</div>
+					<div class="workflow-outputs">
+						<h4>Outputs</h4>
+						<ul id="workflow-outputs-list"></ul>
+					</div>
+				</div>
+			</div>
+
+			<!-- Position Indicator -->
+			<div id="workflow-position" class="workflow-position">
+				<!-- e.g., "Node 3 of 8 in workflow chain" -->
+				<!-- Validation Details button will be added here dynamically -->
+			</div>
+			
+			<div class="modal-footer workflow-navigation-title">
+				<div class="workflow-navigation-title">
+						<h4>Previous/Next Steps</h4>
+				</div>
+			</div>
+			
+			<div class="modal-footer workflow-navigation">
+				<!-- Previous buttons (dynamically generated) -->
+				<div id="workflow-prev-buttons" class="workflow-nav-group"></div>
+				
+				<!-- Next buttons (dynamically generated) -->
+				<div id="workflow-next-buttons" class="workflow-nav-group"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Validation Details Modal -->
+	<div id="workflow-validation-modal" class="modal hidden">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2>Workflow Validation Report</h2>
+				<button class="modal-close" id="validation-close">&times;</button>
+			</div>
+			<div class="modal-body" id="validation-details-body">
+				<!-- Detailed validation report inserted dynamically -->
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" id="validation-close-btn">Close</button>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Showcase Mode Flag - MUST BE BEFORE ALL SCRIPTS -->
+<script>
+    // Set showcase mode flag
+    window.showcaseMode = true;
+    
+    // Clear localStorage
+    localStorage.removeItem('knowledge-graph-autosave');
+    localStorage.removeItem('nodebook-autosave');
+    localStorage.removeItem('nodebook-privacy-banner-dismissed');
+</script>
+
+    <!-- SheetJS Library for Excel Processing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- D3.js Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/algorithms.js"></script>
+    <script src="js/renderer.js"></script>
+	<script src="js/imageManager.js"></script>
+    <script src="js/properties.js"></script>
+    <script src="js/minimap.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/contextMenu.js"></script>
+	<script src="js/workflow.js"></script>
+    <script src="js/fileManager.js"></script>
+    <script src="js/excelConverter.js"></script>
+    <script src="js/sidebarTabs.js"></script>
+    <script src="js/app.js"></script>
+	<script src="js/explodeGraph.js"></script>
+	
+<!-- Showcase Mode Initialization -->
+<script>
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const graphFile = urlParams.get('graph') || 'welcome';
+    
+    const checkApp = setInterval(function() {
+        if (window.app) {
+            clearInterval(checkApp);
+            
+            if (graphFile === 'welcome') {
+                window.app.loadWelcomeGraph();
+            } else {
+                // Load from file
+                fetch(`graphs/${graphFile}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        window.app.loadGraph(data);
+                        window.app.updateStatus(`Loaded: ${graphFile}`);
+                    })
+                    .catch(error => {
+                        console.error('Error loading graph:', error);
+                        // Fallback to welcome
+                        window.app.loadWelcomeGraph();
+                    });
+            }
+        }
+    }, 100);
+})();
+</script>
+
+</body>
+</html>

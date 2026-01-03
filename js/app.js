@@ -1678,6 +1678,7 @@ class KnowledgeGraphApp {
 		this.loadGraph(welcomeGraph);
 		this.updateStatus('Welcome! Right-click on canvas to start building 🚀');
 	}
+	
 
     /**
      * Load graph from JSON
@@ -1934,7 +1935,23 @@ class KnowledgeGraphApp {
     }
 }
 
-// Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new KnowledgeGraphApp();
+    if (window.showcaseMode) {
+        console.log('Showcase mode detected - skipping prompts');
+        // Create app but skip welcome prompt
+        const app = new KnowledgeGraphApp();
+        // Override to skip the modal
+        app.promptForWelcomeGraphIfEmpty = async function() {
+            // Do nothing - showcase script will handle it
+        };
+        app.setupPrivacyNotice = function() {
+            // Do nothing
+        };
+        window.app = app;
+    } else {
+        new KnowledgeGraphApp();
+    }
 });
+
+// Export for external use
+window.App = KnowledgeGraphApp;
