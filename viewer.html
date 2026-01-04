@@ -230,30 +230,37 @@ function applyBoundary(renderer, boundaryConfig) {
     }
 }
     
-    // Load graph from file
-    async function loadGraphFromFile(graphName) {
-        // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        const response = await fetch(`graphs/${graphName}.json?v=${timestamp}`);
-            
-            if (!response.ok) {
-                throw new Error(`Graph not found: ${graphName}.json (${response.status})`);
-            }
-            
-            const graphData = await response.json();
-            
-            // Validate graph structure
-            if (!graphData.graph || !graphData.graph.nodes) {
-                throw new Error('Invalid graph structure');
-            }
-            
-            return graphData;
-            
-        } catch (error) {
-            console.error('Error loading graph:', error);
-            throw error;
+    // Get cache version from URL
+function getCacheVersionFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('v');
+}
+
+// Load graph from file
+async function loadGraphFromFile(graphName) {
+    try {
+        // Use version parameter if provided, otherwise use timestamp for cache busting
+        const version = getCacheVersionFromURL() || new Date().getTime();
+        const response = await fetch(`graphs/${graphName}.json?v=${version}`);
+        
+        if (!response.ok) {
+            throw new Error(`Graph not found: ${graphName}.json (${response.status})`);
         }
+        
+        const graphData = await response.json();
+        
+        // Validate graph structure
+        if (!graphData.graph || !graphData.graph.nodes) {
+            throw new Error('Invalid graph structure');
+        }
+        
+        return graphData;
+        
+    } catch (error) {
+        console.error('Error loading graph:', error);
+        throw error;
     }
+}
     
     // Viewer mode initialization
     document.addEventListener('DOMContentLoaded', async function() {
