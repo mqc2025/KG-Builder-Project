@@ -1,0 +1,435 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "as9100_implementation",
+      "title": "AS9100 Implementation Process & Requirements",
+      "description": "Overview of AS9100 implementation methodology and key aerospace quality management requirements",
+      "created": "2025-01-03T00:00:00.000Z",
+      "modified": "2025-01-03T00:00:00.000Z"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "node_as9100",
+        "name": "AS9100",
+        "description": "Aerospace Quality Management System standard",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Standard",
+        "x": 400,
+        "y": 100
+      },
+      {
+        "id": "node_iso9001",
+        "name": "ISO 9001",
+        "description": "Base quality management standard",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Standard",
+        "x": 250,
+        "y": 100
+      },
+      {
+        "id": "node_gap_analysis",
+        "name": "Gap Analysis & Planning",
+        "description": "Phase 1: Assess current systems against AS9100 requirements",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 100,
+        "y": 250
+      },
+      {
+        "id": "node_documentation",
+        "name": "Documentation Development",
+        "description": "Phase 2: Develop Quality Manual, procedures, and work instructions",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 250,
+        "y": 250
+      },
+      {
+        "id": "node_training",
+        "name": "Training & Deployment",
+        "description": "Phase 3: Train team on processes and AS9100 requirements",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 400,
+        "y": 250
+      },
+      {
+        "id": "node_internal_audit",
+        "name": "Internal Audits",
+        "description": "Phase 4: Verify system effectiveness and identify non-conformances",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 550,
+        "y": 250
+      },
+      {
+        "id": "node_mgmt_review",
+        "name": "Management Review",
+        "description": "Phase 5: Ensure top-level commitment and readiness",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 700,
+        "y": 250
+      },
+      {
+        "id": "node_certification",
+        "name": "Certification Support",
+        "description": "Phase 6: Support through Stage 1 and Stage 2 audits",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 850,
+        "y": 250
+      },
+      {
+        "id": "node_config_mgmt",
+        "name": "Configuration Management",
+        "description": "Formal control of design changes and product consistency",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 150,
+        "y": 400
+      },
+      {
+        "id": "node_risk_mgmt",
+        "name": "Risk Management",
+        "description": "Enhanced risk assessment throughout QMS processes",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 300,
+        "y": 400
+      },
+      {
+        "id": "node_product_safety",
+        "name": "Product Safety",
+        "description": "Control of critical items and safety-critical components",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 450,
+        "y": 400
+      },
+      {
+        "id": "node_fai",
+        "name": "First Article Inspection",
+        "description": "Verify new or changed products meet all specifications",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 600,
+        "y": 400
+      },
+      {
+        "id": "node_counterfeit",
+        "name": "Counterfeit Parts Prevention",
+        "description": "Prevent, detect, and control counterfeit materials",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 750,
+        "y": 400
+      },
+      {
+        "id": "node_special_processes",
+        "name": "Special Processes",
+        "description": "Enhanced controls for welding, heat treating, NDT, coating",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 200,
+        "y": 550
+      },
+      {
+        "id": "node_supplier_mgmt",
+        "name": "Supplier Management",
+        "description": "Rigorous supplier approval and monitoring requirements",
+        "color": "#3498db",
+        "size": 15,
+        "category": "AS9100 Requirement",
+        "x": 400,
+        "y": 550
+      },
+      {
+        "id": "node_contract_req",
+        "name": "Contract Requirements",
+        "description": "Required by aerospace OEMs and defense contractors",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Business Benefit",
+        "x": 600,
+        "y": 550
+      },
+      {
+        "id": "node_operational_excellence",
+        "name": "Operational Excellence",
+        "description": "Improved efficiency and reduced non-conformances",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Business Benefit",
+        "x": 100,
+        "y": 700
+      },
+      {
+        "id": "node_customer_confidence",
+        "name": "Customer Confidence",
+        "description": "Third-party validation of quality systems",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Business Benefit",
+        "x": 300,
+        "y": 700
+      },
+      {
+        "id": "node_regulatory",
+        "name": "Regulatory Compliance",
+        "description": "Alignment with FAA, EASA, Transport Canada requirements",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Business Benefit",
+        "x": 500,
+        "y": 700
+      },
+      {
+        "id": "node_post_cert",
+        "name": "Post-Certification Support",
+        "description": "Ongoing QMS maintenance and continuous improvement",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Service",
+        "x": 700,
+        "y": 700
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_iso_to_as9100",
+        "name": "extends",
+        "source": "node_as9100",
+        "target": "node_iso9001",
+        "description": "AS9100 builds upon ISO 9001",
+        "relationship": "extends",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_gap",
+        "name": "starts with",
+        "source": "node_as9100",
+        "target": "node_gap_analysis",
+        "description": "Implementation begins with gap analysis",
+        "relationship": "starts with",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_gap_to_doc",
+        "name": "leads to",
+        "source": "node_gap_analysis",
+        "target": "node_documentation",
+        "description": "Phase 1 leads to Phase 2",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_doc_to_training",
+        "name": "leads to",
+        "source": "node_documentation",
+        "target": "node_training",
+        "description": "Phase 2 leads to Phase 3",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_training_to_audit",
+        "name": "leads to",
+        "source": "node_training",
+        "target": "node_internal_audit",
+        "description": "Phase 3 leads to Phase 4",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_audit_to_mgmt",
+        "name": "leads to",
+        "source": "node_internal_audit",
+        "target": "node_mgmt_review",
+        "description": "Phase 4 leads to Phase 5",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_mgmt_to_cert",
+        "name": "leads to",
+        "source": "node_mgmt_review",
+        "target": "node_certification",
+        "description": "Phase 5 leads to Phase 6",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_config",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_config_mgmt",
+        "description": "AS9100 requires configuration management",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_risk",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_risk_mgmt",
+        "description": "AS9100 requires risk management",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_safety",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_product_safety",
+        "description": "AS9100 requires product safety controls",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_fai",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_fai",
+        "description": "AS9100 requires first article inspection",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_counterfeit",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_counterfeit",
+        "description": "AS9100 requires counterfeit prevention",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_special",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_special_processes",
+        "description": "AS9100 requires special process controls",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_as9100_to_supplier",
+        "name": "requires",
+        "source": "node_as9100",
+        "target": "node_supplier_mgmt",
+        "description": "AS9100 requires supplier management",
+        "relationship": "requires",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_cert_to_contract",
+        "name": "enables",
+        "source": "node_certification",
+        "target": "node_contract_req",
+        "description": "Certification enables contract eligibility",
+        "relationship": "enables",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_cert_to_operational",
+        "name": "achieves",
+        "source": "node_certification",
+        "target": "node_operational_excellence",
+        "description": "Certification achieves operational excellence",
+        "relationship": "achieves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_cert_to_confidence",
+        "name": "provides",
+        "source": "node_certification",
+        "target": "node_customer_confidence",
+        "description": "Certification provides customer confidence",
+        "relationship": "provides",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_cert_to_regulatory",
+        "name": "ensures",
+        "source": "node_certification",
+        "target": "node_regulatory",
+        "description": "Certification ensures regulatory compliance",
+        "relationship": "ensures",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_cert_to_post",
+        "name": "followed by",
+        "source": "node_certification",
+        "target": "node_post_cert",
+        "description": "Certification followed by ongoing support",
+        "relationship": "followed by",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      }
+    ]
+  }
+}

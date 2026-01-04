@@ -618,6 +618,7 @@
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
     const graphFile = urlParams.get('graph') || 'welcome';
+    const version = urlParams.get('v') || new Date().getTime(); // Cache busting
     
     const checkApp = setInterval(function() {
         if (window.app) {
@@ -626,8 +627,8 @@
             if (graphFile === 'welcome') {
                 window.app.loadWelcomeGraph();
             } else {
-                // Load from file
-                fetch(`graphs/${graphFile}.json`)
+                // Load from file with cache busting
+                fetch(`graphs/${graphFile}.json?v=${version}`)
                     .then(response => response.json())
                     .then(data => {
                         window.app.loadGraph(data);

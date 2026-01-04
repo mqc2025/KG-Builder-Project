@@ -24,16 +24,26 @@
 			height: 100%;
 			overflow: hidden;
 		}
+		/* Transparent background */
+        body {
+            background: transparent !important;
+        }
+        
+        .canvas-container,
+        #canvas {
+            background: transparent !important;
+        }
 
 		.viewer-mode .canvas-container {
-			position: fixed !important;
-			left: 0 !important;
-			right: 0 !important;
-			top: 0 !important;
-			bottom: 0 !important;
-			width: 100% !important;
-			height: 100% !important;
-		}
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: transparent !important;
+        }
 
 		.viewer-mode #canvas {
 			width: 100% !important;
@@ -98,600 +108,24 @@
         <div class="loading-text">Loading...</div>
     </div>
 
-    <!-- Embedded JSON Data - REPLACE THIS WITH YOUR ACTUAL JSON -->
-    <script id="embedded-graph-data" type="application/json">
+<!-- Graph will be loaded dynamically from URL parameter -->
+<script id="embedded-graph-data" type="application/json">
 {
   "graph": {
     "metadata": {
-      "name": "workflow_showcase",
-      "title": "Complete Software Development Lifecycle Workflow",
-      "description": "A comprehensive workflow demonstrating start/end nodes, tasks, decisions, branching, loops, and merge points. Includes a disconnected chain to showcase validation warnings.",
-      "created": "2025-01-29",
-      "modified": "2025-12-29"
+      "name": "loading",
+      "title": "Loading...",
+      "description": "Graph is being loaded"
     },
     "settings": {
       "nodeLabelSize": 12,
-      "edgeLabelSize": 10,
-      "worldBoundary": {
-        "enabled": false,
-        "minX": -2000,
-        "maxX": 2000,
-        "minY": -2000,
-        "maxY": 2000
-      }
+      "edgeLabelSize": 10
     },
-    "nodes": [
-      {
-        "id": "start_node",
-        "name": "Start",
-        "color": "#3498db",
-        "size": 20,
-        "description": "Starting point of the software development workflow",
-        "category": "start-end",
-        "x": 100,
-        "y": 300,
-        "fx": 100,
-        "fy": 300,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.770Z",
-        "modifiedDate": "2025-12-29T17:08:13.770Z"
-      },
-      {
-        "id": "task_requirements",
-        "name": "Gather Requirements",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Collect and document project requirements from stakeholders",
-        "category": "task",
-        "x": 300,
-        "y": 300,
-        "fx": 300,
-        "fy": 300,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_design",
-        "name": "Create Design",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Design system architecture and user interface",
-        "category": "task",
-        "x": 500,
-        "y": 300,
-        "fx": 500,
-        "fy": 300,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "decision_design_approved",
-        "name": "Design Approved?",
-        "color": "#f39c12",
-        "size": 18,
-        "description": "Decision point: Is the design approved by stakeholders?",
-        "category": "decision",
-        "x": 700,
-        "y": 301.3375244140625,
-        "fx": 700,
-        "fy": 301.3375244140625,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_implement",
-        "name": "Implement Code",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Write code according to approved design specifications",
-        "category": "task",
-        "x": 900,
-        "y": 200,
-        "fx": 900,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_revise_design",
-        "name": "Revise Design",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Modify design based on feedback and return to review",
-        "category": "task",
-        "x": 900,
-        "y": 400,
-        "fx": 900,
-        "fy": 400,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_testing",
-        "name": "Run Tests",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Execute unit tests, integration tests, and system tests",
-        "category": "task",
-        "x": 1100,
-        "y": 200,
-        "fx": 1100,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "decision_tests_passed",
-        "name": "Tests Passed?",
-        "color": "#f39c12",
-        "size": 18,
-        "description": "Decision point: Did all tests pass successfully?",
-        "category": "decision",
-        "x": 1300,
-        "y": 200,
-        "fx": 1300,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_fix_bugs",
-        "name": "Fix Bugs",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Debug and fix issues found during testing",
-        "category": "task",
-        "x": 1300,
-        "y": 350,
-        "fx": 1300,
-        "fy": 350,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_deploy",
-        "name": "Deploy to Production",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Deploy the application to production environment",
-        "category": "task",
-        "x": 1500,
-        "y": 200,
-        "fx": 1500,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "task_monitor",
-        "name": "Monitor System",
-        "color": "#2ecc71",
-        "size": 15,
-        "description": "Monitor system performance and user feedback",
-        "category": "task",
-        "x": 1700,
-        "y": 200,
-        "fx": 1700,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "end_node",
-        "name": "End",
-        "color": "#e74c3c",
-        "size": 20,
-        "description": "Workflow complete - software delivered and monitored",
-        "category": "start-end",
-        "x": 1900,
-        "y": 200,
-        "fx": 1900,
-        "fy": 200,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.771Z",
-        "modifiedDate": "2025-12-29T17:08:13.771Z"
-      },
-      {
-        "id": "disconnected_start",
-        "name": "Start",
-        "color": "#95a5a6",
-        "size": 16,
-        "description": "This is a disconnected workflow chain (for testing validation warnings)",
-        "category": "start-end",
-        "x": 1000,
-        "y": 600,
-        "fx": 1000,
-        "fy": 600,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.772Z",
-        "modifiedDate": "2025-12-29T17:08:13.772Z"
-      },
-      {
-        "id": "disconnected_task1",
-        "name": "Incomplete Task",
-        "color": "#95a5a6",
-        "size": 14,
-        "description": "This chain is disconnected and missing an end node",
-        "category": "task",
-        "x": 1200,
-        "y": 600,
-        "fx": 1200,
-        "fy": 600,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.772Z",
-        "modifiedDate": "2025-12-29T17:08:13.772Z"
-      },
-      {
-        "id": "disconnected_task2",
-        "name": "Another Task",
-        "color": "#95a5a6",
-        "size": 14,
-        "description": "Part of disconnected chain",
-        "category": "task",
-        "x": 1400,
-        "y": 600,
-        "fx": 1400,
-        "fy": 600,
-        "icon": "",
-        "subCat": "",
-        "link1": "",
-        "link2": "",
-        "link3": "",
-        "link4": "",
-        "priority": "Medium",
-        "deadline": "",
-        "userDate": "",
-        "createdDate": "2025-12-29T17:08:13.772Z",
-        "modifiedDate": "2025-12-29T17:08:13.772Z"
-      }
-    ],
-    "edges": [
-      {
-        "id": "edge_start_to_req",
-        "name": "begin",
-        "source": "start_node",
-        "target": "task_requirements",
-        "description": "Start the workflow",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_req_to_design",
-        "name": "proceed",
-        "source": "task_requirements",
-        "target": "task_design",
-        "description": "Move to design phase",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_design_to_decision",
-        "name": "review",
-        "source": "task_design",
-        "target": "decision_design_approved",
-        "description": "Submit design for approval",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_decision_approved_yes",
-        "name": "yes - approved",
-        "source": "decision_design_approved",
-        "target": "task_implement",
-        "description": "Design approved, proceed to implementation",
-        "relationship": "next",
-        "color": "#2ecc71",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_decision_approved_no",
-        "name": "no - needs revision",
-        "source": "decision_design_approved",
-        "target": "task_revise_design",
-        "description": "Design needs revision",
-        "relationship": "next",
-        "color": "#e74c3c",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_revise_to_design",
-        "name": "resubmit",
-        "source": "task_revise_design",
-        "target": "task_design",
-        "description": "Loop back to design after revisions (this is allowed)",
-        "relationship": "next",
-        "color": "#f39c12",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_implement_to_testing",
-        "name": "complete",
-        "source": "task_implement",
-        "target": "task_testing",
-        "description": "Implementation complete, run tests",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_testing_to_decision",
-        "name": "evaluate",
-        "source": "task_testing",
-        "target": "decision_tests_passed",
-        "description": "Evaluate test results",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_tests_passed_yes",
-        "name": "yes - all passed",
-        "source": "decision_tests_passed",
-        "target": "task_deploy",
-        "description": "All tests passed, ready to deploy",
-        "relationship": "next",
-        "color": "#2ecc71",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_tests_passed_no",
-        "name": "no - bugs found",
-        "source": "decision_tests_passed",
-        "target": "task_fix_bugs",
-        "description": "Tests failed, fix bugs",
-        "relationship": "next",
-        "color": "#e74c3c",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_fix_to_testing",
-        "name": "retest",
-        "source": "task_fix_bugs",
-        "target": "task_testing",
-        "description": "Loop back to testing after bug fixes",
-        "relationship": "next",
-        "color": "#f39c12",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_deploy_to_monitor",
-        "name": "deployed",
-        "source": "task_deploy",
-        "target": "task_monitor",
-        "description": "Deployment complete, begin monitoring",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "edge_monitor_to_end",
-        "name": "complete",
-        "source": "task_monitor",
-        "target": "end_node",
-        "description": "Workflow complete",
-        "relationship": "next",
-        "color": "#3498db",
-        "weight": 2,
-        "directed": true
-      },
-      {
-        "id": "data_req_to_design",
-        "name": "requirements doc",
-        "source": "task_requirements",
-        "target": "task_design",
-        "description": "Requirements document provided to design team",
-        "relationship": "input",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "data_design_to_implement",
-        "name": "design specs",
-        "source": "task_design",
-        "target": "task_implement",
-        "description": "Design specifications guide implementation",
-        "relationship": "input",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "data_implement_to_testing",
-        "name": "source code",
-        "source": "task_implement",
-        "target": "task_testing",
-        "description": "Source code submitted for testing",
-        "relationship": "input",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "data_testing_to_bugs",
-        "name": "bug reports",
-        "source": "task_testing",
-        "target": "task_fix_bugs",
-        "description": "Bug reports from testing",
-        "relationship": "input",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "data_deploy_to_monitor",
-        "name": "deployment logs",
-        "source": "task_deploy",
-        "target": "task_monitor",
-        "description": "Deployment logs and metrics",
-        "relationship": "input",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "edge_disconnected_start_to_task1",
-        "name": "begin",
-        "source": "disconnected_start",
-        "target": "disconnected_task1",
-        "description": "Start of disconnected chain",
-        "relationship": "next",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      },
-      {
-        "id": "edge_disconnected_task1_to_task2",
-        "name": "continue",
-        "source": "disconnected_task1",
-        "target": "disconnected_task2",
-        "description": "Continue in disconnected chain (missing end node)",
-        "relationship": "next",
-        "color": "#95a5a6",
-        "weight": 1,
-        "directed": true
-      }
-    ]
+    "nodes": [],
+    "edges": []
   }
 }
-    </script>
+</script>
 
     <!-- D3.js Library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -702,64 +136,207 @@
     <script src="js/renderer.js"></script>
     <script src="js/minimap.js"></script>
 
-    <!-- Viewer Initialization Script -->
-    <script>
-        // Set viewer mode flag globally
-        window.VIEWER_MODE = true;
-        
-        // Viewer mode initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                // Get embedded JSON data
-                const jsonScript = document.getElementById('embedded-graph-data');
-                const graphData = JSON.parse(jsonScript.textContent);
-                
-                // Update title
-                const titleEl = document.getElementById('graph-title');
-                if (graphData.graph.metadata && graphData.graph.metadata.title) {
-                    titleEl.textContent = graphData.graph.metadata.title;
-                } else if (graphData.graph.metadata && graphData.graph.metadata.name) {
-                    titleEl.textContent = graphData.graph.metadata.name;
-                }
-                
-                // Initialize graph
-                const graph = new Graph();
-                graph.fromJSON(graphData);
-                
-                // Initialize renderer (viewer mode)
-                const canvas = document.getElementById('canvas');
-                const renderer = new Renderer(canvas, graph);
-                
-                // Disable editing in renderer
-                renderer.isViewerMode = true;
-                
-                // Initialize minimap
-                const minimapElement = document.getElementById('minimap');
-                const minimap = new Minimap(minimapElement, renderer);
-                
-                // Render the graph
-                renderer.render();
-                
-                // Auto-fit to view after a short delay
-                setTimeout(() => {
-                    renderer.fitToView();
-                    // Hide title after a few seconds
-                    setTimeout(() => {
-                        titleEl.style.opacity = '0';
-                        titleEl.style.transition = 'opacity 1s';
-                    }, 3000);
-                }, 500);
-                
-                // Enable zoom and pan only (no editing)
-                console.log('Graph viewer loaded successfully');
-                console.log('Nodes:', graph.nodes.length, 'Edges:', graph.edges.length);
-                
-            } catch (error) {
-                console.error('Error loading graph:', error);
-                document.getElementById('graph-title').textContent = 'Error loading graph';
-                document.getElementById('graph-title').style.backgroundColor = '#e74c3c';
-            }
+ <script>
+    // Set viewer mode flag globally
+    window.VIEWER_MODE = true;
+    
+    // Parse URL parameter
+    function getGraphNameFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('graph');
+    }
+	
+	// Get text color from URL parameter
+	function getTextColorFromURL() {
+		const urlParams = new URLSearchParams(window.location.search);
+		return urlParams.get('textColor') || 'black'; // default to black
+	}
+
+	// Apply text color dynamically
+	function applyTextColor(color) {
+		const style = document.createElement('style');
+		style.textContent = `
+			.canvas-container text,
+			#canvas text,
+			.node-label,
+			.edge-label,
+			svg text {
+				fill: ${color} !important;
+			}
+			.viewer-title {
+				color: ${color} !important;
+			}
+		`;
+		document.head.appendChild(style);
+	}
+	
+	// Get boundary settings from URL parameter
+function getBoundaryFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const boundary = urlParams.get('boundary');
+    
+    if (!boundary) return null;
+    
+    // Support formats: "true", "1200x800", "1200,800"
+    if (boundary === 'true' || boundary === '1') {
+        return { width: 1000, height: 600 }; // default size
+    }
+    
+    // Parse custom dimensions
+    const match = boundary.match(/(\d+)[x,](\d+)/);
+    if (match) {
+        return { width: parseInt(match[1]), height: parseInt(match[2]) };
+    }
+    
+    return null;
+}
+
+// Apply boundary box
+function applyBoundary(renderer, boundaryConfig) {
+    if (!boundaryConfig) return;
+    
+    const canvas = d3.select('#canvas');
+    const containerWidth = document.getElementById('canvas-container').clientWidth;
+    const containerHeight = document.getElementById('canvas-container').clientHeight;
+    
+    // Calculate centered position
+    const x = (containerWidth - boundaryConfig.width) / 2;
+    const y = (containerHeight - boundaryConfig.height) / 2;
+    
+    // Draw boundary box
+    canvas.append('rect')
+        .attr('class', 'boundary-box')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('width', boundaryConfig.width)
+        .attr('height', boundaryConfig.height)
+        .attr('fill', 'none')
+        .attr('stroke', 'rgba(255, 255, 255, 0.3)')
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '5,5')
+        .attr('rx', 10)
+        .attr('ry', 10);
+    
+    // Constrain nodes to boundary
+    if (renderer && renderer.simulation) {
+        renderer.simulation.on('tick', function() {
+            renderer.graph.nodes.forEach(node => {
+                if (node.x < x + 30) node.x = x + 30;
+                if (node.x > x + boundaryConfig.width - 30) node.x = x + boundaryConfig.width - 30;
+                if (node.y < y + 30) node.y = y + 30;
+                if (node.y > y + boundaryConfig.height - 30) node.y = y + boundaryConfig.height - 30;
+            });
         });
-    </script>
+    }
+}
+    
+    // Load graph from file
+    async function loadGraphFromFile(graphName) {
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const response = await fetch(`graphs/${graphName}.json?v=${timestamp}`);
+            
+            if (!response.ok) {
+                throw new Error(`Graph not found: ${graphName}.json (${response.status})`);
+            }
+            
+            const graphData = await response.json();
+            
+            // Validate graph structure
+            if (!graphData.graph || !graphData.graph.nodes) {
+                throw new Error('Invalid graph structure');
+            }
+            
+            return graphData;
+            
+        } catch (error) {
+            console.error('Error loading graph:', error);
+            throw error;
+        }
+    }
+    
+    // Viewer mode initialization
+    document.addEventListener('DOMContentLoaded', async function() {
+		// Apply text color from URL parameter
+		const textColor = getTextColorFromURL();
+		applyTextColor(textColor)
+        
+		const titleEl = document.getElementById('graph-title');
+        
+        try {
+            // Get graph name from URL
+            const graphName = getGraphNameFromURL();
+            
+            if (!graphName) {
+                titleEl.textContent = 'No graph specified';
+                titleEl.style.backgroundColor = '#e67e22';
+                console.error('Usage: viewer.html?graph=filename');
+                return;
+            }
+            
+            // Show loading state
+            titleEl.textContent = `Loading ${graphName}...`;
+            
+            // Load graph data from file
+            const graphData = await loadGraphFromFile(graphName);
+            
+            // Update title
+            if (graphData.graph.metadata && graphData.graph.metadata.title) {
+                titleEl.textContent = graphData.graph.metadata.title;
+            } else if (graphData.graph.metadata && graphData.graph.metadata.name) {
+                titleEl.textContent = graphData.graph.metadata.name;
+            } else {
+                titleEl.textContent = graphName;
+            }
+            
+            // Initialize graph
+            const graph = new Graph();
+            graph.fromJSON(graphData);
+            
+            // Initialize renderer (viewer mode)
+            const canvas = document.getElementById('canvas');
+            const renderer = new Renderer(canvas, graph);
+            
+            // Disable editing in renderer
+            renderer.isViewerMode = true;
+            
+            // Initialize minimap
+            const minimapElement = document.getElementById('minimap');
+            const minimap = new Minimap(minimapElement, renderer);
+            
+            // Apply boundary if specified
+			const boundaryConfig = getBoundaryFromURL();
+			if (boundaryConfig) {
+				applyBoundary(renderer, boundaryConfig);
+			}
+
+			// Render the graph
+			renderer.render();
+
+			// Auto-fit to view after a short delay
+			setTimeout(() => {
+				if (!boundaryConfig) {
+					renderer.fitToView(); // Only auto-fit if no boundary
+				}
+                // Hide title after a few seconds
+                setTimeout(() => {
+                    titleEl.style.opacity = '0';
+                    titleEl.style.transition = 'opacity 1s';
+                }, 3000);
+            }, 500);
+            
+            // Enable zoom and pan only (no editing)
+            console.log('Graph viewer loaded successfully');
+            console.log('Graph:', graphName);
+            console.log('Nodes:', graph.nodes.length, 'Edges:', graph.edges.length);
+            
+        } catch (error) {
+            console.error('Error loading graph:', error);
+            titleEl.textContent = `Error: ${error.message}`;
+            titleEl.style.backgroundColor = '#e74c3c';
+            titleEl.style.opacity = '1';
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,561 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "iso9001_certification",
+      "title": "ISO 9001 Certification Implementation Process",
+      "description": "Complete overview of ISO 9001 certification process, benefits, and documentation requirements",
+      "created": "2025-01-03T00:00:00.000Z",
+      "modified": "2025-01-03T00:00:00.000Z"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "node_iso9001",
+        "name": "ISO 9001",
+        "description": "International Quality Management System standard",
+        "color": "#2ecc71",
+        "size": 15,
+        "category": "Standard",
+        "x": 400,
+        "y": 50
+      },
+      {
+        "id": "node_phase1",
+        "name": "Initial Consultation",
+        "description": "Phase 1: Scope definition and project objectives",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 100,
+        "y": 200
+      },
+      {
+        "id": "node_phase2",
+        "name": "Gap Analysis",
+        "description": "Phase 2: Assessment of current practices vs ISO 9001",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 250,
+        "y": 200
+      },
+      {
+        "id": "node_phase3",
+        "name": "Documentation Development",
+        "description": "Phase 3: Quality Manual, procedures, work instructions",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 400,
+        "y": 200
+      },
+      {
+        "id": "node_phase4",
+        "name": "Implementation & Training",
+        "description": "Phase 4: Deploy procedures and train employees",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 550,
+        "y": 200
+      },
+      {
+        "id": "node_phase5",
+        "name": "Internal Audit",
+        "description": "Phase 5: Test system effectiveness",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 700,
+        "y": 200
+      },
+      {
+        "id": "node_phase6",
+        "name": "Certification Audit",
+        "description": "Phase 6: Certification body audit support",
+        "color": "#3498db",
+        "size": 15,
+        "category": "Implementation Phase",
+        "x": 850,
+        "y": 200
+      },
+      {
+        "id": "node_quality_manual",
+        "name": "Quality Manual",
+        "description": "QMS scope, processes, and high-level descriptions",
+        "color": "#9b59b6",
+        "size": 15,
+        "category": "Documentation",
+        "x": 250,
+        "y": 350
+      },
+      {
+        "id": "node_procedures",
+        "name": "Core Procedures",
+        "description": "15-20 procedures for key QMS processes",
+        "color": "#9b59b6",
+        "size": 15,
+        "category": "Documentation",
+        "x": 400,
+        "y": 350
+      },
+      {
+        "id": "node_work_instructions",
+        "name": "Work Instructions",
+        "description": "Step-by-step instructions for critical processes",
+        "color": "#9b59b6",
+        "size": 15,
+        "category": "Documentation",
+        "x": 550,
+        "y": 350
+      },
+      {
+        "id": "node_forms",
+        "name": "Forms & Templates",
+        "description": "Audit checklists, CARs, training records, logs",
+        "color": "#9b59b6",
+        "size": 15,
+        "category": "Documentation",
+        "x": 700,
+        "y": 350
+      },
+      {
+        "id": "node_customer_confidence",
+        "name": "Customer Confidence",
+        "description": "Third-party validation of quality commitment",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 100,
+        "y": 500
+      },
+      {
+        "id": "node_operational_efficiency",
+        "name": "Operational Efficiency",
+        "description": "15-25% reduction in quality-related costs",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 250,
+        "y": 500
+      },
+      {
+        "id": "node_reduced_defects",
+        "name": "Reduced Defects",
+        "description": "Lower scrap rates and rework costs",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 400,
+        "y": 500
+      },
+      {
+        "id": "node_employee_engagement",
+        "name": "Employee Engagement",
+        "description": "Clear procedures and accountability",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 550,
+        "y": 500
+      },
+      {
+        "id": "node_competitive_advantage",
+        "name": "Competitive Advantage",
+        "description": "Differentiation from non-certified competitors",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 700,
+        "y": 500
+      },
+      {
+        "id": "node_continuous_improvement",
+        "name": "Continuous Improvement",
+        "description": "Data-driven decision making culture",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 850,
+        "y": 500
+      },
+      {
+        "id": "node_market_access",
+        "name": "Market Access",
+        "description": "Required for many industries and customers",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 100,
+        "y": 650
+      },
+      {
+        "id": "node_risk_management",
+        "name": "Risk Management",
+        "description": "Proactive identification and mitigation",
+        "color": "#e74c3c",
+        "size": 15,
+        "category": "Benefit",
+        "x": 250,
+        "y": 650
+      },
+      {
+        "id": "node_b2b_manufacturers",
+        "name": "B2B Manufacturers",
+        "description": "Companies selling to other businesses",
+        "color": "#f39c12",
+        "size": 15,
+        "category": "Target Industry",
+        "x": 400,
+        "y": 650
+      },
+      {
+        "id": "node_government_contractors",
+        "name": "Government Contractors",
+        "description": "Required for procurement qualification",
+        "color": "#f39c12",
+        "size": 15,
+        "category": "Target Industry",
+        "x": 550,
+        "y": 650
+      },
+      {
+        "id": "node_export_companies",
+        "name": "Export-Oriented Companies",
+        "description": "International customers require certification",
+        "color": "#f39c12",
+        "size": 15,
+        "category": "Target Industry",
+        "x": 700,
+        "y": 650
+      },
+      {
+        "id": "node_growing_manufacturers",
+        "name": "Growing Manufacturers",
+        "description": "Need documented processes for consistency",
+        "color": "#f39c12",
+        "size": 15,
+        "category": "Target Industry",
+        "x": 850,
+        "y": 650
+      },
+      {
+        "id": "node_stage1_audit",
+        "name": "Stage 1 Audit",
+        "description": "Document review phase",
+        "color": "#1abc9c",
+        "size": 15,
+        "category": "Certification Process",
+        "x": 700,
+        "y": 800
+      },
+      {
+        "id": "node_stage2_audit",
+        "name": "Stage 2 Audit",
+        "description": "Implementation audit (1-3 days)",
+        "color": "#1abc9c",
+        "size": 15,
+        "category": "Certification Process",
+        "x": 850,
+        "y": 800
+      },
+      {
+        "id": "node_certificate",
+        "name": "ISO 9001 Certificate",
+        "description": "Issued within 2 weeks of successful audit",
+        "color": "#27ae60",
+        "size": 15,
+        "category": "Outcome",
+        "x": 1000,
+        "y": 800
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_iso_to_phase1",
+        "name": "starts with",
+        "source": "node_iso9001",
+        "target": "node_phase1",
+        "description": "ISO 9001 implementation starts with consultation",
+        "relationship": "starts with",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase1_to_phase2",
+        "name": "leads to",
+        "source": "node_phase1",
+        "target": "node_phase2",
+        "description": "Consultation leads to gap analysis",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase2_to_phase3",
+        "name": "leads to",
+        "source": "node_phase2",
+        "target": "node_phase3",
+        "description": "Gap analysis leads to documentation",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase3_to_phase4",
+        "name": "leads to",
+        "source": "node_phase3",
+        "target": "node_phase4",
+        "description": "Documentation leads to implementation",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase4_to_phase5",
+        "name": "leads to",
+        "source": "node_phase4",
+        "target": "node_phase5",
+        "description": "Implementation leads to internal audit",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase5_to_phase6",
+        "name": "leads to",
+        "source": "node_phase5",
+        "target": "node_phase6",
+        "description": "Internal audit leads to certification",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_phase3_to_manual",
+        "name": "creates",
+        "source": "node_phase3",
+        "target": "node_quality_manual",
+        "description": "Documentation phase creates quality manual",
+        "relationship": "creates",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_phase3_to_procedures",
+        "name": "creates",
+        "source": "node_phase3",
+        "target": "node_procedures",
+        "description": "Documentation phase creates procedures",
+        "relationship": "creates",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_phase3_to_instructions",
+        "name": "creates",
+        "source": "node_phase3",
+        "target": "node_work_instructions",
+        "description": "Documentation phase creates work instructions",
+        "relationship": "creates",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_phase3_to_forms",
+        "name": "creates",
+        "source": "node_phase3",
+        "target": "node_forms",
+        "description": "Documentation phase creates forms",
+        "relationship": "creates",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_customer",
+        "name": "provides",
+        "source": "node_iso9001",
+        "target": "node_customer_confidence",
+        "description": "ISO 9001 provides customer confidence",
+        "relationship": "provides",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_efficiency",
+        "name": "provides",
+        "source": "node_iso9001",
+        "target": "node_operational_efficiency",
+        "description": "ISO 9001 provides operational efficiency",
+        "relationship": "provides",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_defects",
+        "name": "reduces",
+        "source": "node_iso9001",
+        "target": "node_reduced_defects",
+        "description": "ISO 9001 reduces defects",
+        "relationship": "reduces",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_engagement",
+        "name": "improves",
+        "source": "node_iso9001",
+        "target": "node_employee_engagement",
+        "description": "ISO 9001 improves employee engagement",
+        "relationship": "improves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_advantage",
+        "name": "creates",
+        "source": "node_iso9001",
+        "target": "node_competitive_advantage",
+        "description": "ISO 9001 creates competitive advantage",
+        "relationship": "creates",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_improvement",
+        "name": "enables",
+        "source": "node_iso9001",
+        "target": "node_continuous_improvement",
+        "description": "ISO 9001 enables continuous improvement",
+        "relationship": "enables",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_market",
+        "name": "opens",
+        "source": "node_iso9001",
+        "target": "node_market_access",
+        "description": "ISO 9001 opens market access",
+        "relationship": "opens",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_risk",
+        "name": "strengthens",
+        "source": "node_iso9001",
+        "target": "node_risk_management",
+        "description": "ISO 9001 strengthens risk management",
+        "relationship": "strengthens",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_b2b",
+        "name": "serves",
+        "source": "node_iso9001",
+        "target": "node_b2b_manufacturers",
+        "description": "ISO 9001 serves B2B manufacturers",
+        "relationship": "serves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_government",
+        "name": "serves",
+        "source": "node_iso9001",
+        "target": "node_government_contractors",
+        "description": "ISO 9001 serves government contractors",
+        "relationship": "serves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_export",
+        "name": "serves",
+        "source": "node_iso9001",
+        "target": "node_export_companies",
+        "description": "ISO 9001 serves export companies",
+        "relationship": "serves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_iso_to_growing",
+        "name": "serves",
+        "source": "node_iso9001",
+        "target": "node_growing_manufacturers",
+        "description": "ISO 9001 serves growing manufacturers",
+        "relationship": "serves",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_phase6_to_stage1",
+        "name": "includes",
+        "source": "node_phase6",
+        "target": "node_stage1_audit",
+        "description": "Certification audit includes Stage 1",
+        "relationship": "includes",
+        "color": "#95a5a6",
+        "weight": 1,
+        "directed": true
+      },
+      {
+        "id": "edge_stage1_to_stage2",
+        "name": "leads to",
+        "source": "node_stage1_audit",
+        "target": "node_stage2_audit",
+        "description": "Stage 1 leads to Stage 2",
+        "relationship": "leads to",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      },
+      {
+        "id": "edge_stage2_to_cert",
+        "name": "results in",
+        "source": "node_stage2_audit",
+        "target": "node_certificate",
+        "description": "Stage 2 audit results in certificate",
+        "relationship": "results in",
+        "color": "#95a5a6",
+        "weight": 2,
+        "directed": true
+      }
+    ]
+  }
+}
