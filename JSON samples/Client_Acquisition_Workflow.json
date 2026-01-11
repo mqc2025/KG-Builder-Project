@@ -733,16 +733,16 @@
         "weight": 1
       },
       {
-        "id": "edge_warm_to_decision",
-        "name": "outreach sent",
-        "source": "task_warm_outreach",
-        "target": "decision_responses",
-        "description": "Wait for responses from warm outreach",
-        "relationship": "next",
-        "directed": true,
-        "color": "#3498db",
-        "weight": 2
-      },
+	  "id": "edge_linkedin_to_decision",
+	  "name": "content posted",
+	  "source": "task_linkedin_content",
+	  "target": "decision_responses",
+	  "description": "After posting LinkedIn content, assess response level",
+	  "relationship": "next",
+	  "directed": true,
+	  "color": "#3498db",
+	  "weight": 2
+	},
       {
         "id": "edge_decision_no_to_cold",
         "name": "no responses",
@@ -799,16 +799,16 @@
         "weight": 1
       },
       {
-        "id": "edge_nurture_loop",
-        "name": "stay in touch",
-        "source": "task_nurture_lead",
-        "target": "task_linkedin_content",
-        "description": "Continue building relationship through content",
-        "relationship": "next",
-        "directed": true,
-        "color": "#95a5a6",
-        "weight": 1
-      },
+	  "id": "edge_nurture_to_warm",
+	  "name": "re-engage",
+	  "source": "task_nurture_lead",
+	  "target": "task_warm_outreach",
+	  "description": "Re-engage nurtured leads with warm follow-up",
+	  "relationship": "next",
+	  "directed": true,
+	  "color": "#95a5a6",
+	  "weight": 1
+	},
       {
         "id": "edge_decision_yes_to_gap",
         "name": "yes - qualified",

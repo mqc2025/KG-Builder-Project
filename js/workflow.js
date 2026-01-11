@@ -142,11 +142,12 @@ class WorkflowManager {
         this.validationReport = this.validateWorkflowStructure(chain);
         this.workflowChain = chain;
         
-        // Check if there are blocking errors
-        if (this.validationReport.errors.length > 0) {
-            alert(`Cannot open workflow navigator:\n\n${this.validationReport.errors.join('\n')}`);
-            return;
-        }
+        // Show validation status but allow navigation
+		if (this.validationReport.errors.length > 0) {
+			// Don't block opening - just show errors in validation summary
+			console.warn('Workflow has validation errors:', this.validationReport.errors);
+			// Errors will be displayed in the validation summary panel
+		}
         
         // Initialize navigation
         this.currentNodeId = nodeId;

@@ -35,10 +35,11 @@ class FileManager {
             this.exportModal.classList.add('hidden');
         });
 
-        document.getElementById('export-json')?.addEventListener('click', () => {
-            this.exportJSON();
-            this.exportModal.classList.add('hidden');
-        });
+        
+		document.getElementById('export-standard-json')?.addEventListener('click', () => {
+			this.exportStandardJSON();
+			this.exportModal.classList.add('hidden');
+		});
 
         document.getElementById('export-png')?.addEventListener('click', () => {
             this.exportPNG();
@@ -164,6 +165,72 @@ class FileManager {
 
         Utils.downloadFile(filename, jsonString, 'application/json');
     }
+	
+	/**
+ * Export graph as standard JSON format (compatible with D3.js, Cytoscape, etc.)
+ */
+exportStandardJSON() {
+    const nodeBookJson = this.graph.toJSON();
+    
+    // Extract nodes and edges, removing NodeBook-specific wrapper
+    const standardJson = {
+        nodes: nodeBookJson.graph.nodes.map(node => {
+            // Create clean node object
+            const cleanNode = {
+                id: node.id,
+                name: node.name,
+                label: node.name,  // Common in many libraries
+                x: node.x,
+                y: node.y
+            };
+            
+            // Add optional common fields if they exist
+            if (node.color) cleanNode.color = node.color;
+            if (node.size) cleanNode.size = node.size;
+            if (node.description) cleanNode.description = node.description;
+            if (node.category) cleanNode.group = node.category;  // 'group' is common
+            if (node.icon) cleanNode.icon = node.icon;
+            
+            // Copy all other custom properties
+            Object.keys(node).forEach(key => {
+                if (!cleanNode.hasOwnProperty(key) && 
+                    key !== 'fx' && key !== 'fy' && 
+                    key !== 'vx' && key !== 'vy' &&
+                    key !== 'subCat' && key !== 'link1' && key !== 'link2' && 
+                    key !== 'link3' && key !== 'link4' && 
+                    key !== 'priority' && key !== 'deadline' && 
+                    key !== 'userDate' && key !== 'createdDate' && key !== 'modifiedDate') {
+                    cleanNode[key] = node[key];
+                }
+            });
+            
+            return cleanNode;
+        }),
+        edges: nodeBookJson.graph.edges.map(edge => {
+            // Create clean edge object
+            const cleanEdge = {
+                id: edge.id,
+                source: edge.source,
+                target: edge.target
+            };
+            
+            // Add optional common fields if they exist
+            if (edge.name) cleanEdge.label = edge.name;
+            if (edge.relationship) cleanEdge.type = edge.relationship;
+            if (edge.color) cleanEdge.color = edge.color;
+            if (edge.weight) cleanEdge.weight = edge.weight;
+            if (edge.directed !== undefined) cleanEdge.directed = edge.directed;
+            if (edge.description) cleanEdge.description = edge.description;
+            
+            return cleanEdge;
+        })
+    };
+    
+    const jsonString = JSON.stringify(standardJson, null, 2);
+    const filename = `${this.graph.metadata.name.replace(/\s+/g, '_')}_standard.json`;
+    
+    Utils.downloadFile(filename, jsonString, 'application/json');
+}
 
     /**
      * Export graph as PNG
@@ -428,6 +495,9 @@ class FileManager {
 
 		setTimeout(() => {
 			try {
+				// Auto-detect and transform standard JSON formats
+				json = this.detectAndTransformFormat(json);
+				
 				const success = this.graph.fromJSON(json);
 
 				if (!success) {
@@ -467,6 +537,120 @@ class FileManager {
 			}
 		}, 100);
 	}
+	
+/**
+ * Detect and transform standard JSON formats to NodeBook format
+ * Supports: {nodes, edges}, {nodes, links}, and NodeBook format
+ * @param {Object} json - Input JSON
+ * @returns {Object} NodeBook-formatted JSON
+ */
+detectAndTransformFormat(json) {
+    // Already in NodeBook format
+    if (json.graph && json.graph.nodes && json.graph.edges) {
+        return json;
+    }
+    
+    // Standard format: {nodes, edges}
+    if (json.nodes && json.edges && !json.graph) {
+        return this.transformStandardToNodeBook(json.nodes, json.edges);
+    }
+    
+    // D3.js format: {nodes, links}
+    if (json.nodes && json.links && !json.graph) {
+        return this.transformStandardToNodeBook(json.nodes, json.links);
+    }
+    
+    // Unknown format, return as-is and let validation handle it
+    return json;
+}
+
+	/**
+	 * Transform standard format to NodeBook format
+	 * @param {Array} nodes - Array of nodes
+	 * @param {Array} edges - Array of edges/links
+	 * @returns {Object} NodeBook-formatted JSON
+	 */
+	transformStandardToNodeBook(nodes, edges) {
+		const now = new Date().toISOString();
+		
+		// Transform nodes - ensure required fields
+		const transformedNodes = nodes.map(node => {
+			const transformed = {
+				id: node.id || node.name || `node_${Math.random().toString(36).substr(2, 9)}`,
+				name: node.name || node.label || node.id || 'Unnamed',
+				description: node.description || node.desc || '',
+				color: node.color || node.fill || '#3498db',
+				size: node.size || node.radius || node.value || 10,
+				icon: node.icon || '',
+				category: node.category || node.group || node.type || '',
+				subCat: node.subCat || node.subCategory || '',
+				x: node.x || 0,
+				y: node.y || 0
+			};
+			
+			// Copy any additional custom properties
+			Object.keys(node).forEach(key => {
+				if (!transformed.hasOwnProperty(key) && 
+					key !== 'label' && key !== 'group' && key !== 'type' && 
+					key !== 'radius' && key !== 'value' && key !== 'fill') {
+					transformed[key] = node[key];
+				}
+			});
+			
+			return transformed;
+		});
+		
+		// Transform edges - ensure required fields
+		const transformedEdges = edges.map(edge => {
+			const transformed = {
+				id: edge.id || `edge_${Math.random().toString(36).substr(2, 9)}`,
+				source: typeof edge.source === 'object' ? edge.source.id : edge.source,
+				target: typeof edge.target === 'object' ? edge.target.id : edge.target,
+				name: edge.name || edge.label || '',
+				relationship: edge.relationship || edge.type || edge.label || '',
+				description: edge.description || edge.desc || '',
+				directed: edge.directed !== undefined ? edge.directed : true,
+				color: edge.color || edge.stroke || '#95a5a6',
+				weight: edge.weight || edge.value || 1
+			};
+			
+			// Copy any additional custom properties
+			Object.keys(edge).forEach(key => {
+				if (!transformed.hasOwnProperty(key) && 
+					key !== 'label' && key !== 'type' && key !== 'stroke' && key !== 'value') {
+					transformed[key] = edge[key];
+				}
+			});
+			
+			return transformed;
+		});
+		
+		// Create NodeBook structure
+		return {
+			graph: {
+				metadata: {
+					name: 'Imported Graph',
+					title: 'Imported from Standard Format',
+					description: 'Auto-converted from standard JSON format',
+					created: now,
+					modified: now
+				},
+				settings: {
+					nodeLabelSize: 12,
+					edgeLabelSize: 10,
+					worldBoundary: {
+						enabled: false,
+						minX: -2000,
+						maxX: 2000,
+						minY: -2000,
+						maxY: 2000
+					}
+				},
+				nodes: transformedNodes,
+				edges: transformedEdges
+			}
+		};
+	}	
 
     /**
      * Save graph directly (Ctrl+S behavior)
