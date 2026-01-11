@@ -1,0 +1,2103 @@
+{
+  "graph": {
+    "metadata": {
+      "name": "Ti64_Bolt_Manufacturing_Process",
+      "title": "Titanium Ti-6Al-4V Bolt Manufacturing Process Traveller",
+      "description": "Complete AS9100D-compliant manufacturing process for aerospace-grade titanium bolts. Includes material receipt through final shipping with full quality control, inspection gates, and process documentation per AS9100D requirements.",
+      "created": "2026-01-11T00:00:00.000Z",
+      "modified": "2026-01-11"
+    },
+    "settings": {
+      "nodeLabelSize": 12,
+      "edgeLabelSize": 10,
+      "worldBoundary": {
+        "enabled": false,
+        "minX": -2000,
+        "maxX": 2000,
+        "minY": -2000,
+        "maxY": 2000
+      }
+    },
+    "nodes": [
+      {
+        "id": "start",
+        "name": "Start",
+        "category": "start-end",
+        "color": "#27ae60",
+        "size": 18,
+        "icon": "▶️",
+        "description": "Manufacturing process initiated upon receipt of Production Order",
+        "x": 100,
+        "y": 400,
+        "fx": 100,
+        "fy": 400,
+        "processOwner": "Production Manager",
+        "processScope": "Ti-6Al-4V Bolt Manufacturing",
+        "triggerEvent": "Production Order released",
+        "initialInputs": [
+          "Production Order",
+          "Raw material availability confirmed",
+          "Tooling verified"
+        ],
+        "applicableStandards": [
+          "AS9100D Clause 8.5",
+          "AMS 4928",
+          "ASTM F467"
+        ],
+        "pdcaPhase": "plan",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_retrieve_material",
+        "name": "Retrieve Ti64 Bar from Storage",
+        "category": "task",
+        "color": "#3498db",
+        "size": 14,
+        "icon": "📦",
+        "description": "Pull specified length of Ti-6Al-4V bar stock from controlled raw material storage per Production Order requirements",
+        "x": 300,
+        "y": 400,
+        "fx": 300,
+        "fy": 400,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Production Order number",
+          "Material specification (Ti-6Al-4V per AMS 4928)",
+          "Required bar length",
+          "Material traceability cert"
+        ],
+        "processActivities": [
+          "Verify PO number and material specification",
+          "Locate material in storage using heat/lot number",
+          "Pull required length from inventory",
+          "Update material tracking system",
+          "Move material to receiving inspection area"
+        ],
+        "processOutputs": [
+          "Ti64 bar stock with cert",
+          "Material movement record",
+          "Updated inventory system"
+        ],
+        "resources": {
+          "personnel": [
+            "Material Handler (trained)"
+          ],
+          "competencies": [
+            "Material identification",
+            "Traceability system operation",
+            "Forklift certification"
+          ],
+          "tools": [
+            "Material tracking system",
+            "Forklift",
+            "Heat/lot number scanner"
+          ],
+          "timeRequired": "15 minutes"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Correct material spec verified",
+            "Heat/lot number matches cert"
+          ],
+          "measurementCriteria": "100% traceability maintained",
+          "kpi": "Material retrieval accuracy rate",
+          "acceptanceCriteria": "Material cert matches PO specification"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-001",
+              "description": "Wrong material retrieved",
+              "likelihood": "Low",
+              "impact": "Critical",
+              "riskLevel": "High",
+              "mitigation": "Dual verification of heat/lot number against PO"
+            },
+            {
+              "id": "RISK-002",
+              "description": "Material cert missing or incorrect",
+              "likelihood": "Low",
+              "impact": "High",
+              "riskLevel": "Medium",
+              "mitigation": "System requires cert scan before material release"
+            }
+          ],
+          "opportunities": [
+            {
+              "id": "OPP-001",
+              "description": "Barcode scanning reduces retrieval time",
+              "benefit": "15% time reduction achieved"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "WI-MM-001: Raw Material Storage and Retrieval",
+          "QP-004: Material Traceability Control",
+          "AS9100D Clause 8.5.2: Identification and Traceability"
+        ],
+        "qualityRecords": [
+          "Material movement log",
+          "Traceability record"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_material_inspection",
+        "name": "Material Receiving Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "🔍",
+        "description": "Verify material conformity: correct alloy, proper cert, no damage, within specification limits",
+        "x": 500,
+        "y": 400,
+        "fx": 500,
+        "fy": 400,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Material cert shows Ti-6Al-4V per AMS 4928",
+          "Heat/lot number on material matches cert",
+          "No surface damage or contamination visible",
+          "Diameter within specification tolerance",
+          "Material cert is current and complete"
+        ],
+        "decisionMethod": "Visual and dimensional inspection per WI-QC-001",
+        "decisionMaker": "Quality Inspector (Level II)",
+        "evidenceRequired": [
+          "Material certification",
+          "Dimensional inspection results",
+          "Visual inspection checklist",
+          "Traceability verification"
+        ],
+        "dataSource": "Receiving Inspection Report (Form QF-001)",
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-003",
+              "description": "Non-conforming material accepted",
+              "likelihood": "Very Low",
+              "impact": "Critical",
+              "riskLevel": "High",
+              "mitigation": "Independent dual inspection for aerospace materials"
+            }
+          ],
+          "decisionRiskLevel": {
+            "accept": "Low - material verified per procedure",
+            "reject": "Medium - potential schedule delay for replacement"
+          }
+        },
+        "documentation": {
+          "decisionRecord": "Required - Receiving Inspection Report",
+          "approvalRequired": true,
+          "approver": "Quality Manager",
+          "traceabilityReference": "RIR number linked to PO and heat/lot",
+          "retentionPeriod": "Life of part + 10 years per AS9100D"
+        },
+        "documentationReferences": [
+          "WI-QC-001: Receiving Inspection Procedure",
+          "QP-008: Control of Nonconforming Product",
+          "AS9100D Clause 8.6: Release of Products and Services"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "name": "QC, MRB & Quarantine Material",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "⛔",
+        "description": "Segregate non-conforming material, create NCR, notify procurement for replacement",
+        "x": -361.4063415527344,
+        "y": 525.94580078125,
+        "fx": -361.4063415527344,
+        "fy": 525.94580078125,
+        "pdcaPhase": "act",
+        "processActivities": [
+          "Tag material with NCR (Non-Conformance Report)",
+          "Move to quarantine area",
+          "Generate NCR document",
+          "Notify procurement and supplier",
+          "Await disposition (return, scrap, use-as-is)"
+        ],
+        "processOutputs": [
+          "NCR document",
+          "Material returned to supplier"
+        ],
+        "documentationReferences": [
+          "QP-008: Control of Nonconforming Product"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T15:56:50.895Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_cutting",
+        "name": "Cut to Size",
+        "category": "task",
+        "color": "#3498db",
+        "size": 14,
+        "icon": "✂️",
+        "description": "Cut Ti64 bar to specified blank length per engineering drawing using abrasive saw",
+        "x": 695.4719848632812,
+        "y": 400.0587158203125,
+        "fx": 695.4719848632812,
+        "fy": 400.0587158203125,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Ti64 bar stock (inspected)",
+          "Engineering drawing with blank dimensions",
+          "Cutting parameters"
+        ],
+        "processActivities": [
+          "Verify drawing revision and blank length",
+          "Set up abrasive saw per WI-CUT-001",
+          "Secure material in fixture",
+          "Cut blanks to length + machining allowance",
+          "Mark each blank with heat/lot number",
+          "Clean cutting debris"
+        ],
+        "processOutputs": [
+          "Cut blanks (specified length)",
+          "Cutting operation traveller"
+        ],
+        "resources": {
+          "personnel": [
+            "Saw Operator (certified)"
+          ],
+          "competencies": [
+            "Abrasive saw operation",
+            "Ti alloy cutting procedures",
+            "Blueprint reading"
+          ],
+          "tools": [
+            "Abrasive cut-off saw",
+            "Coolant system",
+            "Calipers",
+            "Permanent marker"
+          ],
+          "timeRequired": "30 minutes per batch (10 pieces)"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "First piece length check",
+            "In-process length verification every 5 pieces"
+          ],
+          "measurementCriteria": "Length within ±0.030 inch tolerance",
+          "kpi": "Cutting yield rate",
+          "acceptanceCriteria": "95% of blanks within tolerance"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-004",
+              "description": "Incorrect blank length cut",
+              "likelihood": "Low",
+              "impact": "Medium",
+              "riskLevel": "Medium",
+              "mitigation": "First piece inspection before batch cutting"
+            },
+            {
+              "id": "RISK-005",
+              "description": "Heat/lot traceability lost",
+              "likelihood": "Low",
+              "impact": "Critical",
+              "riskLevel": "High",
+              "mitigation": "Mark each blank immediately after cutting"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "WI-CUT-001: Abrasive Cutting of Titanium Alloys",
+          "Engineering Drawing: BOLT-Ti64-XXX",
+          "AS9100D Clause 8.5.1: Control of Production"
+        ],
+        "qualityRecords": [
+          "Cutting operation traveller",
+          "First piece inspection"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_cutting_inspection",
+        "name": "Post-Cut Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "📏",
+        "description": "Verify blank length, perpendicularity, surface condition, traceability marking",
+        "x": 900,
+        "y": 400,
+        "fx": 900,
+        "fy": 400,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Length within drawing tolerance (±0.030 inch)",
+          "Cut perpendicular to axis (within 1 degree)",
+          "No burrs or sharp edges",
+          "Heat/lot marking clearly visible",
+          "No cracks or surface damage"
+        ],
+        "decisionMethod": "Dimensional measurement and visual inspection",
+        "decisionMaker": "Quality Inspector",
+        "evidenceRequired": [
+          "Dimensional measurements (min 3 per batch)",
+          "Visual inspection checklist"
+        ],
+        "documentationReferences": [
+          "WI-QC-002: In-Process Inspection"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_hot_forging",
+        "name": "Hot Forging",
+        "category": "task",
+        "color": "#e67e22",
+        "size": 14,
+        "icon": "🔥",
+        "description": "Heat blanks to forging temperature and form bolt head using closed-die forging process",
+        "x": 905.5414428710938,
+        "y": 546.7611999511719,
+        "fx": 905.5414428710938,
+        "fy": 546.7611999511719,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Cut blanks (inspected)",
+          "Forging dies (calibrated)",
+          "Forging parameters"
+        ],
+        "processActivities": [
+          "Preheat furnace to 1750°F ± 25°F",
+          "Load blanks into furnace (heat soak 10 min)",
+          "Transfer to forging press within 30 seconds",
+          "Form head in 2-3 strikes per WI-FRG-001",
+          "Air cool to <150°F",
+          "Mark with heat/lot and forging date"
+        ],
+        "processOutputs": [
+          "Forged bolt blanks",
+          "Forging operation record"
+        ],
+        "resources": {
+          "personnel": [
+            "Forge Operator (certified)",
+            "Furnace Operator"
+          ],
+          "competencies": [
+            "Hot forging of Ti alloys",
+            "Temperature control",
+            "Die setup"
+          ],
+          "tools": [
+            "Forging press (500 ton)",
+            "Electric furnace",
+            "Pyrometer",
+            "Tongs",
+            "Dies"
+          ],
+          "timeRequired": "2 hours per batch setup + 5 min per piece"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Furnace temperature before loading",
+            "Soak time verification",
+            "Transfer time <30 sec",
+            "First piece dimensional check"
+          ],
+          "measurementCriteria": "Temperature 1725-1775°F, transfer time <30 sec",
+          "kpi": "Forging defect rate",
+          "acceptanceCriteria": "<2% cracking or die fill defects"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-006",
+              "description": "Improper forging temperature causes cracking",
+              "likelihood": "Medium",
+              "impact": "High",
+              "riskLevel": "High",
+              "mitigation": "Continuous pyrometer monitoring with alarms"
+            },
+            {
+              "id": "RISK-007",
+              "description": "Incomplete die fill",
+              "likelihood": "Low",
+              "impact": "Medium",
+              "riskLevel": "Medium",
+              "mitigation": "First piece inspection before batch processing"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "WI-FRG-001: Hot Forging of Titanium Fasteners",
+          "QP-012: Special Process Control",
+          "AS9100D Clause 8.5.1.2: Control of Special Processes"
+        ],
+        "qualityRecords": [
+          "Forging temperature chart",
+          "Forging operation traveller"
+        ],
+        "specialProcessControl": true,
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_forging_inspection",
+        "name": "Post-Forging Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "🔬",
+        "description": "Inspect for cracks, die fill, dimensions, surface defects using visual + penetrant inspection",
+        "x": 698.279052734375,
+        "y": 530.2505493164062,
+        "fx": 698.279052734375,
+        "fy": 530.2505493164062,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "No cracks visible (visual + FPI)",
+          "Complete die fill (head fully formed)",
+          "Head dimensions within tolerance",
+          "No laps or cold shuts",
+          "Surface condition acceptable"
+        ],
+        "decisionMethod": "Visual + Fluorescent Penetrant Inspection (FPI) per ASTM E1417",
+        "decisionMaker": "NDT Level II Inspector",
+        "evidenceRequired": [
+          "FPI results (photographic record)",
+          "Dimensional measurements",
+          "Visual inspection report"
+        ],
+        "documentationReferences": [
+          "WI-NDT-001: Fluorescent Penetrant Inspection",
+          "ASTM E1417: Standard Practice for Liquid Penetrant Testing"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_salt_bath_cleaning",
+        "name": "Salt Bath Cleaning",
+        "category": "task",
+        "color": "#16a085",
+        "size": 14,
+        "icon": "🧪",
+        "description": "Remove forging scale and surface oxides using molten salt bath",
+        "x": 500.1893005371094,
+        "y": 532.0851135253906,
+        "fx": 500.1893005371094,
+        "fy": 532.0851135253906,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Forged blanks (inspected)",
+          "Salt bath chemistry spec"
+        ],
+        "processActivities": [
+          "Verify salt bath temperature (850°F ± 10°F)",
+          "Verify bath chemistry per WI-CLN-001",
+          "Immerse parts for 15 minutes",
+          "Rinse in hot water cascade",
+          "Neutralize in acid bath",
+          "Final rinse and dry"
+        ],
+        "processOutputs": [
+          "Cleaned forged blanks",
+          "Cleaning operation record"
+        ],
+        "resources": {
+          "personnel": [
+            "Salt Bath Operator (certified)"
+          ],
+          "competencies": [
+            "Chemical process control",
+            "PPE usage",
+            "Waste handling"
+          ],
+          "tools": [
+            "Salt bath tank",
+            "Rinsing system",
+            "pH meter",
+            "Thermometer"
+          ],
+          "timeRequired": "45 minutes per batch"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Bath temperature",
+            "Bath chemistry (pH, salt concentration)",
+            "Rinse water pH"
+          ],
+          "measurementCriteria": "Temp 840-860°F, pH within spec",
+          "acceptanceCriteria": "Surface scale completely removed"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-008",
+              "description": "Incomplete scale removal",
+              "likelihood": "Low",
+              "impact": "Medium",
+              "riskLevel": "Medium",
+              "mitigation": "Visual verification + bath chemistry monitoring"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "WI-CLN-001: Salt Bath Descaling Process",
+          "AS9100D Clause 8.5.1.2: Special Process Control"
+        ],
+        "specialProcessControl": true,
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_cleaning_inspection",
+        "name": "Post-Cleaning Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "🧼",
+        "description": "Verify complete scale removal, no pitting or etching from cleaning process",
+        "x": 291.09246826171875,
+        "y": 535.7540893554688,
+        "fx": 291.09246826171875,
+        "fy": 535.7540893554688,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "100% scale removal verified visually",
+          "No pitting or over-etching",
+          "Surface uniform bright metal appearance",
+          "No chemical residue"
+        ],
+        "decisionMethod": "Visual inspection under magnification",
+        "decisionMaker": "Quality Inspector",
+        "priority": "Medium",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_cleaning_rework",
+        "name": "Re-clean Parts",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "🔄",
+        "description": "Return to salt bath for additional cleaning cycle",
+        "x": 198.01962280273438,
+        "y": 635.7501831054688,
+        "fx": 198.01962280273438,
+        "fy": 635.7501831054688,
+        "pdcaPhase": "act",
+        "priority": "Low",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_heat_treatment",
+        "name": "Heat Treatment",
+        "category": "task",
+        "color": "#e67e22",
+        "size": 14,
+        "icon": "🌡️",
+        "description": "Solution treat and age to achieve specified mechanical properties (minimum 130 ksi UTS)",
+        "x": 102.17520904541016,
+        "y": 539.4231567382812,
+        "fx": 102.17520904541016,
+        "fy": 539.4231567382812,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Cleaned forged blanks",
+          "Heat treatment specification AMS 2801"
+        ],
+        "processActivities": [
+          "Solution heat treat: 1750°F ± 25°F for 1 hour",
+          "Air cool to room temperature",
+          "Age: 1000°F ± 15°F for 4 hours",
+          "Air cool to room temperature",
+          "Document time-temperature profile"
+        ],
+        "processOutputs": [
+          "Heat treated blanks",
+          "Heat treatment chart record",
+          "Test coupons"
+        ],
+        "resources": {
+          "personnel": [
+            "Heat Treat Operator (certified)",
+            "Metallurgist"
+          ],
+          "competencies": [
+            "Vacuum furnace operation",
+            "Ti heat treatment",
+            "Pyrometry"
+          ],
+          "tools": [
+            "Vacuum furnace",
+            "Chart recorder",
+            "Hardness tester"
+          ],
+          "timeRequired": "8 hours per batch (includes cooling)"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Furnace temperature calibration current",
+            "Time-temperature profile recorded",
+            "Test coupon hardness",
+            "Microstructure verification (periodic)"
+          ],
+          "measurementCriteria": "Rockwell C 34-40, UTS ≥130 ksi",
+          "kpi": "Heat treat conformance rate",
+          "acceptanceCriteria": "Hardness and tensile properties within AMS spec"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-009",
+              "description": "Incorrect heat treatment results in low strength",
+              "likelihood": "Very Low",
+              "impact": "Critical",
+              "riskLevel": "High",
+              "mitigation": "Continuous chart recording + test coupon destructive testing"
+            },
+            {
+              "id": "RISK-010",
+              "description": "Oxidation during heat treatment",
+              "likelihood": "Low",
+              "impact": "Medium",
+              "riskLevel": "Medium",
+              "mitigation": "Vacuum furnace operation per procedure"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "AMS 2801: Heat Treatment of Titanium Alloys",
+          "WI-HT-001: Vacuum Heat Treatment Procedure",
+          "AS9100D Clause 8.5.1.2: Special Process Control"
+        ],
+        "qualityRecords": [
+          "Heat treatment chart",
+          "Test coupon results",
+          "Hardness test report"
+        ],
+        "specialProcessControl": true,
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_ht_inspection",
+        "name": "Post-HT Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "💎",
+        "description": "Verify hardness, microstructure (sampling), tensile properties via test coupons",
+        "x": 100.37858581542969,
+        "y": 733.8817138671875,
+        "fx": 100.37858581542969,
+        "fy": 733.8817138671875,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Hardness: Rockwell C 34-40 (3 locations per sample)",
+          "Test coupon tensile: UTS ≥130 ksi, Yield ≥120 ksi",
+          "Microstructure: Alpha-beta structure per AMS",
+          "No surface oxidation or contamination"
+        ],
+        "decisionMethod": "Hardness testing + destructive test coupon analysis",
+        "decisionMaker": "Metallurgist or Quality Engineer",
+        "evidenceRequired": [
+          "Hardness test results (min 3 per batch)",
+          "Tensile test report from test coupon",
+          "Microstructure photos (periodic sampling)"
+        ],
+        "riskAssessment": {
+          "decisionRiskLevel": {
+            "accept": "Low - properties verified",
+            "reject": "Critical - entire batch scrapped or re-heat treated"
+          }
+        },
+        "documentationReferences": [
+          "AMS 2801: Acceptance criteria",
+          "WI-QC-004: Heat Treatment Verification"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_ht_rework",
+        "name": "Re-Heat Treat or Scrap",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "♻️",
+        "description": "If properties low: re-heat treat (if within limits). If out of spec: scrap entire batch",
+        "x": -59.545475006103516,
+        "y": 667.1716918945312,
+        "fx": -59.545475006103516,
+        "fy": 667.1716918945312,
+        "pdcaPhase": "act",
+        "processActivities": [
+          "Engineering review of test results",
+          "Determine if re-heat treat is permissible",
+          "Re-process or scrap per NCR disposition"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_machining",
+        "name": "CNC Machining",
+        "category": "task",
+        "color": "#3498db",
+        "size": 14,
+        "icon": "⚙️",
+        "description": "Machine threads, OD, and hex on CNC lathe to final dimensions per engineering drawing",
+        "x": 306.2234802246094,
+        "y": 733.8311157226562,
+        "fx": 306.2234802246094,
+        "fy": 733.8311157226562,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Heat treated blanks",
+          "Engineering drawing",
+          "CNC program"
+        ],
+        "processActivities": [
+          "Load CNC program and verify rev level",
+          "Set up tooling and fixtures",
+          "First piece setup verification",
+          "Machine threads (UNF-3A class)",
+          "Machine hex head",
+          "Turn OD to final diameter",
+          "Break sharp edges"
+        ],
+        "processOutputs": [
+          "Machined bolts",
+          "Machining operation traveller",
+          "First piece inspection"
+        ],
+        "resources": {
+          "personnel": [
+            "CNC Machinist (certified)"
+          ],
+          "competencies": [
+            "CNC programming",
+            "Thread inspection",
+            "Blueprint reading"
+          ],
+          "tools": [
+            "CNC lathe",
+            "Thread gauges",
+            "Micrometers",
+            "Cutting tools"
+          ],
+          "timeRequired": "15 minutes per piece (after setup)"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "First piece dimensional verification",
+            "Thread gauge check every 10 pieces",
+            "Statistical process control (SPC) on critical dims"
+          ],
+          "measurementCriteria": "All dimensions per drawing ± tolerance",
+          "kpi": "Machining scrap rate",
+          "acceptanceCriteria": "<1% scrap rate"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-011",
+              "description": "Thread dimensions out of tolerance",
+              "likelihood": "Low",
+              "impact": "High",
+              "riskLevel": "Medium",
+              "mitigation": "First piece inspection + frequent gauge checks"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "Engineering Drawing: BOLT-Ti64-XXX",
+          "WI-MCH-001: CNC Machining Procedure",
+          "AS9100D Clause 8.5.1: Production Control"
+        ],
+        "qualityRecords": [
+          "First piece inspection",
+          "SPC charts"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_machining_inspection",
+        "name": "Post-Machining Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "📐",
+        "description": "Full dimensional inspection: threads, OD, hex, length, perpendicularity per drawing",
+        "x": 500.5083923339844,
+        "y": 735.3779907226562,
+        "fx": 500.5083923339844,
+        "fy": 735.3779907226562,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Thread: GO gauge passes, NO-GO gauge rejects",
+          "All dimensions within drawing tolerance",
+          "No tool marks or surface defects",
+          "Hex dimensions within tolerance",
+          "Length meets specification"
+        ],
+        "decisionMethod": "CMM measurement + thread gauge verification",
+        "decisionMaker": "Quality Inspector",
+        "evidenceRequired": [
+          "CMM inspection report",
+          "Thread gauge results",
+          "Surface finish measurement"
+        ],
+        "documentationReferences": [
+          "WI-QC-003: Dimensional Inspection Procedure"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_machining_rework",
+        "name": "Rework Machining",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "🔧",
+        "description": "Re-machine if oversized, scrap if undersized or threads damaged",
+        "x": 604.6255493164062,
+        "y": 625.0403442382812,
+        "fx": 604.6255493164062,
+        "fy": 625.0403442382812,
+        "pdcaPhase": "act",
+        "priority": "Medium",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_solution_cleaning",
+        "name": "Solution Cleaning",
+        "category": "task",
+        "color": "#16a085",
+        "size": 14,
+        "icon": "💧",
+        "description": "Remove machining oils and contaminants using alkaline cleaning solution",
+        "x": 694.120361328125,
+        "y": 735.3779907226562,
+        "fx": 694.120361328125,
+        "fy": 735.3779907226562,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Machined bolts",
+          "Cleaning solution specification"
+        ],
+        "processActivities": [
+          "Pre-rinse in water",
+          "Immerse in alkaline cleaner (180°F) for 10 minutes",
+          "Ultrasonic agitation",
+          "Hot water rinse",
+          "Deionized water final rinse",
+          "Air dry in clean room"
+        ],
+        "processOutputs": [
+          "Cleaned bolts ready for coating"
+        ],
+        "resources": {
+          "personnel": [
+            "Cleaning Operator"
+          ],
+          "competencies": [
+            "Chemical handling",
+            "Ultrasonic cleaning"
+          ],
+          "tools": [
+            "Ultrasonic tank",
+            "Heating system",
+            "DI water system"
+          ],
+          "timeRequired": "30 minutes per batch"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Solution temperature",
+            "Cleanliness verification (water break test)"
+          ],
+          "acceptanceCriteria": "Water sheet test passes (no beading)"
+        },
+        "documentationReferences": [
+          "WI-CLN-002: Precision Cleaning Procedure"
+        ],
+        "priority": "Medium",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_solution_inspection",
+        "name": "Post-Solution Cleaning Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "💦",
+        "description": "Verify complete cleanliness using water break test",
+        "x": 900.508544921875,
+        "y": 741.76611328125,
+        "fx": 900.508544921875,
+        "fy": 741.76611328125,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Water sheet test passes",
+          "No visible contamination",
+          "No residue in threads"
+        ],
+        "decisionMethod": "Water break test + visual inspection",
+        "decisionMaker": "Quality Inspector",
+        "priority": "Medium",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_solution_rework",
+        "name": "Re-clean Parts",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "🔄",
+        "description": "Return to cleaning tank for additional cycle",
+        "x": 1053.0386962890625,
+        "y": 685.5567626953125,
+        "fx": 1053.0386962890625,
+        "fy": 685.5567626953125,
+        "pdcaPhase": "act",
+        "priority": "Low",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_coating",
+        "name": "Apply Protective Coating",
+        "category": "task",
+        "color": "#9b59b6",
+        "size": 14,
+        "icon": "🎨",
+        "description": "Apply dry film lubricant or passivation per customer specification",
+        "x": 902.475830078125,
+        "y": 936.604736328125,
+        "fx": 902.475830078125,
+        "fy": 936.604736328125,
+        "pdcaPhase": "do",
+        "processInputs": [
+          "Cleaned bolts",
+          "Coating specification (e.g., MIL-DTL-46010)"
+        ],
+        "processActivities": [
+          "Verify coating material batch and shelf life",
+          "Apply coating per specification thickness",
+          "Cure per time-temperature profile",
+          "Document coating batch and cure cycle"
+        ],
+        "processOutputs": [
+          "Coated bolts",
+          "Coating application record"
+        ],
+        "resources": {
+          "personnel": [
+            "Coating Technician (certified)"
+          ],
+          "competencies": [
+            "Coating application",
+            "Cure cycle control"
+          ],
+          "tools": [
+            "Spray booth",
+            "Curing oven",
+            "Thickness gauge"
+          ],
+          "timeRequired": "2 hours (includes cure)"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "Coating thickness",
+            "Cure temperature-time profile",
+            "Adhesion test (sampling)"
+          ],
+          "measurementCriteria": "Thickness per spec, cure profile recorded",
+          "acceptanceCriteria": "Coating meets customer specification"
+        },
+        "riskAssessment": {
+          "identifiedRisks": [
+            {
+              "id": "RISK-012",
+              "description": "Coating thickness out of specification",
+              "likelihood": "Low",
+              "impact": "Medium",
+              "riskLevel": "Medium",
+              "mitigation": "Thickness measurement on sample before full batch"
+            }
+          ]
+        },
+        "documentationReferences": [
+          "MIL-DTL-46010: Dry Film Lubricant",
+          "WI-COT-001: Coating Application Procedure",
+          "AS9100D Clause 8.5.1.2: Special Process Control"
+        ],
+        "specialProcessControl": true,
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_coating_inspection",
+        "name": "Post-Coating Inspection",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "🔍",
+        "description": "Verify coating thickness, uniformity, adhesion, appearance",
+        "x": 703.6912231445312,
+        "y": 955.4249267578125,
+        "fx": 703.6912231445312,
+        "fy": 955.4249267578125,
+        "pdcaPhase": "check",
+        "decisionCriteria": [
+          "Coating thickness within specification",
+          "Uniform coverage (no bare spots)",
+          "Adhesion test passes (tape test)",
+          "Color and appearance acceptable"
+        ],
+        "decisionMethod": "Thickness measurement + visual inspection + adhesion test",
+        "decisionMaker": "Quality Inspector",
+        "evidenceRequired": [
+          "Thickness measurements",
+          "Adhesion test results",
+          "Visual inspection record"
+        ],
+        "documentationReferences": [
+          "WI-QC-005: Coating Inspection"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_coating_rework",
+        "name": "Strip and Re-coat",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "🔄",
+        "description": "Chemical strip coating and re-apply",
+        "x": 591.423583984375,
+        "y": 834.2727661132812,
+        "fx": 591.423583984375,
+        "fy": 834.2727661132812,
+        "pdcaPhase": "act",
+        "priority": "Medium",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_final_inspection",
+        "name": "Final Inspection & Packaging",
+        "category": "task",
+        "color": "#27ae60",
+        "size": 14,
+        "icon": "✅",
+        "description": "100% final inspection, package per customer requirements, prepare Certificate of Conformance",
+        "x": 498.7337646484375,
+        "y": 939.3473815917969,
+        "fx": 498.7337646484375,
+        "fy": 939.3473815917969,
+        "pdcaPhase": "check",
+        "processInputs": [
+          "Coated bolts",
+          "Customer packaging specification"
+        ],
+        "processActivities": [
+          "100% visual inspection",
+          "Verify all process steps completed per traveller",
+          "Package per customer specification",
+          "Generate Certificate of Conformance (C of C)",
+          "Attach material cert and test reports",
+          "Label with PO number, part number, quantity, heat/lot"
+        ],
+        "processOutputs": [
+          "Packaged bolts",
+          "Certificate of Conformance",
+          "Complete quality documentation package"
+        ],
+        "resources": {
+          "personnel": [
+            "Final Inspector (Level II)",
+            "Packaging Specialist"
+          ],
+          "competencies": [
+            "Final inspection procedures",
+            "C of C preparation",
+            "Packaging standards"
+          ],
+          "tools": [
+            "Inspection station",
+            "Packaging materials",
+            "Labeling system"
+          ],
+          "timeRequired": "1 hour per PO"
+        },
+        "monitoring": {
+          "checkpoints": [
+            "All traveller sign-offs complete",
+            "All dimensions verified within tolerance",
+            "All quality records present",
+            "C of C accuracy"
+          ],
+          "acceptanceCriteria": "100% conformance to customer PO and drawing"
+        },
+        "documentationReferences": [
+          "WI-QC-006: Final Inspection Procedure",
+          "QP-015: Certificate of Conformance Preparation",
+          "AS9100D Clause 8.6: Release of Products and Services"
+        ],
+        "qualityRecords": [
+          "Final inspection report",
+          "Certificate of Conformance",
+          "Packaging checklist"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "decision_final_acceptance",
+        "name": "Final Acceptance Decision",
+        "category": "decision",
+        "color": "#f39c12",
+        "size": 16,
+        "icon": "🏁",
+        "description": "Quality Manager final review and release authorization",
+        "x": 284.1333923339844,
+        "y": 943.0164184570312,
+        "fx": 284.1333923339844,
+        "fy": 943.0164184570312,
+        "pdcaPhase": "act",
+        "decisionCriteria": [
+          "All inspection points passed",
+          "All quality records complete and accurate",
+          "Certificate of Conformance signed",
+          "No open NCRs against this batch",
+          "Traceability complete from raw material to finished product"
+        ],
+        "decisionMethod": "Final quality review of complete documentation package",
+        "decisionMaker": "Quality Manager",
+        "evidenceRequired": [
+          "Complete traveller with all sign-offs",
+          "All inspection reports",
+          "Material certifications",
+          "Test reports (tensile, hardness, FPI, etc.)",
+          "Certificate of Conformance"
+        ],
+        "riskAssessment": {
+          "decisionRiskLevel": {
+            "accept": "Very Low - all requirements verified",
+            "reject": "High - potential customer complaint if shipped"
+          }
+        },
+        "documentation": {
+          "decisionRecord": "Required - Final release signature on C of C",
+          "approvalRequired": true,
+          "approver": "Quality Manager",
+          "traceabilityReference": "Complete from raw material cert through all processes",
+          "retentionPeriod": "Life of part + 10 years per AS9100D"
+        },
+        "documentationReferences": [
+          "QP-015: Product Release Procedure",
+          "AS9100D Clause 8.6: Release of Products and Services"
+        ],
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_final_reject",
+        "name": "Hold for Review",
+        "category": "task",
+        "color": "#e74c3c",
+        "size": 12,
+        "icon": "⏸️",
+        "description": "Hold shipment, engineering review, customer notification if required",
+        "x": -358.97406005859375,
+        "y": 850.7591552734375,
+        "fx": -358.97406005859375,
+        "fy": 850.7591552734375,
+        "pdcaPhase": "act",
+        "priority": "Critical",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "task_shipping",
+        "name": "Ship to Customer",
+        "category": "task",
+        "color": "#27ae60",
+        "size": 14,
+        "icon": "🚚",
+        "description": "Ship product with complete quality documentation per customer requirements",
+        "x": 87.8782730102539,
+        "y": 943.0163879394531,
+        "fx": 87.8782730102539,
+        "fy": 943.0163879394531,
+        "pdcaPhase": "act",
+        "processInputs": [
+          "Released product",
+          "Shipping documents",
+          "Quality documentation"
+        ],
+        "processActivities": [
+          "Prepare shipping container per customer spec",
+          "Include C of C and supporting documentation",
+          "Generate packing slip and shipping label",
+          "Notify customer of shipment",
+          "Archive quality records"
+        ],
+        "processOutputs": [
+          "Shipped product",
+          "Shipping confirmation",
+          "Archived quality records"
+        ],
+        "resources": {
+          "personnel": [
+            "Shipping Clerk"
+          ],
+          "tools": [
+            "Shipping materials",
+            "Carrier system"
+          ],
+          "timeRequired": "30 minutes"
+        },
+        "documentationReferences": [
+          "WI-SHP-001: Shipping Procedure",
+          "AS9100D Clause 8.5.4: Preservation of Products"
+        ],
+        "qualityRecords": [
+          "Shipping log",
+          "Packing slip",
+          "Customer notification"
+        ],
+        "priority": "High",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "end",
+        "name": "End",
+        "category": "start-end",
+        "color": "#c0392b",
+        "size": 18,
+        "icon": "🏁",
+        "description": "Manufacturing process complete - product delivered to customer with full quality documentation",
+        "x": 91.04475784301758,
+        "y": 1152.1510314941406,
+        "fx": 91.04475784301758,
+        "fy": 1152.1510314941406,
+        "processOutputs": [
+          "Aerospace-grade Ti64 bolts delivered",
+          "Complete quality documentation package",
+          "Customer satisfaction achieved"
+        ],
+        "successMetrics": {
+          "qualityMetrics": "Zero customer complaints on this PO",
+          "deliveryMetrics": "On-time delivery per customer schedule",
+          "documentationMetrics": "100% documentation accuracy"
+        },
+        "continualImprovement": "Process data collected for monthly review and improvement opportunities",
+        "pdcaPhase": "act",
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "input_production_order",
+        "name": "Production Order",
+        "category": "input",
+        "color": "#95a5a6",
+        "size": 12,
+        "icon": "📋",
+        "description": "Customer PO specifying part number, quantity, delivery date, special requirements",
+        "x": 100,
+        "y": 250,
+        "fx": 100,
+        "fy": 250,
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "input_engineering_drawing",
+        "name": "Engineering Drawing",
+        "category": "input",
+        "color": "#95a5a6",
+        "size": 12,
+        "icon": "📐",
+        "description": "Controlled drawing with dimensions, tolerances, material spec, finish requirements",
+        "x": 703.7091979980469,
+        "y": 252.20848083496094,
+        "fx": 703.7091979980469,
+        "fy": 252.20848083496094,
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "input_material_cert",
+        "name": "Material Certification",
+        "category": "input",
+        "color": "#95a5a6",
+        "size": 12,
+        "icon": "📜",
+        "description": "Mill cert showing chemistry, heat treatment, test results for Ti64 bar stock",
+        "x": 500,
+        "y": 250,
+        "fx": 500,
+        "fy": 250,
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "output_quality_records",
+        "name": "Complete Quality Records",
+        "category": "output",
+        "color": "#7f8c8d",
+        "size": 12,
+        "icon": "📚",
+        "description": "Full traceability package: all inspection reports, test results, certs, traveller",
+        "x": 654.2996520996094,
+        "y": 1082.3722839355469,
+        "fx": 654.2996520996094,
+        "fy": 1082.3722839355469,
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      },
+      {
+        "id": "output_finished_bolts",
+        "name": "Finished Ti64 Bolts",
+        "category": "output",
+        "color": "#7f8c8d",
+        "size": 12,
+        "icon": "🔩",
+        "description": "Aerospace-grade titanium bolts meeting all drawing and specification requirements",
+        "x": 341.7104911804199,
+        "y": 1159.431884765625,
+        "fx": 341.7104911804199,
+        "fy": 1159.431884765625,
+        "createdDate": "2026-01-11T00:00:00.000Z",
+        "modifiedDate": "2026-01-11T00:00:00.000Z",
+        "subCat": "",
+        "link1": "",
+        "link2": "",
+        "link3": "",
+        "link4": "",
+        "priority": "Medium",
+        "deadline": "",
+        "userDate": ""
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge_start_to_retrieve",
+        "name": "begin",
+        "source": "start",
+        "target": "task_retrieve_material",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_retrieve_to_inspection",
+        "name": "material retrieved",
+        "source": "task_retrieve_material",
+        "target": "decision_material_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#3498db",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_inspection_reject",
+        "name": "no - reject",
+        "source": "decision_material_inspection",
+        "target": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "relationship": "input",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_inspection_accept",
+        "name": "yes - accept",
+        "source": "decision_material_inspection",
+        "target": "task_cutting",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_cutting_to_inspection",
+        "name": "cutting complete",
+        "source": "task_cutting",
+        "target": "decision_cutting_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#3498db",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_cutting_reject",
+        "name": "no - rework",
+        "source": "decision_cutting_inspection",
+        "target": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "relationship": "input",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_cutting_accept",
+        "name": "yes - accept",
+        "source": "decision_cutting_inspection",
+        "target": "task_hot_forging",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_forging_to_inspection",
+        "name": "forging complete",
+        "source": "task_hot_forging",
+        "target": "decision_forging_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e67e22",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_forging_reject",
+        "name": "no - rework/scrap",
+        "source": "decision_forging_inspection",
+        "target": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "relationship": "input",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_forging_accept",
+        "name": "yes - accept",
+        "source": "decision_forging_inspection",
+        "target": "task_salt_bath_cleaning",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_saltbath_to_inspection",
+        "name": "cleaning complete",
+        "source": "task_salt_bath_cleaning",
+        "target": "decision_cleaning_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#16a085",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_cleaning_reject",
+        "name": "no - re-clean",
+        "source": "decision_cleaning_inspection",
+        "target": "task_cleaning_rework",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_cleaning_rework_loop",
+        "name": "re-cleaned",
+        "source": "task_cleaning_rework",
+        "target": "decision_cleaning_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#f39c12",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "edge_cleaning_accept",
+        "name": "yes - accept",
+        "source": "decision_cleaning_inspection",
+        "target": "task_heat_treatment",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_ht_to_inspection",
+        "name": "heat treatment complete",
+        "source": "task_heat_treatment",
+        "target": "decision_ht_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e67e22",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_ht_reject",
+        "name": "no - re-HT or scrap",
+        "source": "decision_ht_inspection",
+        "target": "task_ht_rework",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_ht_rework_loop",
+        "name": "re-heat treated",
+        "source": "task_ht_rework",
+        "target": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "relationship": "next",
+        "directed": true,
+        "color": "#f39c12",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "edge_ht_accept",
+        "name": "yes - accept",
+        "source": "decision_ht_inspection",
+        "target": "task_machining",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_machining_to_inspection",
+        "name": "machining complete",
+        "source": "task_machining",
+        "target": "decision_machining_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#3498db",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_machining_reject",
+        "name": "no - rework",
+        "source": "decision_machining_inspection",
+        "target": "task_machining_rework",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_machining_rework_loop",
+        "name": "reworked",
+        "source": "task_machining_rework",
+        "target": "decision_machining_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#f39c12",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "edge_machining_accept",
+        "name": "yes - accept",
+        "source": "decision_machining_inspection",
+        "target": "task_solution_cleaning",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_solution_to_inspection",
+        "name": "cleaning complete",
+        "source": "task_solution_cleaning",
+        "target": "decision_solution_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#16a085",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_solution_reject",
+        "name": "no - re-clean",
+        "source": "decision_solution_inspection",
+        "target": "task_solution_rework",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_solution_rework_loop",
+        "name": "re-cleaned",
+        "source": "task_solution_rework",
+        "target": "decision_solution_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#f39c12",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "edge_solution_accept",
+        "name": "yes - accept",
+        "source": "decision_solution_inspection",
+        "target": "task_coating",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_coating_to_inspection",
+        "name": "coating complete",
+        "source": "task_coating",
+        "target": "decision_coating_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#9b59b6",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_coating_reject",
+        "name": "no - strip/re-coat",
+        "source": "decision_coating_inspection",
+        "target": "task_coating_rework",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_coating_rework_loop",
+        "name": "re-coated",
+        "source": "task_coating_rework",
+        "target": "decision_coating_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#f39c12",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "edge_coating_accept",
+        "name": "yes - accept",
+        "source": "decision_coating_inspection",
+        "target": "task_final_inspection",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_final_to_decision",
+        "name": "final inspection complete",
+        "source": "task_final_inspection",
+        "target": "decision_final_acceptance",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_final_reject",
+        "name": "no - hold for review",
+        "source": "decision_final_acceptance",
+        "target": "task_final_reject",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_final_accept",
+        "name": "yes - release to ship",
+        "source": "decision_final_acceptance",
+        "target": "task_shipping",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_shipping_to_end",
+        "name": "shipped",
+        "source": "task_shipping",
+        "target": "end",
+        "relationship": "next",
+        "directed": true,
+        "color": "#27ae60",
+        "weight": 2,
+        "description": ""
+      },
+      {
+        "id": "edge_material_reject_to_end",
+        "name": "material rejected - process terminated",
+        "source": "29075ead85283d4ebdb017ec1d5f07e3dacbd020aa8cb0af3ce74304e208513c",
+        "target": "task_final_reject",
+        "description": "Non-conforming material rejected, new material required",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 1
+      },
+      {
+        "id": "edge_final_reject_to_end",
+        "name": "held pending disposition",
+        "source": "task_final_reject",
+        "target": "end",
+        "description": "Product held for engineering review and customer notification",
+        "relationship": "next",
+        "directed": true,
+        "color": "#e74c3c",
+        "weight": 1
+      },
+      {
+        "id": "input_po_to_start",
+        "name": "initiates process",
+        "source": "input_production_order",
+        "target": "start",
+        "relationship": "input",
+        "directed": true,
+        "color": "#95a5a6",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "input_drawing_to_process",
+        "name": "defines requirements",
+        "source": "input_engineering_drawing",
+        "target": "task_cutting",
+        "relationship": "input",
+        "directed": true,
+        "color": "#95a5a6",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "input_cert_to_inspection",
+        "name": "material evidence",
+        "source": "input_material_cert",
+        "target": "decision_material_inspection",
+        "relationship": "input",
+        "directed": true,
+        "color": "#95a5a6",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "output_records_from_final",
+        "name": "documentation package",
+        "source": "task_final_inspection",
+        "target": "output_quality_records",
+        "relationship": "output",
+        "directed": true,
+        "color": "#7f8c8d",
+        "weight": 1,
+        "description": ""
+      },
+      {
+        "id": "output_bolts_from_end",
+        "name": "delivered product",
+        "source": "end",
+        "target": "output_finished_bolts",
+        "relationship": "output",
+        "directed": true,
+        "color": "#7f8c8d",
+        "weight": 1,
+        "description": ""
+      }
+    ]
+  }
+}
